@@ -18,7 +18,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @EnableResourceServer
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    /*@Bean
+/*
+    @Bean
     public TokenStore tokenStore() {
         return new JwtTokenStore(accessTokenConverter());
     }
@@ -28,7 +29,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
         jwtAccessTokenConverter.setSigningKey("rengu");
         return jwtAccessTokenConverter;
-    }*/
+    }
+*/
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
