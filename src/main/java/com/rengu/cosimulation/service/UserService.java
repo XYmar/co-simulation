@@ -16,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 /**
  * Author: XYmar
  * Date: 2019/2/12 16:15
@@ -33,18 +35,18 @@ public class UserService implements UserDetailsService {
 
     // 保存用户
     @CacheEvict(value = "User_Cache", allEntries = true)
-    public UserEntity saveUser(UserEntity userEntity, RoleEntity roleEntitie) {
+    public UserEntity saveUser(UserEntity userEntity) {
         if (userEntity == null) {
             throw new ResultException(ResultCode.USER_ARGS_NOT_FOUND_ERROR);
         }
-        if (StringUtils.isEmpty(userEntity.getUsername())) {
+        /*if (StringUtils.isEmpty(userEntity.getUsername())) {
             throw new ResultException(ResultCode.USER_USERNAME_ARGS_NOT_FOUND_ERROR);
         }
         if (StringUtils.isEmpty(userEntity.getPassword())) {
             throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
-        }
-        if(roleEntitie != null){
-            userEntity.setRoleEntity(roleEntitie);
+        }*/
+        if(userEntity.getRoleEntity() != null){
+            userEntity.setRoleEntity(userEntity.getRoleEntity());
         }
         userEntity.setPassword(new BCryptPasswordEncoder().encode(userEntity.getPassword()));
         return userRepository.save(userEntity);
@@ -52,7 +54,13 @@ public class UserService implements UserDetailsService {
 
     //保存管理员用户
     public UserEntity saveAdminUser(UserEntity userEntity) {
-        return saveUser(userEntity, roleService.getRoleByName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME));
+        userEntity.setRoleEntity(roleService.getRoleByName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME));
+        return saveUser(userEntity);
+    }
+
+    // 查询所有用户
+    public List<UserEntity> getAll() {
+        return userRepository.findAll();
     }
 
     // 根据用户名查询用户是否存在
@@ -73,7 +81,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        return null;
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return getUserByUsername(username);
     }
 }

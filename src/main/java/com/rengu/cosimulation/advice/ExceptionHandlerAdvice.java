@@ -46,8 +46,8 @@ public class ExceptionHandlerAdvice implements ResponseBodyAdvice {
 
     @ExceptionHandler(ResultException.class)
     public ResultEntity handleResultException(ResultException e, HttpServletRequest request) {
-        logger.debug("uri={} | requestBody={}", request.getRequestURI(),
-                JSON.toJSONString(modelHolder.get()));
+        /*logger.debug("uri={} | requestBody={}", request.getRequestURI(),
+                JSON.toJSONString(modelHolder.get()));*/
         return ResultUtils.warn(e.getResultCode());
     }
 
