@@ -5,6 +5,7 @@ import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,5 +38,23 @@ public class UserController {
     @GetMapping
     public ResultEntity getUsers(){
         return ResultUtils.success(userService.getAll());
+    }
+
+    // 根据ID查询用户
+    @GetMapping(value = "/{userId}")
+    public ResultEntity getUserById(@PathVariable(value = "userId") String userId){
+        return ResultUtils.success(userService.getUserById(userId));
+    }
+
+    // 根据ID修改用户信息
+    @PatchMapping(value = "/{userId}")
+    public ResultEntity updateUserById(@PathVariable(value = "userId") String userId, UserEntity userEntity){
+        return ResultUtils.success(userService.updateUserByUserId(userId, userEntity));
+    }
+
+    // 根据ID删除用户
+    @DeleteMapping(value = "/{userId}")
+    public ResultEntity deleteUserById(@PathVariable(value = "userId") String userId){
+        return ResultUtils.success(userService.deleteByUserId(userId));
     }
 }

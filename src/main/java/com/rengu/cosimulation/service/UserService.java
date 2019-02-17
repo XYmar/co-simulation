@@ -6,8 +6,10 @@ import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.UserRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
+import com.rengu.cosimulation.utils.ApplicationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -83,5 +85,47 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return getUserByUsername(username);
+    }
+
+    // 根据Id查询用户是否存在
+    private boolean hasUserById(String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            return false;
+        }
+        return userRepository.existsById(userId);
+    }
+
+    @Cacheable(value = "User_Cache", key = "#userId")
+    public UserEntity getUserById(String userId) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        return userRepository.findById(userId).get();
+    }
+
+    @CachePut(value = "User_Cache", key = "#userId")
+    public UserEntity updateUserByUserId(String userId, UserEntity userEntityArgs) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = getUserById(userId);
+        if(userEntityArgs == null){
+            throw new ResultException(ResultCode.USER_ARGS_NOT_FOUND_ERROR);
+        }
+
+        if(!StringUtils.isEmpty(userEntityArgs.getUsername()) && !userEntity.getUsername().equals(userEntityArgs.getUsername())){
+            userEntity.setUsername(userEntityArgs.getUsername());
+        }
+        return userRepository.save(userEntity);
+    }
+
+    @CacheEvict(value = "User_Cache", key = "#userId")
+    public UserEntity deleteByUserId(String userId) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = getUserById(userId);
+        userRepository.delete(userEntity);
+        return userEntity;
     }
 }
