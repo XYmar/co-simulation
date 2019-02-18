@@ -27,14 +27,14 @@ public class RoleController {
 
     // 添加角色信息
     @PostMapping
-    public RoleEntity saveRole(@RequestBody @Valid RoleEntity roleEntity) {
-        return roleService.saveRole(roleEntity);
+    public ResultEntity saveRole(@RequestBody @Valid RoleEntity roleEntity) {
+        return ResultUtils.success(roleService.saveRole(roleEntity));
     }
 
     // 查询所有角色
     @GetMapping
-    public List<RoleEntity> getRoles() {
-        return roleService.getAll();
+    public ResultEntity getRoles() {
+        return ResultUtils.success(roleService.getAll());
     }
 
     // 根据ID查询角色

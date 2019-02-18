@@ -14,7 +14,7 @@ public enum ResultCode {
     ROLE_NAME_NOT_FOUND_ERROR(10003, "未发现该角色名称"),
     ROLE_NAME_EXISTED_ERROR(10004, "该角色名称已存在"),
     ROLE_ID_NOT_FOUND_ERROR(10005,"未发现该角色ID"),
-    ROLE_CHANGE_NOT_SUPPORT_ERROR(10006, "该角色不可修改"),
+    ROLE_CHANGE_NOT_SUPPORT_ERROR(10006, "不可对该角色进行操作"),
 
     // 用户相关    1001x
     USER_ARGS_NOT_FOUND_ERROR(10011, "未发现用户参数"),

@@ -116,6 +116,9 @@ public class RoleService {
             throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
         }
         RoleEntity roleEntity = getRoleById(roleId);
+        if(!roleEntity.getChangeable()){    // 不可修改的角色
+            throw new ResultException(ResultCode.ROLE_CHANGE_NOT_SUPPORT_ERROR);
+        }
         roleRepository.delete(roleEntity);
         return roleEntity;
     }
