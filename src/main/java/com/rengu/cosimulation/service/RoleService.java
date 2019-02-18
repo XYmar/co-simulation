@@ -1,6 +1,7 @@
 package com.rengu.cosimulation.service;
 
 import com.rengu.cosimulation.entity.RoleEntity;
+import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.RoleRepository;
@@ -8,6 +9,8 @@ import com.rengu.cosimulation.utils.ApplicationMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -62,5 +65,52 @@ public class RoleService {
     // 根据角色名称查询角色信息
     public RoleEntity getRoleByName(String name) {
         return roleRepository.findByName(name);
+    }
+
+    // 根据ID查询角色信息
+    @Cacheable(value = "Role_Cache", key = "#roleId")
+    public RoleEntity getRoleById(String roleId) {
+        if(!hasRoleById(roleId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        return roleRepository.findById(roleId).get();
+    }
+
+    // 根据Id查询角色是否存在
+    private boolean hasRoleById(String roleId) {
+        if (StringUtils.isEmpty(roleId)) {
+            return false;
+        }
+        return roleRepository.existsById(roleId);
+    }
+
+    // 根据ID修改角色信息
+    @CachePut(value = "Role_Cache", key = "#roleId")
+    public RoleEntity updateRoleByRoleId(String roleId, RoleEntity roleEntityArgs) {
+        if(!hasRoleById(roleId)){
+            throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
+        }
+        RoleEntity roleEntity = getRoleById(roleId);
+        if(roleEntityArgs == null){
+            throw new ResultException(ResultCode.ROLE_ARGS_NOT_FOUND_ERROR);
+        }
+
+        if(!StringUtils.isEmpty(roleEntityArgs.getName()) && !roleEntity.getName().equals(roleEntityArgs.getName())){
+            roleEntity.setName(roleEntityArgs.getName());
+        }
+        if(!StringUtils.isEmpty(roleEntityArgs.getDescription()) && !roleEntity.getDescription().equals(roleEntityArgs.getDescription())){
+            roleEntity.setDescription(roleEntityArgs.getDescription());
+        }
+        return roleRepository.save(roleEntity);
+    }
+
+    // 根据ID删除角色信息
+    public RoleEntity deleteByRoleId(String roleId) {
+        if(!hasRoleById(roleId)){
+            throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
+        }
+        RoleEntity roleEntity = getRoleById(roleId);
+        roleRepository.delete(roleEntity);
+        return roleEntity;
     }
 }

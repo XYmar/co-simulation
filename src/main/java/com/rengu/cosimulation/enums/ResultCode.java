@@ -13,6 +13,7 @@ public enum ResultCode {
     ROLE_NAME_ARGS_NOT_FOUND_ERROR(10002, "角色名称参数不存在或不合法"),
     ROLE_NAME_NOT_FOUND_ERROR(10003, "未发现该角色名称"),
     ROLE_NAME_EXISTED_ERROR(10004, "该角色名称已存在"),
+    ROLE_ID_NOT_FOUND_ERROR(10005,"未发现该角色ID"),
 
     // 用户相关    1001x
     USER_ARGS_NOT_FOUND_ERROR(10011, "未发现用户参数"),
