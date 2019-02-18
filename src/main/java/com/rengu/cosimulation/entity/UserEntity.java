@@ -28,7 +28,6 @@ public class UserEntity implements UserDetails, Serializable {
     @NotBlank(message = "用户名不能为空")
     private String username;
     @NotBlank(message = "密码不能为空")
-    @JsonIgnore
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;

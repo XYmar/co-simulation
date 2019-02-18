@@ -49,6 +49,8 @@ public class UserService implements UserDetailsService {
         }*/
         if(userEntity.getRoleEntity() != null){
             userEntity.setRoleEntity(userEntity.getRoleEntity());
+        }else{
+            userEntity.setRoleEntity(roleService.getRoleByName(ApplicationConfig.DEFAULT_USER_ROLE_NAME));
         }
         userEntity.setPassword(new BCryptPasswordEncoder().encode(userEntity.getPassword()));
         return userRepository.save(userEntity);

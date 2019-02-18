@@ -33,7 +33,7 @@ public class ApplicationInit  implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
 
         // 创建角色数组
-        RoleEntity[] roles = new RoleEntity[6];
+        RoleEntity[] roles = new RoleEntity[7];
 
         // 实例化每一个角色
         for(int i=0;i<roles.length;i++){
@@ -53,6 +53,8 @@ public class ApplicationInit  implements ApplicationRunner {
         roles[4].setDescription("仿真技术文件审核员");
         roles[5].setName(ApplicationConfig.DEFAULT_NORMAL_DESIGNER_ROLE_NAME);
         roles[5].setDescription("一般仿真设计员");
+        roles[6].setName(ApplicationConfig.DEFAULT_USER_ROLE_NAME);
+        roles[6].setDescription("普通用户");
 
         // 初始化6个角色
         /*if (!roleService.hasRoleByName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME)) {
