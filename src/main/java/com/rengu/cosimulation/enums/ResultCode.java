@@ -22,6 +22,7 @@ public enum ResultCode {
     USER_PASSWORD_ARGS_NOT_FOUND_ERROR(10014, "用户密码参数不存在或不合法"),
     USER_ID_NOT_FOUND_ERROR(10015,"未发现该用户ID"),
     USER_USERNAME_EXISTED_ERROR(10016,"该用户名已存在"),
+    USER_ENABLED_NOT_SUPPORT_ERROR(10017,"不支持的权限类型"),
     PARAMETER_ERROR(10101, "参数错误");
 
     private int code;

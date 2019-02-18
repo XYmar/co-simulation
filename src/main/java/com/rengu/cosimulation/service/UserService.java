@@ -149,4 +149,17 @@ public class UserService implements UserDetailsService {
         userEntity.setRoleEntity(roleService.getRoleById(roleId));
         return userRepository.save(userEntity);
     }
+
+    @CacheEvict(value = "User_Cache", key = "#userId")
+    public UserEntity assignUserById(String userId, Boolean enabled) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(enabled)){
+            throw new ResultException(ResultCode.USER_ENABLED_NOT_SUPPORT_ERROR);
+        }
+        UserEntity userEntity = getUserById(userId);
+        userEntity.setEnabled(enabled);
+        return userRepository.save(userEntity);
+    }
 }

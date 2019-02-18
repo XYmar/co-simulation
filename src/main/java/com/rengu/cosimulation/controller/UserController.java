@@ -63,4 +63,10 @@ public class UserController {
     public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId, String roleId){
         return ResultUtils.success(userService.distributeUserById(userId, roleId));
     }
+
+    // 根据ID禁用或解除
+    @PatchMapping(value = "/{userId}/authority")
+    public ResultEntity assignUserById(@PathVariable(value = "userId") String userId, Boolean enabled){
+        return ResultUtils.success(userService.assignUserById(userId, enabled));
+    }
 }
