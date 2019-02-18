@@ -77,7 +77,7 @@ public class RoleService {
     }
 
     // 根据Id查询角色是否存在
-    private boolean hasRoleById(String roleId) {
+    public boolean hasRoleById(String roleId) {
         if (StringUtils.isEmpty(roleId)) {
             return false;
         }

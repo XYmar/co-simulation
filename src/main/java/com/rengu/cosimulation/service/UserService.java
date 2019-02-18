@@ -47,6 +47,9 @@ public class UserService implements UserDetailsService {
         if (StringUtils.isEmpty(userEntity.getPassword())) {
             throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
         }*/
+        if (hasUserByUsername(userEntity.getUsername())) {
+            throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
+        }
         if(userEntity.getRoleEntity() != null){
             userEntity.setRoleEntity(userEntity.getRoleEntity());
         }else{
@@ -116,6 +119,9 @@ public class UserService implements UserDetailsService {
         }
 
         if(!StringUtils.isEmpty(userEntityArgs.getUsername()) && !userEntity.getUsername().equals(userEntityArgs.getUsername())){
+            if (hasUserByUsername(userEntity.getUsername())) {
+                throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
+            }
             userEntity.setUsername(userEntityArgs.getUsername());
         }
         return userRepository.save(userEntity);
@@ -129,5 +135,18 @@ public class UserService implements UserDetailsService {
         UserEntity userEntity = getUserById(userId);
         userRepository.delete(userEntity);
         return userEntity;
+    }
+
+    @CacheEvict(value = "User_Cache", key = "#userId")
+    public UserEntity distributeUserById(String userId, String roleId) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        if(!roleService.hasRoleById(roleId)){
+            throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = getUserById(userId);
+        userEntity.setRoleEntity(roleService.getRoleById(roleId));
+        return userRepository.save(userEntity);
     }
 }

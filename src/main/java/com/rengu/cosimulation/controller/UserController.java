@@ -57,4 +57,10 @@ public class UserController {
     public ResultEntity deleteUserById(@PathVariable(value = "userId") String userId){
         return ResultUtils.success(userService.deleteByUserId(userId));
     }
+
+    // 根据ID为用户分配角色
+    @PatchMapping(value = "/{userId}/distribute")
+    public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId, String roleId){
+        return ResultUtils.success(userService.distributeUserById(userId, roleId));
+    }
 }
