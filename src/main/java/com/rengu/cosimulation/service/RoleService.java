@@ -45,6 +45,9 @@ public class RoleService {
         if(hasRoleByName(roleEntity.getName())){
             throw new RuntimeException(ApplicationMessage.ROLE_NAME_EXISTED);
         }
+        if(roleEntity.getChangeable() == null){
+            roleEntity.setChangeable(true);
+        }
         return roleRepository.save(roleEntity);
     }
 
@@ -91,6 +94,9 @@ public class RoleService {
             throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
         }
         RoleEntity roleEntity = getRoleById(roleId);
+        if(!roleEntity.getChangeable()){    // 不可修改的角色
+           throw new ResultException(ResultCode.ROLE_CHANGE_NOT_SUPPORT_ERROR);
+        }
         if(roleEntityArgs == null){
             throw new ResultException(ResultCode.ROLE_ARGS_NOT_FOUND_ERROR);
         }

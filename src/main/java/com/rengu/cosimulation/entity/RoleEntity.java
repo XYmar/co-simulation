@@ -24,4 +24,5 @@ public class RoleEntity {
     @NotEmpty(message = ApplicationMessage.ROLE_NAME_ARGS_NOT_FOUND)
     private String name;
     private String description;
+    private Boolean changeable;       // 是否支持修改
 }

@@ -43,10 +43,13 @@ public class ApplicationInit  implements ApplicationRunner {
         // 创建6个默认角色，并赋值
         roles[0].setName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
         roles[0].setDescription("系统管理员");
+        roles[0].setChangeable(false);
         roles[1].setName(ApplicationConfig.DEFAULT_SECURITY_GUARD_ROLE_NAME);
         roles[1].setDescription("安全保密员");
+        roles[1].setChangeable(false);
         roles[2].setName(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
         roles[2].setDescription("安全审计员");
+        roles[2].setChangeable(false);
         roles[3].setName(ApplicationConfig.DEFAULT_PROJECT_MANAGER_ROLE_NAME);
         roles[3].setDescription("项目管理员");
         roles[4].setName(ApplicationConfig.DEFAULT_FILE_AUDITOR__ROLE_NAME);
