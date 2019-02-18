@@ -58,6 +58,12 @@ public class UserController {
         return ResultUtils.success(userService.deleteByUserId(userId));
     }
 
+    // 根据ID修改用户密码
+    @PatchMapping(value = "/{userId}/password")
+    public ResultEntity updatePasswordById(@PathVariable(value = "userId") String userId, String password){
+        return ResultUtils.success(userService.updatePasswordById(userId, password));
+    }
+
     // 根据ID为用户分配角色
     @PatchMapping(value = "/{userId}/distribute")
     public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId, String roleId){

@@ -100,6 +100,7 @@ public class UserService implements UserDetailsService {
         return userRepository.existsById(userId);
     }
 
+    // 根据id查询用户
     @Cacheable(value = "User_Cache", key = "#userId")
     public UserEntity getUserById(String userId) {
         if(!hasUserById(userId)){
@@ -108,6 +109,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(userId).get();
     }
 
+    // 根据id修改用户
     @CachePut(value = "User_Cache", key = "#userId")
     public UserEntity updateUserByUserId(String userId, UserEntity userEntityArgs) {
         if(!hasUserById(userId)){
@@ -127,6 +129,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
+    // 根据id删除用户
     @CacheEvict(value = "User_Cache", key = "#userId")
     public UserEntity deleteByUserId(String userId) {
         if(!hasUserById(userId)){
@@ -137,6 +140,21 @@ public class UserService implements UserDetailsService {
         return userEntity;
     }
 
+    // 根据id修改用户密码
+    @CacheEvict(value = "User_Cache", key = "#userId")
+    public UserEntity updatePasswordById(String userId, String password) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(password)){
+            throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = getUserById(userId);
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(password));
+        return userRepository.save(userEntity);
+    }
+
+    // 根据id分配用户权限
     @CacheEvict(value = "User_Cache", key = "#userId")
     public UserEntity distributeUserById(String userId, String roleId) {
         if(!hasUserById(userId)){
@@ -150,6 +168,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
+    // 根据id禁用或解除禁用
     @CacheEvict(value = "User_Cache", key = "#userId")
     public UserEntity assignUserById(String userId, Boolean enabled) {
         if(!hasUserById(userId)){
