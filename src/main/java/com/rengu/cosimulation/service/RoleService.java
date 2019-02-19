@@ -43,7 +43,7 @@ public class RoleService {
             throw new ResultException(ResultCode.ROLE_NAME_ARGS_NOT_FOUND_ERROR);
         }
         if(hasRoleByName(roleEntity.getName())){
-            throw new RuntimeException(ApplicationMessage.ROLE_NAME_EXISTED);
+            throw new ResultException(ResultCode.ROLE_NAME_EXISTED_ERROR);
         }
         if(roleEntity.getChangeable() == null){
             roleEntity.setChangeable(true);
@@ -102,6 +102,9 @@ public class RoleService {
         }
 
         if(!StringUtils.isEmpty(roleEntityArgs.getName()) && !roleEntity.getName().equals(roleEntityArgs.getName())){
+            if(hasRoleByName(roleEntityArgs.getName())){
+                throw new ResultException(ResultCode.ROLE_NAME_EXISTED_ERROR);
+            }
             roleEntity.setName(roleEntityArgs.getName());
         }
         if(!StringUtils.isEmpty(roleEntityArgs.getDescription()) && !roleEntity.getDescription().equals(roleEntityArgs.getDescription())){

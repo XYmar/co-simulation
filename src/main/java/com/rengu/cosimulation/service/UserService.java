@@ -121,7 +121,7 @@ public class UserService implements UserDetailsService {
         }
 
         if(!StringUtils.isEmpty(userEntityArgs.getUsername()) && !userEntity.getUsername().equals(userEntityArgs.getUsername())){
-            if (hasUserByUsername(userEntity.getUsername())) {
+            if (hasUserByUsername(userEntityArgs.getUsername())) {
                 throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
             }
             userEntity.setUsername(userEntityArgs.getUsername());
