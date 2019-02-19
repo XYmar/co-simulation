@@ -38,6 +38,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.cors();
         // 放行所有Option请求
         http.authorizeRequests().antMatchers(HttpMethod.OPTIONS).permitAll();
+        // 放行swagger2文档页面
+        http.authorizeRequests().antMatchers("/swagger-ui.html", "/webjars/**", "/swagger-resources/**", "/v2/api-docs").permitAll();
         // 放行新增角色接口
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/role").permitAll();
         // 放行actuator接口
