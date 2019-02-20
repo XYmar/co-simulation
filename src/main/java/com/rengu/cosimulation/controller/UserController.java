@@ -30,6 +30,7 @@ public class UserController {
 
     // 新增用户（只有系统管理员可执行此操作）
     @PostMapping
+    @PreAuthorize(value = "hasRole('ADMIN')")
     public ResultEntity saveUser(@RequestBody @Valid UserEntity userEntity){
         return ResultUtils.success(userService.saveUser(userEntity));
     }

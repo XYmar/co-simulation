@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
@@ -44,17 +46,27 @@ public class ExceptionHandlerAdvice implements ResponseBodyAdvice {
         return ResultUtils.warn(ResultCode.PARAMETER_ERROR, tips);
     }
 
+    // 权限问题
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResultEntity handleAccessDeniedException(AccessDeniedException e) {
+        String tips = e.getMessage();
+        return ResultUtils.warn(ResultCode.ACCESS_DENIED_ERROR, tips);
+    }
+
+    // 未传递参数异常
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResultEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        String tips = "未传递参数";
+        return ResultUtils.warn(ResultCode.ARGS_NOT_FOUND_ERROR, tips);
+    }
+
     @ExceptionHandler(ResultException.class)
     public ResultEntity handleResultException(ResultException e, HttpServletRequest request) {
-        /*logger.debug("uri={} | requestBody={}", request.getRequestURI(),
-                JSON.toJSONString(modelHolder.get()));*/
         return ResultUtils.warn(e.getResultCode());
     }
 
     @ExceptionHandler(Exception.class)
     public ResultEntity handleException(Exception e, HttpServletRequest request) {
-        logger.error("uri={} | requestBody={}", request.getRequestURI(),
-                JSON.toJSONString(modelHolder.get()), e);
         return ResultUtils.warn(ResultCode.WEAK_NET_WORK);
     }
 

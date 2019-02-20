@@ -24,7 +24,19 @@ public enum ResultCode {
     USER_ID_NOT_FOUND_ERROR(10015,"未发现该用户ID"),
     USER_USERNAME_EXISTED_ERROR(10016,"该用户名已存在"),
     USER_ENABLED_NOT_SUPPORT_ERROR(10017,"不支持的权限类型"),
-    PARAMETER_ERROR(10101, "参数错误");
+
+    // 项目相关    2000x
+    PROJECT_ARGS_NOT_FOUND_ERROR(20001, "未发现项目参数"),
+    PROJECT_NAME_ARGS_NOT_FOUND_ERROR(20002, "项目名称参数不存在或不合法"),
+    PROJECT_NAME_NOT_FOUND_ERROR(20003, "未发现该项目名称"),
+    PROJECT_PIC_ARGS_NOT_FOUND_ERROR(20004, "请指定项目负责人"),
+    PROJECT_ID_NOT_FOUND_ERROR(20005,"未发现该项目ID"),
+    PROJECT_NAME_EXISTED_ERROR(20006,"该项目名已存在"),
+    PROJECT_ENABLED_NOT_SUPPORT_ERROR(20007,"不支持的权限类型"),
+
+    PARAMETER_ERROR(40001, "参数错误"),
+    ACCESS_DENIED_ERROR(40002, "参数错误"),
+    ARGS_NOT_FOUND_ERROR(40003, "未传递参数");
 
     private int code;
     private String msg;
