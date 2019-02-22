@@ -1,0 +1,68 @@
+package com.rengu.cosimulation.controller;
+
+import com.rengu.cosimulation.entity.ProjectEntity;
+import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.service.ProjectService;
+import com.rengu.cosimulation.service.UserService;
+import com.rengu.cosimulation.utils.ResultUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+/**
+ * Author: XYmar
+ * Date: 2019/2/20 13:25
+ */
+@RestController
+@RequestMapping(value = "/projects")
+public class ProjectController {
+    private final ProjectService projectService;
+    private final UserService userService;
+
+    @Autowired
+    public ProjectController(ProjectService projectService, UserService userService) {
+        this.projectService = projectService;
+        this.userService = userService;
+    }
+
+    // 新增项目（名称，负责人）
+    @PostMapping
+    @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
+    public ResultEntity saveProject(ProjectEntity projectEntity, String picId){
+        return ResultUtils.success(projectService.saveProject(projectEntity, picId));
+    }
+
+    // 项目管理员查询所有项目
+    @GetMapping
+    @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
+    public ResultEntity getProjects(){
+        return ResultUtils.success(projectService.getAll());
+    }
+
+    // 根据用户id查询所有项目(负责人)
+    @GetMapping(value = "/byUserId/{userId}")
+    public ResultEntity getProjectsByUserId(@PathVariable(value = "userId") String userId, boolean deleted){
+        return ResultUtils.success(projectService.getProjectsByUser(userService.getUserById(userId), deleted));
+    }
+
+    // 根据ID查询项目
+    @GetMapping(value = "/{projectId}")
+    public ResultEntity getProjectById(@PathVariable(value = "projectId") String projectId){
+        return ResultUtils.success(projectService.getProjectById(projectId));
+    }
+
+    // 根据ID删除项目
+    @PatchMapping(value = "/{projectId}/delete")
+    public ResultEntity deleteProjectById(@PathVariable(value = "projectId") String projectId){
+        return ResultUtils.success(projectService.deleteProjectById(projectId));
+    }
+
+    // 根据ID撤销删除项目
+    @PatchMapping(value = "/{projectId}/restore")
+    public ResultEntity restoreProjectById(@PathVariable(value = "projectId") String projectId){
+        return ResultUtils.success(projectService.restoreProjectById(projectId));
+    }
+
+}

@@ -11,6 +11,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Author: XYmar
  * Date: 2019/2/13 9:12
@@ -31,7 +35,6 @@ public class ApplicationInit  implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-
         // 创建角色数组
         RoleEntity[] roles = new RoleEntity[7];
 
@@ -82,4 +85,5 @@ public class ApplicationInit  implements ApplicationRunner {
         }
 
     }
+
 }

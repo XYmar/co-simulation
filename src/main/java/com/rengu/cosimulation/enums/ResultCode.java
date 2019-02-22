@@ -7,7 +7,7 @@ package com.rengu.cosimulation.enums;
  */
 public enum ResultCode {
     SUCCESS(0, "请求成功"),
-    WEAK_NET_WORK(-1, "网络异常，请稍后重试"),
+    WEAK_NET_WORK(-1, "请求有误，请重试"),
     // 角色相关    1000x
     ROLE_ARGS_NOT_FOUND_ERROR(10001, "未发现角色参数"),
     ROLE_NAME_ARGS_NOT_FOUND_ERROR(10002, "角色名称参数不存在或不合法"),
