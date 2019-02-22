@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class RoleEntity {
+public class RoleEntity  implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
