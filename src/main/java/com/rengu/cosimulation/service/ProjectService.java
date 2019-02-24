@@ -113,4 +113,42 @@ public class ProjectService {
         projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
         return projectRepository.save(projectEntity);
     }
+
+    // 项目管理员修改项目负责人
+    public ProjectEntity updateProjectPic(String projectId, String picId){
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = getProjectById(projectId);
+        if(StringUtils.isEmpty(picId)){
+            throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
+        }
+        projectEntity.setPic(userService.getUserById(picId));
+        return projectRepository.save(projectEntity);
+    }
+
+    // 修改项目相关信息
+    public ProjectEntity updateProjectById(String projectId, ProjectEntity projectEntityArgs) {
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        if(projectEntityArgs == null){
+            throw new ResultException(ResultCode.PROJECT_ARGS_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(projectEntityArgs.getName())){
+            throw new ResultException(ResultCode.PROJECT_NAME_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(projectEntityArgs.getOrderNum())){
+            throw new ResultException(ResultCode.PROJECT_ORDER_NUM_NOT_FOUND_ERROR);
+        }
+        if(projectEntityArgs.getFinishTime() == null){
+            throw new ResultException(ResultCode.PROJECT_FINISH_TIME_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = getProjectById(projectId);
+        projectEntity.setName(projectEntityArgs.getName());
+        projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
+        projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
+        return projectRepository.save(projectEntity);
+    }
+
 }

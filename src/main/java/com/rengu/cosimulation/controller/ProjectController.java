@@ -71,4 +71,16 @@ public class ProjectController {
         return ResultUtils.success(projectService.restoreProjectById(projectId));
     }
 
+    // 根据id修改项目
+    @PatchMapping(value = "/{projectId}")
+    public ResultEntity updateProjectById(@PathVariable(value = "projectId") String projectId, ProjectEntity projectEntityArgs){
+        return ResultUtils.success(projectService.updateProjectById(projectId, projectEntityArgs));
+    }
+
+    // 管理员修改项目负责人
+    @PatchMapping(value = "/{projectId}/updatePic")
+    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String picId){
+        return ResultUtils.success(projectService.updateProjectPic(projectId, picId));
+    }
+
 }
