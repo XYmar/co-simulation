@@ -94,4 +94,23 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
+    // 负责人指定项目令号、设节点
+    public ProjectEntity arrangeProject(String projectId, ProjectEntity projectEntityArgs) {
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = getProjectById(projectId);
+        if(projectEntityArgs == null){
+            throw new ResultException(ResultCode.PROJECT_ARGS_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(projectEntityArgs.getOrderNum())){
+            throw new ResultException(ResultCode.PROJECT_ORDER_NUM_NOT_FOUND_ERROR);
+        }
+        if(projectEntityArgs.getFinishTime() == null){
+            throw new ResultException(ResultCode.PROJECT_FINISH_TIME_NOT_FOUND_ERROR);
+        }
+        projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
+        projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
+        return projectRepository.save(projectEntity);
+    }
 }
