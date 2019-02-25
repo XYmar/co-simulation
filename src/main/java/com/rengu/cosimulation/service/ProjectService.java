@@ -43,6 +43,7 @@ public class ProjectService {
             throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
         }
         projectEntity.setPic(userService.getUserById(picId));
+        projectEntity.setState(0);
         return projectRepository.save(projectEntity);
     }
 
@@ -148,6 +149,7 @@ public class ProjectService {
         projectEntity.setName(projectEntityArgs.getName());
         projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
         projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
+        projectEntity.setState(projectEntityArgs.getState());
         return projectRepository.save(projectEntity);
     }
 
