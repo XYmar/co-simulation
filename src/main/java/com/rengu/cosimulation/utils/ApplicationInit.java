@@ -1,7 +1,9 @@
 package com.rengu.cosimulation.utils;
 
+import com.rengu.cosimulation.entity.DesignLinkEntity;
 import com.rengu.cosimulation.entity.RoleEntity;
 import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.service.DesignLinkService;
 import com.rengu.cosimulation.service.RoleService;
 import com.rengu.cosimulation.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +28,13 @@ public class ApplicationInit  implements ApplicationRunner {
 
     private final RoleService roleService;
     private final UserService userService;
+    private final DesignLinkService designLinkService;
 
     @Autowired
-    public ApplicationInit(RoleService roleService, UserService userService) {
+    public ApplicationInit(RoleService roleService, UserService userService, DesignLinkService designLinkService) {
         this.roleService = roleService;
         this.userService = userService;
+        this.designLinkService = designLinkService;
     }
 
     @Override
@@ -63,18 +67,11 @@ public class ApplicationInit  implements ApplicationRunner {
         roles[6].setDescription("普通用户");
 
         // 初始化6个角色
-        /*if (!roleService.hasRoleByName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME)) {
-            RoleEntity roleEntity = new RoleEntity();
-            roleEntity.setName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
-            roleEntity.setDescription("系统管理员");
-            roleService.saveRole(roleEntity);*/
-
-            for (RoleEntity role : roles) {
-                if (!roleService.hasRoleByName(role.getName())) {
-                    roleService.saveRole(role);
-                }
+        for (RoleEntity role : roles) {
+            if (!roleService.hasRoleByName(role.getName())) {
+                roleService.saveRole(role);
             }
-        /*}*/
+        }
 
         // 初始化管理员用户
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME)) {
@@ -82,6 +79,38 @@ public class ApplicationInit  implements ApplicationRunner {
             userEntity.setUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME);
             userEntity.setPassword(ApplicationConfig.DEFAULT_ADMIN_PASSWORD);
             userService.saveAdminUser(userEntity);
+        }
+
+        // 初始化设计环节
+        // 创建设计环节数组
+        DesignLinkEntity[] designLinkEntities = new DesignLinkEntity[7];
+
+        // 实例化每一个设计环节
+        for(int i=0;i<designLinkEntities.length;i++){
+            designLinkEntities[i] = new DesignLinkEntity();
+        }
+
+        // 创建7个默认设计环节，并赋值
+        designLinkEntities[0].setName(ApplicationConfig.DEFAULT_STRUCTURAL_MODELING_NAME);
+        designLinkEntities[0].setDescription("结构建模");
+        designLinkEntities[1].setName(ApplicationConfig.DEFAULT_ELECTRICAL_MODELING_NAME);
+        designLinkEntities[1].setDescription("电气建模");
+        designLinkEntities[2].setName(ApplicationConfig.DEFAULT_STRUCTURAL_SIMULATION_NAME);
+        designLinkEntities[2].setDescription("结构仿真");
+        designLinkEntities[3].setName(ApplicationConfig.DEFAULT_ELECTRICAL_SIMULATION_NAME);
+        designLinkEntities[3].setDescription("电气仿真");
+        designLinkEntities[4].setName(ApplicationConfig.DEFAULT_THERMAL_SIMULATION_NAME);
+        designLinkEntities[4].setDescription("热学仿真");
+        designLinkEntities[5].setName(ApplicationConfig.DEFAULT_MECHANICAL_SIMULATION_NAME);
+        designLinkEntities[5].setDescription("力学仿真");
+        designLinkEntities[6].setName(ApplicationConfig.DEFAULT_ASSEMBLY_SIMULATION_NAME);
+        designLinkEntities[6].setDescription("装配仿真");
+
+        // 初始化7个设计环节
+        for (DesignLinkEntity designLinkEntitie : designLinkEntities) {
+            if (!designLinkService.hasDesignLinkByName(designLinkEntitie.getName())) {
+                designLinkService.saveDesignLink(designLinkEntitie);
+            }
         }
 
     }

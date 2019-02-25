@@ -18,4 +18,7 @@ public class ApplicationMessage {
     public static final String PROJECT_NAME_NOT_FOUND = "未发现该项目名称";
     public static final String PROJECT_NAME_EXISTED = "该项目名称已存在";
     public static final String PROJECT_PIC_NOT_FOUND = "未发现该项目负责人";
+
+    //设计环节相关提示
+    public static final String DESIGN_LINK_NAME_NOT_FOUND = "设计环节名称不能为空";
 }

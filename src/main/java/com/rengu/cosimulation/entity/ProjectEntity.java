@@ -25,9 +25,10 @@ public class ProjectEntity implements Serializable {
     private String name;
     private String orderNum;      // 令号
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date finishTime = new Date();                 // 节点计划
+    private Date finishTime;                 // 节点计划
     @ManyToOne
     private UserEntity pic;                        // 项目负责人
-    private boolean deleted = false;               // 项目状态
+    private boolean deleted = false;               // 项目是否删除
+    private int state;                             // 项目状态：0:未进行  1:进行中  2:已完成  3:超时
 
 }
