@@ -93,7 +93,7 @@ public class UserService implements UserDetailsService {
     }
 
     // 根据Id查询用户是否存在
-    private boolean hasUserById(String userId) {
+    public boolean hasUserById(String userId) {
         if (StringUtils.isEmpty(userId)) {
             return false;
         }

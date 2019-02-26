@@ -1,9 +1,11 @@
 package com.rengu.cosimulation.service;
 
+import com.rengu.cosimulation.entity.DesignLinkEntity;
 import com.rengu.cosimulation.entity.ProjectEntity;
 import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
+import com.rengu.cosimulation.repository.DesignLinkRepository;
 import com.rengu.cosimulation.repository.ProjectRepository;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.xml.transform.Result;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Author: XYmar
@@ -23,11 +28,15 @@ import java.util.List;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserService userService;
+    private final DesignLinkService designLinkService;
+    private final DesignLinkRepository designLinkRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, UserService userService) {
+    public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository) {
         this.projectRepository = projectRepository;
         this.userService = userService;
+        this.designLinkService = designLinkService;
+        this.designLinkRepository = designLinkRepository;
     }
 
     // 新建项目(名称、负责人)
@@ -66,7 +75,7 @@ public class ProjectService {
     }
 
     // 根据id查询项目是否存在
-    private boolean hasProjectById(String projectId) {
+    public boolean hasProjectById(String projectId) {
         if (StringUtils.isEmpty(projectId)) {
             return false;
         }
@@ -152,5 +161,40 @@ public class ProjectService {
         projectEntity.setState(projectEntityArgs.getState());
         return projectRepository.save(projectEntity);
     }
+
+    /*// 项目设置子任务(执行者，子任务，节点)
+    public ProjectEntity setDesignLink(String projectId, String designLinkEntityId, String userId, String finishTime){
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = getProjectById(projectId);
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = userService.getUserById(userId);
+        if(!designLinkService.hasDesignLinkById(designLinkEntityId)){
+            throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+
+        // 子任务设置负责人
+        DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
+        Set<UserEntity> userEntitySet = new HashSet<>();
+        userEntitySet.add(userEntity);
+        designLinkEntity.setUserEntities(userEntitySet);
+
+        //项目添加子任务
+        Set<DesignLinkEntity> designLinkEntitySet = projectEntity.getDesignLinkEntities() == null ? new HashSet<>() : projectEntity.getDesignLinkEntities();
+        if(StringUtils.isEmpty(finishTime)){
+            throw new ResultException(ResultCode.DESIGN_LINK_FINISH_TIME_NOT_FOUND_ERROR);
+        }
+        designLinkEntity.setFinishTime(finishTime);
+        designLinkEntitySet.add(designLinkRepository.save(designLinkEntity));
+
+
+        projectEntity.setDesignLinkEntities(designLinkEntitySet);
+        return projectRepository.save(projectEntity);
+
+        // TODO 把子任务保存好保存到项目中
+    }*/
 
 }

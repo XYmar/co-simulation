@@ -1,5 +1,6 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.DesignLinkEntity;
 import com.rengu.cosimulation.entity.ProjectEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.service.ProjectService;

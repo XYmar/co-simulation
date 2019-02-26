@@ -62,7 +62,7 @@ public class DesignLinkService {
     }
 
     // 根据Id查询用户是否存在
-    private boolean hasDesignLinkById(String designLinkId) {
+    public boolean hasDesignLinkById(String designLinkId) {
         if (StringUtils.isEmpty(designLinkId)) {
             return false;
         }
