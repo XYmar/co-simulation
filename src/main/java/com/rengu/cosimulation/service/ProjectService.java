@@ -48,6 +48,9 @@ public class ProjectService {
         if(StringUtils.isEmpty(projectEntity.getName())){
             throw new ResultException(ResultCode.PROJECT_NAME_ARGS_NOT_FOUND_ERROR);
         }
+        if(hasProjectByNameAndDeleted(projectEntity.getName(), false)){
+            throw new ResultException(ResultCode.PROJECT_NAME_EXISTED_ERROR);
+        }
         if(StringUtils.isEmpty(picId)){
             throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
         }
@@ -63,6 +66,14 @@ public class ProjectService {
     // 查询所有项目,根据用户Id(负责人)
     public List<ProjectEntity> getProjectsByUser(UserEntity userEntity, boolean deleted) {
         return projectRepository.findByPicAndDeleted(userEntity, deleted);
+    }
+
+    // 根据名称查询等项目是否存在
+    public boolean hasProjectByNameAndDeleted(String name, boolean deleted) {
+        if (StringUtils.isEmpty(name)) {
+            return false;
+        }
+        return projectRepository.existsByNameAndDeleted(name, deleted);
     }
 
     // 根据项目id查询项目
@@ -145,20 +156,25 @@ public class ProjectService {
         if(projectEntityArgs == null){
             throw new ResultException(ResultCode.PROJECT_ARGS_NOT_FOUND_ERROR);
         }
-        if(StringUtils.isEmpty(projectEntityArgs.getName())){
-            throw new ResultException(ResultCode.PROJECT_NAME_NOT_FOUND_ERROR);
-        }
-        if(StringUtils.isEmpty(projectEntityArgs.getOrderNum())){
-            throw new ResultException(ResultCode.PROJECT_ORDER_NUM_NOT_FOUND_ERROR);
-        }
-        if(projectEntityArgs.getFinishTime() == null){
-            throw new ResultException(ResultCode.PROJECT_FINISH_TIME_NOT_FOUND_ERROR);
-        }
+
         ProjectEntity projectEntity = getProjectById(projectId);
-        projectEntity.setName(projectEntityArgs.getName());
-        projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
-        projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
-        projectEntity.setState(projectEntityArgs.getState());
+
+        if(!StringUtils.isEmpty(projectEntityArgs.getName()) && !projectEntity.getName().equals(projectEntityArgs.getName())){
+            if(hasProjectByNameAndDeleted(projectEntityArgs.getName(), false)){
+                throw new ResultException(ResultCode.PROJECT_NAME_EXISTED_ERROR);
+            }
+            projectEntity.setName(projectEntityArgs.getName());
+        }
+        if(!StringUtils.isEmpty(projectEntityArgs.getOrderNum()) && !projectEntity.getOrderNum().equals(projectEntityArgs.getOrderNum())){
+            projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
+        }
+        if(!StringUtils.isEmpty(projectEntityArgs.getFinishTime())){
+            projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
+        }
+
+        if(!StringUtils.isEmpty(String.valueOf(projectEntityArgs.getState()))){
+            projectEntity.setState(projectEntityArgs.getState());
+        }
         return projectRepository.save(projectEntity);
     }
 
