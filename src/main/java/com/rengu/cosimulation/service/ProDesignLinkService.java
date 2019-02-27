@@ -53,6 +53,7 @@ public class ProDesignLinkService {
         // 设置子任务相关内容
         proDesignLinkEntity.setName(designLinkEntity.getName());                   // 名称
         proDesignLinkEntity.setDescription(designLinkEntity.getDescription());     // 描述
+        proDesignLinkEntity.setFinishTime(finishTime);
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
@@ -69,4 +70,61 @@ public class ProDesignLinkService {
         return proDesignLinkRepository.save(proDesignLinkEntity);
     }
 
+    // 根据id查询子任务是否存在
+    public boolean hasProDesignLinkById(String proDesignLinkById) {
+        if (StringUtils.isEmpty(proDesignLinkById)) {
+            return false;
+        }
+        return proDesignLinkRepository.existsById(proDesignLinkById);
+    }
+
+    // 根据子任务名称查询子任务是否存在
+    public boolean hasProDesignLinkByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return false;
+        }
+        return proDesignLinkRepository.existsByName(name);
+    }
+
+    // 根据id查询子任务
+    public ProDesignLinkEntity getProDesignLinkById(String proDesignLinkById) {
+        if(!hasProDesignLinkById(proDesignLinkById)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        return proDesignLinkRepository.findById(proDesignLinkById).get();
+    }
+
+    // 根据id修改子任务
+    public ProDesignLinkEntity updateProDesignLinkById(String proDesignLinkById, String designLinkEntityId, String userId, String finishTime){
+        if(!hasProDesignLinkById(proDesignLinkById)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        ProDesignLinkEntity proDesignLinkEntity = getProDesignLinkById(proDesignLinkById);
+        if(designLinkService.hasDesignLinkById(designLinkEntityId)){
+            DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
+            if(hasProDesignLinkByName(designLinkEntity.getName())){
+                throw new ResultException(ResultCode.PRODESIGN_LINK_NAME_EXISTED_ERROR);
+            }
+            proDesignLinkEntity.setDesignLinkEntity(designLinkEntity);
+        }
+        if(userService.hasUserById(userId)){
+            UserEntity userEntity = userService.getUserById(userId);
+            proDesignLinkEntity.setUserEntity(userEntity);
+        }
+        if(!StringUtils.isEmpty(finishTime)){
+            proDesignLinkEntity.setFinishTime(finishTime);
+        }
+
+        return proDesignLinkRepository.save(proDesignLinkEntity);
+    }
+
+    // 删除子任务
+    public ProDesignLinkEntity deleteProDesignLinkById(String proDesignLinkId){
+        if(!hasProDesignLinkById(proDesignLinkId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        ProDesignLinkEntity proDesignLinkEntity = getProDesignLinkById(proDesignLinkId);
+        proDesignLinkRepository.delete(proDesignLinkEntity);
+        return proDesignLinkEntity;
+    }
 }

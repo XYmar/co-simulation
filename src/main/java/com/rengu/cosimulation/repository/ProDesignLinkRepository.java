@@ -14,4 +14,6 @@ import java.util.List;
 @Repository
 public interface ProDesignLinkRepository extends JpaRepository<ProDesignLinkEntity, String> {
     List<ProDesignLinkEntity> findByProjectEntity(ProjectEntity projectEntity);
+
+    boolean existsByName(String name);
 }

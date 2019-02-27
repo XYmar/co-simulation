@@ -31,4 +31,23 @@ public class ProDesignLinkController {
     public ResultEntity setDesignLink(@PathVariable(value = "projectId") String projectId, String designLinkEntityId, String userId, String finishTime){
         return ResultUtils.success(proDesignLinkService.setProDesignLink(projectId, designLinkEntityId, userId, finishTime));
     }
+
+    // 根据id查询子任务
+    @GetMapping(value = "/{proDesignLinkId}")
+    public ResultEntity getProDesignLinkById(String proDesignLinkById){
+        return ResultUtils.success(proDesignLinkService.getProDesignLinkById(proDesignLinkById));
+    }
+
+    // 修改子任务(执行者，子任务，节点)
+    @PatchMapping(value = "/{proDesignLinkById}/updateDesignLink")
+    public ResultEntity updateProDesignLinkById(@PathVariable(value = "proDesignLinkById") String proDesignLinkById, String designLinkEntityId, String userId, String finishTime){
+        return ResultUtils.success(proDesignLinkService.updateProDesignLinkById(proDesignLinkById, designLinkEntityId, userId, finishTime));
+    }
+
+    // 删除子任务
+    @DeleteMapping(value = "/{proDesignLinkId}")
+    public ResultEntity deleteProDesignLinkById(@PathVariable(value = "proDesignLinkId") String proDesignLinkId){
+        return ResultUtils.success(proDesignLinkService.deleteProDesignLinkById(proDesignLinkId));
+    }
+
 }
