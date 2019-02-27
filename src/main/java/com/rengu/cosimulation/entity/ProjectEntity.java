@@ -27,8 +27,11 @@ public class ProjectEntity implements Serializable {
     private Date finishTime;                 // 节点计划
     @ManyToOne
     private UserEntity pic;                        // 项目负责人
+    @ManyToOne
+    private UserEntity creator;                    // 创建者
     private boolean deleted = false;               // 项目是否删除
     private int state;                             // 项目状态：0:未进行  1:进行中  2:已完成  3:超时
+    private String description;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<ProDesignLinkEntity> proDesignLinkEntitySet;   // 项目子任务

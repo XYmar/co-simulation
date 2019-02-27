@@ -31,15 +31,15 @@ public class ProjectController {
     // 新增项目（名称，负责人）
     @PostMapping
     @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
-    public ResultEntity saveProject(ProjectEntity projectEntity, String picId){
-        return ResultUtils.success(projectService.saveProject(projectEntity, picId));
+    public ResultEntity saveProject(ProjectEntity projectEntity, String creatorId, String picId){
+        return ResultUtils.success(projectService.saveProject(projectEntity, creatorId, picId));
     }
 
     // 项目管理员查询所有项目
     @GetMapping
     @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
-    public ResultEntity getProjects(){
-        return ResultUtils.success(projectService.getAll());
+    public ResultEntity getProjects(boolean deleted){
+        return ResultUtils.success(projectService.getAllByDeleted(deleted));
     }
 
     // 根据用户id查询所有项目(负责人)
@@ -62,26 +62,26 @@ public class ProjectController {
 
     // 根据ID删除项目
     @PatchMapping(value = "/{projectId}/delete")
-    public ResultEntity deleteProjectById(@PathVariable(value = "projectId") String projectId){
-        return ResultUtils.success(projectService.deleteProjectById(projectId));
+    public ResultEntity deleteProjectById(@PathVariable(value = "projectId") String projectId, String userId){
+        return ResultUtils.success(projectService.deleteProjectById(projectId, userId));
     }
 
     // 根据ID撤销删除项目
     @PatchMapping(value = "/{projectId}/restore")
-    public ResultEntity restoreProjectById(@PathVariable(value = "projectId") String projectId){
-        return ResultUtils.success(projectService.restoreProjectById(projectId));
+    public ResultEntity restoreProjectById(@PathVariable(value = "projectId") String projectId, String userId){
+        return ResultUtils.success(projectService.restoreProjectById(projectId, userId));
     }
 
     // 根据id修改项目
     @PatchMapping(value = "/{projectId}")
-    public ResultEntity updateProjectById(@PathVariable(value = "projectId") String projectId, ProjectEntity projectEntityArgs){
-        return ResultUtils.success(projectService.updateProjectById(projectId, projectEntityArgs));
+    public ResultEntity updateProjectById(@PathVariable(value = "projectId") String projectId, String userId, ProjectEntity projectEntityArgs){
+        return ResultUtils.success(projectService.updateProjectById(projectId, userId, projectEntityArgs));
     }
 
     // 管理员修改项目负责人
     @PatchMapping(value = "/{projectId}/updatePic")
-    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String picId){
-        return ResultUtils.success(projectService.updateProjectPic(projectId, picId));
+    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String creatorId, String picId){
+        return ResultUtils.success(projectService.updateProjectPic(projectId, creatorId, picId));
     }
 
 }

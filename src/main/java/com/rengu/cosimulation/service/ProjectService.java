@@ -39,19 +39,23 @@ public class ProjectService {
         this.designLinkRepository = designLinkRepository;
     }
 
-    // 新建项目(名称、负责人)
+    // 新建项目(创建者、名称、负责人)
     @CacheEvict(value = "Project_Cache", allEntries = true)
-    public ProjectEntity saveProject(ProjectEntity projectEntity, String picId){
+    public ProjectEntity saveProject(ProjectEntity projectEntity, String creatorId, String picId){
         if(projectEntity == null){
             throw new ResultException(ResultCode.PROJECT_ARGS_NOT_FOUND_ERROR);
         }
+        if(!userService.hasUserById(creatorId)){
+            throw new ResultException(ResultCode.PROJECT_CREATOR_ARGS_NOT_FOUND_ERROR);
+        }
+        projectEntity.setCreator(userService.getUserById(creatorId));
         if(StringUtils.isEmpty(projectEntity.getName())){
             throw new ResultException(ResultCode.PROJECT_NAME_ARGS_NOT_FOUND_ERROR);
         }
         if(hasProjectByNameAndDeleted(projectEntity.getName(), false)){
             throw new ResultException(ResultCode.PROJECT_NAME_EXISTED_ERROR);
         }
-        if(StringUtils.isEmpty(picId)){
+        if(!userService.hasUserById(picId)){
             throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
         }
         projectEntity.setPic(userService.getUserById(picId));
@@ -59,8 +63,8 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
-    public List<ProjectEntity> getAll() {
-        return projectRepository.findAll();
+    public List<ProjectEntity> getAllByDeleted(boolean deleted) {
+        return projectRepository.findByDeleted(deleted);
     }
 
     // 查询所有项目,根据用户Id(负责人)
@@ -93,24 +97,41 @@ public class ProjectService {
         return projectRepository.existsById(projectId);
     }
 
-    // 根据id删除项目
+    // 清空项目
     @CacheEvict(value = " Project_Cache", allEntries = true)
-    public ProjectEntity deleteProjectById(String projectId) {
+    public void deleteAllProject() {
+        List<ProjectEntity> projectEntities = getAllByDeleted(true);
+        if(projectEntities.size() > 0){
+            projectRepository.deleteAll(projectEntities);
+        }
+    }
+
+    // 清空
+    @CacheEvict(value = " Project_Cache", allEntries = true)
+    public ProjectEntity deleteProjectById(String projectId, String userId) {
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+        // 非项目管理员，非负责人
+        if(!projectEntity.getCreator().getId().equals(userId) || !projectEntity.getPic().getId().equals(userId)){
+            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
+        }
         projectEntity.setDeleted(true);
         return projectRepository.save(projectEntity);
     }
 
     // 根据id撤销删除
     @CacheEvict(value = " Project_Cache", allEntries = true)
-    public ProjectEntity restoreProjectById(String projectId) {
+    public ProjectEntity restoreProjectById(String projectId, String userId) {
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+        // 非项目管理员，非负责人
+        if(!projectEntity.getCreator().getId().equals(userId) || !projectEntity.getPic().getId().equals(userId)){
+            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
+        }
         projectEntity.setDeleted(false);
         return projectRepository.save(projectEntity);
     }
@@ -136,11 +157,18 @@ public class ProjectService {
     }
 
     // 项目管理员修改项目负责人
-    public ProjectEntity updateProjectPic(String projectId, String picId){
+    public ProjectEntity updateProjectPic(String projectId, String creatorId, String picId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+        if(!userService.hasUserById(creatorId)){
+            throw new ResultException(ResultCode.PROJECT_CREATOR_ARGS_NOT_FOUND_ERROR);
+        }
+
+        if(!projectEntity.getCreator().getId().equals(creatorId)){
+            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
+        }
         if(StringUtils.isEmpty(picId)){
             throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
         }
@@ -149,7 +177,7 @@ public class ProjectService {
     }
 
     // 修改项目相关信息
-    public ProjectEntity updateProjectById(String projectId, ProjectEntity projectEntityArgs) {
+    public ProjectEntity updateProjectById(String projectId, String userId, ProjectEntity projectEntityArgs) {
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
@@ -158,6 +186,11 @@ public class ProjectService {
         }
 
         ProjectEntity projectEntity = getProjectById(projectId);
+
+        // 非项目管理员，非负责人
+        if(!projectEntity.getCreator().getId().equals(userId) || !projectEntity.getPic().getId().equals(userId)){
+            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
+        }
 
         if(!StringUtils.isEmpty(projectEntityArgs.getName()) && !projectEntity.getName().equals(projectEntityArgs.getName())){
             if(hasProjectByNameAndDeleted(projectEntityArgs.getName(), false)){
@@ -174,6 +207,10 @@ public class ProjectService {
 
         if(!StringUtils.isEmpty(String.valueOf(projectEntityArgs.getState()))){
             projectEntity.setState(projectEntityArgs.getState());
+        }
+
+        if(!StringUtils.isEmpty(projectEntityArgs.getDescription())){
+            projectEntity.setDescription(projectEntityArgs.getDescription());
         }
         return projectRepository.save(projectEntity);
     }

@@ -28,7 +28,7 @@ public enum ResultCode {
     // 项目相关    2000x
     PROJECT_ARGS_NOT_FOUND_ERROR(20001, "未发现项目参数"),
     PROJECT_NAME_ARGS_NOT_FOUND_ERROR(20002, "项目名称参数不存在或不合法"),
-    PROJECT_NAME_NOT_FOUND_ERROR(20003, "未发现该项目名称"),
+    PROJECT_CREATOR_ARGS_NOT_FOUND_ERROR(20003, "未发现创建者信息"),
     PROJECT_PIC_ARGS_NOT_FOUND_ERROR(20004, "请指定项目负责人"),
     PROJECT_ID_NOT_FOUND_ERROR(20005,"未发现该项目ID"),
     PROJECT_NAME_EXISTED_ERROR(20006,"该项目名已存在"),
@@ -53,7 +53,8 @@ public enum ResultCode {
 
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),
-    ARGS_NOT_FOUND_ERROR(40003, "未传递参数");
+    ARGS_NOT_FOUND_ERROR(40003, "未传递参数"),
+    AUTHORITY_DENIED_ERROR(40004, "无权限进行该操作");
 
     private int code;
     private String msg;
