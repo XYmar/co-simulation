@@ -106,7 +106,7 @@ public class ProjectService {
         }
     }
 
-    // 清空
+    // 根据id删除项目（回收站）
     @CacheEvict(value = " Project_Cache", allEntries = true)
     public ProjectEntity deleteProjectById(String projectId, String userId) {
         if(!hasProjectById(projectId)){
@@ -114,7 +114,7 @@ public class ProjectService {
         }
         ProjectEntity projectEntity = getProjectById(projectId);
         // 非项目管理员，非负责人
-        if(!projectEntity.getCreator().getId().equals(userId) || !projectEntity.getPic().getId().equals(userId)){
+        if(!projectEntity.getCreator().getId().equals(userId) && !projectEntity.getPic().getId().equals(userId)){
             throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
         }
         projectEntity.setDeleted(true);
@@ -129,7 +129,7 @@ public class ProjectService {
         }
         ProjectEntity projectEntity = getProjectById(projectId);
         // 非项目管理员，非负责人
-        if(!projectEntity.getCreator().getId().equals(userId) || !projectEntity.getPic().getId().equals(userId)){
+        if(!projectEntity.getCreator().getId().equals(userId) && !projectEntity.getPic().getId().equals(userId)){
             throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
         }
         projectEntity.setDeleted(false);
@@ -186,9 +186,8 @@ public class ProjectService {
         }
 
         ProjectEntity projectEntity = getProjectById(projectId);
-
         // 非项目管理员，非负责人
-        if(!projectEntity.getCreator().getId().equals(userId) || !projectEntity.getPic().getId().equals(userId)){
+        if(!(projectEntity.getCreator().getId().equals(userId)) && !(projectEntity.getPic().getId().equals(userId))){
             throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
         }
 

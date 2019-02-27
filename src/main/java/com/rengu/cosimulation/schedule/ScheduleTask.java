@@ -20,7 +20,7 @@ public class ScheduleTask {
     }
 
     //  @Scheduled(fixedRate = 3 * 60 * 1000)   三分钟
-    @Scheduled(cron = "/0 30 10 L * ?")        // 每月最后一天的10点30分触发
+    @Scheduled(cron = "0 30 10 28 * ?")        // 每月28号的10点30分触发
     public void reportCurrentTime() {
         projectService.deleteAllProject();
     }
