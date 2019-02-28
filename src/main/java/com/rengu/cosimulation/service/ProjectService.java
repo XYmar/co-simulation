@@ -214,39 +214,14 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
-    /*// 项目设置子任务(执行者，子任务，节点)
-    public ProjectEntity setDesignLink(String projectId, String designLinkEntityId, String userId, String finishTime){
+    // 启动项目
+    public ProjectEntity startProject(String projectId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
-        UserEntity userEntity = userService.getUserById(userId);
-        if(!designLinkService.hasDesignLinkById(designLinkEntityId)){
-            throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
-        }
-
-        // 子任务设置负责人
-        DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
-        Set<UserEntity> userEntitySet = new HashSet<>();
-        userEntitySet.add(userEntity);
-        designLinkEntity.setUserEntities(userEntitySet);
-
-        //项目添加子任务
-        Set<DesignLinkEntity> designLinkEntitySet = projectEntity.getDesignLinkEntities() == null ? new HashSet<>() : projectEntity.getDesignLinkEntities();
-        if(StringUtils.isEmpty(finishTime)){
-            throw new ResultException(ResultCode.DESIGN_LINK_FINISH_TIME_NOT_FOUND_ERROR);
-        }
-        designLinkEntity.setFinishTime(finishTime);
-        designLinkEntitySet.add(designLinkRepository.save(designLinkEntity));
-
-
-        projectEntity.setDesignLinkEntities(designLinkEntitySet);
+        projectEntity.setState(1);
         return projectRepository.save(projectEntity);
 
-        // TODO 把子任务保存好保存到项目中
-    }*/
-
+    }
 }
