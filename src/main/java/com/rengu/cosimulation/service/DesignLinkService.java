@@ -86,6 +86,9 @@ public class DesignLinkService {
             designLinkEntity.setName(designLinkEntityArgs.getName());
         }
         designLinkEntity.setDescription(designLinkEntityArgs.getDescription());
+        if(!StringUtils.isEmpty(String.valueOf(designLinkEntityArgs.getType()))){
+            designLinkEntity.setType(designLinkEntityArgs.getType());
+        }
         return designLinkRepository.save(designLinkEntity);
     }
 
