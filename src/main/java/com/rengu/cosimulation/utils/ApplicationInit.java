@@ -93,18 +93,25 @@ public class ApplicationInit  implements ApplicationRunner {
         // 创建7个默认设计环节，并赋值
         designLinkEntities[0].setName(ApplicationConfig.DEFAULT_STRUCTURAL_MODELING_NAME);
         designLinkEntities[0].setDescription("结构建模");
+        designLinkEntities[0].setType(0);
         designLinkEntities[1].setName(ApplicationConfig.DEFAULT_ELECTRICAL_MODELING_NAME);
         designLinkEntities[1].setDescription("电气建模");
+        designLinkEntities[1].setType(0);
         designLinkEntities[2].setName(ApplicationConfig.DEFAULT_STRUCTURAL_SIMULATION_NAME);
         designLinkEntities[2].setDescription("结构仿真");
+        designLinkEntities[2].setType(1);
         designLinkEntities[3].setName(ApplicationConfig.DEFAULT_ELECTRICAL_SIMULATION_NAME);
         designLinkEntities[3].setDescription("电气仿真");
+        designLinkEntities[3].setType(1);
         designLinkEntities[4].setName(ApplicationConfig.DEFAULT_THERMAL_SIMULATION_NAME);
         designLinkEntities[4].setDescription("热学仿真");
+        designLinkEntities[4].setType(1);
         designLinkEntities[5].setName(ApplicationConfig.DEFAULT_MECHANICAL_SIMULATION_NAME);
         designLinkEntities[5].setDescription("力学仿真");
+        designLinkEntities[5].setType(1);
         designLinkEntities[6].setName(ApplicationConfig.DEFAULT_ASSEMBLY_SIMULATION_NAME);
         designLinkEntities[6].setDescription("装配仿真");
+        designLinkEntities[6].setType(1);
 
         // 初始化7个设计环节
         for (DesignLinkEntity designLinkEntitie : designLinkEntities) {
