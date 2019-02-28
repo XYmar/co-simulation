@@ -22,5 +22,6 @@ public class DesignLinkEntity implements Serializable {
     @NotBlank(message = ApplicationMessage.DESIGN_LINK_NAME_NOT_FOUND)
     private String name;                  // 设计环节名称
     private String description;           // 设计环节描述
+    private int type;                     // 类型   0：建模   1：仿真
 
 }
