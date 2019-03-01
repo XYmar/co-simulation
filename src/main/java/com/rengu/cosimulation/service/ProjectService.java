@@ -137,11 +137,17 @@ public class ProjectService {
     }
 
     // 负责人指定项目令号、设节点
-    public ProjectEntity arrangeProject(String projectId, ProjectEntity projectEntityArgs) {
+    public ProjectEntity arrangeProject(String projectId, String userId, ProjectEntity projectEntityArgs) {
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+
+        // 非项目管理员，非负责人
+        if(!(projectEntity.getCreator().getId().equals(userId)) && !(projectEntity.getPic().getId().equals(userId))){
+            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
+        }
+
         if(projectEntityArgs == null){
             throw new ResultException(ResultCode.PROJECT_ARGS_NOT_FOUND_ERROR);
         }
