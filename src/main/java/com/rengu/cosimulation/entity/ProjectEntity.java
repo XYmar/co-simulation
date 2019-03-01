@@ -24,7 +24,7 @@ public class ProjectEntity implements Serializable {
     private String name;
     private String orderNum;      // 令号
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date finishTime;                 // 节点计划
+    private String finishTime;                 // 节点计划
     @ManyToOne
     private UserEntity pic;                        // 项目负责人
     @ManyToOne
