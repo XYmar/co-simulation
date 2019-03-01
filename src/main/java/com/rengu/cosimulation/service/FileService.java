@@ -55,18 +55,18 @@ public class FileService {
     }
 
     // 合并文件块
-    public synchronized FileEntity mergeChunks(ChunkEntity chunkEntity, FileEntity fileEntity) throws IOException {
+    public synchronized FileEntity mergeChunks(ChunkEntity chunkEntity, FileEntity fileEntityArgs) throws IOException {
         if (hasFileByMD5(chunkEntity.getIdentifier())) {
             return getFileByMD5(chunkEntity.getIdentifier());
         } else {
             File file = null;
             String extension = FilenameUtils.getExtension(chunkEntity.getFilename());
             if (StringUtils.isEmpty(extension)) {
-                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + fileEntity.getType() + File.separator + chunkEntity.getIdentifier());
+                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + fileEntityArgs.getType() + File.separator + chunkEntity.getIdentifier());
             } else {
-                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + fileEntity.getType() + File.separator + chunkEntity.getIdentifier() + "." + FilenameUtils.getExtension(chunkEntity.getFilename()));
+                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + fileEntityArgs.getType() + File.separator + chunkEntity.getIdentifier() + "." + FilenameUtils.getExtension(chunkEntity.getFilename()));
             }
-            return mergeChunks(file, chunkEntity, fileEntity);
+            return mergeChunks(file, chunkEntity, fileEntityArgs);
         }
     }
 
