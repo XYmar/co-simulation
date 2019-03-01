@@ -1,5 +1,9 @@
 package com.rengu.cosimulation.utils;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+
 /**
  * Author: XYmar
  * Date: 2019/2/12 17:25
@@ -27,5 +31,11 @@ public class ApplicationConfig {
     public static final String DEFAULT_THERMAL_SIMULATION_NAME = "thermal_simulation";               //热学仿真
     public static final String DEFAULT_MECHANICAL_SIMULATION_NAME = "mechanical_simulation";         //力学仿真
     public static final String DEFAULT_ASSEMBLY_SIMULATION_NAME = "assembly_simulation";             //结构建模
+
+    // 文件块保存路径
+    public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");
+    // 文件保存路径
+    public static final String FILES_SAVE_PATH = FormatUtils.formatPath(FileUtils.getUserDirectoryPath() + File.separator + "SIMULATION" + File.separator + "FILES");
+
 
 }

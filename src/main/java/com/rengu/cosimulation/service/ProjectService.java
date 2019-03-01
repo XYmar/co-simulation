@@ -148,7 +148,7 @@ public class ProjectService {
         if(StringUtils.isEmpty(projectEntityArgs.getOrderNum())){
             throw new ResultException(ResultCode.PROJECT_ORDER_NUM_NOT_FOUND_ERROR);
         }
-        if(projectEntityArgs.getFinishTime() == null){
+        if(StringUtils.isEmpty(projectEntityArgs.getFinishTime())){
             throw new ResultException(ResultCode.PROJECT_FINISH_TIME_NOT_FOUND_ERROR);
         }
         projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
