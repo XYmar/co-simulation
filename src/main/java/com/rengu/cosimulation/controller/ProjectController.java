@@ -56,8 +56,8 @@ public class ProjectController {
 
     // 负责人指定项目令号、设节点
     @PatchMapping(value = "/{projectId}/arrange")
-    public ResultEntity arrangeProject(@PathVariable(value = "projectId") String projectId, ProjectEntity projectEntityArgs){
-        return ResultUtils.success(projectService.arrangeProject(projectId, projectEntityArgs));
+    public ResultEntity arrangeProject(@PathVariable(value = "projectId") String projectId, String userId, ProjectEntity projectEntityArgs){
+        return ResultUtils.success(projectService.arrangeProject(projectId, userId, projectEntityArgs));
     }
 
     // 根据ID删除项目
