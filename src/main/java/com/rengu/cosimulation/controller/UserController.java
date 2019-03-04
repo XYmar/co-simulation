@@ -55,8 +55,8 @@ public class UserController {
 
     // 根据ID修改用户信息
     @PatchMapping(value = "/{userId}")
-    public ResultEntity updateUserById(@PathVariable(value = "userId") String userId, UserEntity userEntity, @RequestParam(value = "ids") String[] ids){
-        return ResultUtils.success(userService.updateUserByUserId(userId, userEntity, ids));
+    public ResultEntity updateUserById(@PathVariable(value = "userId") String userId, UserEntity userEntity){
+        return ResultUtils.success(userService.updateUserByUserId(userId, userEntity));
     }
 
     // 根据ID删除用户
@@ -72,10 +72,10 @@ public class UserController {
     }
 
     // 根据ID为用户分配角色
-    /*@PatchMapping(value = "/{userId}/distribute")
-    public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId, String roleId){
-        return ResultUtils.success(userService.distributeUserById(userId, roleId));
-    }*/
+    @PatchMapping(value = "/{userId}/distribute")
+    public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId,  @RequestParam(value = "ids") String[] ids){
+        return ResultUtils.success(userService.distributeUserById(userId, ids));
+    }
 
     // 根据ID禁用或解除
     @PatchMapping(value = "/{userId}/authority")

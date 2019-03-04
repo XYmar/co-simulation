@@ -115,7 +115,7 @@ public class UserService implements UserDetailsService {
 
     // 根据id修改用户
     @CachePut(value = "User_Cache", key = "#userId")
-    public UserEntity updateUserByUserId(String userId, UserEntity userEntityArgs, String[] ids) {
+    public UserEntity updateUserByUserId(String userId, UserEntity userEntityArgs) {
         if(!hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
@@ -134,18 +134,6 @@ public class UserService implements UserDetailsService {
         if(!StringUtils.isEmpty(String.valueOf(userEntityArgs.getSecretClass()))){
             userEntity.setSecretClass(userEntityArgs.getSecretClass());
         }
-
-        List<RoleEntity> roleEntityList = new ArrayList<>();
-        if(ids.length == 0){
-            throw new ResultException(ResultCode.USER_ROLE_NOT_FOUND_ERROR);
-        }
-        for (String id : ids) {
-            roleEntityList.add(roleService.getRoleById(id));
-        }
-
-        HashSet<RoleEntity> roleEntityHashSet = new HashSet<>(roleEntityList);
-
-        userEntity.setRoleEntities(roleEntityHashSet);
 
         return userRepository.save(userEntity);
     }
@@ -176,20 +164,26 @@ public class UserService implements UserDetailsService {
     }
 
     // 根据id分配用户权限,  一次只能分配一个角色, 再次传入角色的时候累加
-    /*@CacheEvict(value = "User_Cache", key = "#userId")
-    public UserEntity distributeUserById(String userId, String roleId) {
+    @CacheEvict(value = "User_Cache", key = "#userId")
+    public UserEntity distributeUserById(String userId, String[] ids) {
         if(!hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
-        if(!roleService.hasRoleById(roleId)){
-            throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
-        }
         UserEntity userEntity = getUserById(userId);
-        Set<RoleEntity> roleEntitySet = new HashSet<>();
-        roleEntitySet.add(roleService.getRoleById(roleId));
-        userEntity.setRoleEntities(roleEntitySet);
+
+        List<RoleEntity> roleEntityList = new ArrayList<>();
+        if(ids.length == 0){
+            throw new ResultException(ResultCode.USER_ROLE_NOT_FOUND_ERROR);
+        }
+        for (String id : ids) {
+            roleEntityList.add(roleService.getRoleById(id));
+        }
+
+        HashSet<RoleEntity> roleEntityHashSet = new HashSet<>(roleEntityList);
+
+        userEntity.setRoleEntities(roleEntityHashSet);
         return userRepository.save(userEntity);
-    }*/
+    }
 
     // 根据id禁用或解除禁用
     @CacheEvict(value = "User_Cache", key = "#userId")
