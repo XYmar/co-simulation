@@ -18,7 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Author: XYmar
@@ -35,35 +36,38 @@ public class UserService implements UserDetailsService {
         this.roleService = roleService;
     }
 
-    // 保存用户
+    // 保存用户 , 一个角色
     @CacheEvict(value = "User_Cache", allEntries = true)
-    public UserEntity saveUser(UserEntity userEntity) {
+    public UserEntity saveUser(UserEntity userEntity, String roleName) {
         if (userEntity == null) {
             throw new ResultException(ResultCode.USER_ARGS_NOT_FOUND_ERROR);
         }
-        /*if (StringUtils.isEmpty(userEntity.getUsername())) {
-            throw new ResultException(ResultCode.USER_USERNAME_ARGS_NOT_FOUND_ERROR);
-        }
-        if (StringUtils.isEmpty(userEntity.getPassword())) {
-            throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
-        }*/
         if (hasUserByUsername(userEntity.getUsername())) {
             throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
         }
-        if(userEntity.getRoleEntity() != null){
-            userEntity.setRoleEntity(userEntity.getRoleEntity());
-        }else{
-            userEntity.setRoleEntity(roleService.getRoleByName(ApplicationConfig.DEFAULT_USER_ROLE_NAME));
-        }
         userEntity.setPassword(new BCryptPasswordEncoder().encode(userEntity.getPassword()));
+
+        if(StringUtils.isEmpty(roleName)){
+            throw new ResultException(ResultCode.USER_ROLE_NOT_FOUND_ERROR);
+        }
+        Set<RoleEntity> roleEntitySet = new HashSet<>();
+        roleEntitySet.add(roleService.getRoleByName(roleName));
+        userEntity.setRoleEntities(roleEntitySet);
+        /*if(userEntity.getRoleEntities() != null){                    // 设置三元等
+            userEntity.setRoleEntities(userEntity.getRoleEntities());
+        }else{                                                       // 设置普通用户
+            Set<RoleEntity> roleEntitySet = new HashSet<>();
+            roleEntitySet.add(roleService.getRoleByName(ApplicationConfig.DEFAULT_USER_ROLE_NAME));
+            userEntity.setRoleEntities(roleEntitySet);
+        }*/
+
         return userRepository.save(userEntity);
     }
 
     //保存管理员用户
-    public UserEntity saveAdminUser(UserEntity userEntity) {
-        userEntity.setRoleEntity(roleService.getRoleByName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME));
+    /*public UserEntity saveAdminUser(UserEntity userEntity, String roleName) {
         return saveUser(userEntity);
-    }
+    }*/
 
     // 查询所有用户
     public List<UserEntity> getAll() {
@@ -111,7 +115,7 @@ public class UserService implements UserDetailsService {
 
     // 根据id修改用户
     @CachePut(value = "User_Cache", key = "#userId")
-    public UserEntity updateUserByUserId(String userId, UserEntity userEntityArgs) {
+    public UserEntity updateUserByUserId(String userId, UserEntity userEntityArgs, String[] ids) {
         if(!hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
@@ -130,6 +134,19 @@ public class UserService implements UserDetailsService {
         if(!StringUtils.isEmpty(String.valueOf(userEntityArgs.getSecretClass()))){
             userEntity.setSecretClass(userEntityArgs.getSecretClass());
         }
+
+        List<RoleEntity> roleEntityList = new ArrayList<>();
+        if(ids.length == 0){
+            throw new ResultException(ResultCode.USER_ROLE_NOT_FOUND_ERROR);
+        }
+        for (String id : ids) {
+            roleEntityList.add(roleService.getRoleById(id));
+        }
+
+        HashSet<RoleEntity> roleEntityHashSet = new HashSet<>(roleEntityList);
+
+        userEntity.setRoleEntities(roleEntityHashSet);
+
         return userRepository.save(userEntity);
     }
 
@@ -158,8 +175,8 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
-    // 根据id分配用户权限
-    @CacheEvict(value = "User_Cache", key = "#userId")
+    // 根据id分配用户权限,  一次只能分配一个角色, 再次传入角色的时候累加
+    /*@CacheEvict(value = "User_Cache", key = "#userId")
     public UserEntity distributeUserById(String userId, String roleId) {
         if(!hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
@@ -168,9 +185,11 @@ public class UserService implements UserDetailsService {
             throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
         }
         UserEntity userEntity = getUserById(userId);
-        userEntity.setRoleEntity(roleService.getRoleById(roleId));
+        Set<RoleEntity> roleEntitySet = new HashSet<>();
+        roleEntitySet.add(roleService.getRoleById(roleId));
+        userEntity.setRoleEntities(roleEntitySet);
         return userRepository.save(userEntity);
-    }
+    }*/
 
     // 根据id禁用或解除禁用
     @CacheEvict(value = "User_Cache", key = "#userId")

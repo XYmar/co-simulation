@@ -34,14 +34,15 @@ public class UserEntity implements UserDetails, Serializable {
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;                 // 是否可用：可用  禁用
-    @ManyToOne(fetch = FetchType.EAGER)
-    private RoleEntity roleEntity;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<RoleEntity> roleEntities;
 
-    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_"+ roleEntity.getName().toUpperCase()));
+        for (RoleEntity roleEntity : roleEntities) {
+            grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + roleEntity.getName().toUpperCase()));
+        }
         return grantedAuthorities;
     }
 }
