@@ -3,14 +3,13 @@ package com.rengu.cosimulation.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -29,10 +28,12 @@ public class UserEntity implements UserDetails, Serializable {
     private String username;
     @NotBlank(message = "密码不能为空")
     private String password;
+    @Range(min = 0, max = 4, message = "请设置0-4的范围")
+    private int secretClass;                       // 人员密级
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
-    private boolean enabled = true;                 //是否可用：可用  禁用
+    private boolean enabled = true;                 // 是否可用：可用  禁用
     @ManyToOne(fetch = FetchType.EAGER)
     private RoleEntity roleEntity;
 

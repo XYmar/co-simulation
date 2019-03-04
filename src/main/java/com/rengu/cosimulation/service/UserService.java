@@ -126,6 +126,10 @@ public class UserService implements UserDetailsService {
             }
             userEntity.setUsername(userEntityArgs.getUsername());
         }
+
+        if(!StringUtils.isEmpty(String.valueOf(userEntityArgs.getSecretClass()))){
+            userEntity.setSecretClass(userEntityArgs.getSecretClass());
+        }
         return userRepository.save(userEntity);
     }
 
