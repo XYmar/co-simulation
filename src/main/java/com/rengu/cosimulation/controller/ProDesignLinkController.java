@@ -1,10 +1,14 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.service.ProDesignLinkFilesService;
 import com.rengu.cosimulation.service.ProDesignLinkService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Author: XYmar
@@ -14,10 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/proDesignLink")
 public class ProDesignLinkController {
     private final ProDesignLinkService proDesignLinkService;
+    private final ProDesignLinkFilesService proDesignLinkFilesService;
 
     @Autowired
-    public ProDesignLinkController(ProDesignLinkService proDesignLinkService) {
+    public ProDesignLinkController(ProDesignLinkService proDesignLinkService, ProDesignLinkFilesService proDesignLinkFilesService) {
         this.proDesignLinkService = proDesignLinkService;
+        this.proDesignLinkFilesService = proDesignLinkFilesService;
     }
 
     // 根据项目id查询子任务
@@ -48,6 +54,12 @@ public class ProDesignLinkController {
     @DeleteMapping(value = "/{proDesignLinkId}")
     public ResultEntity deleteProDesignLinkById(@PathVariable(value = "proDesignLinkId") String proDesignLinkId){
         return ResultUtils.success(proDesignLinkService.deleteProDesignLinkById(proDesignLinkId));
+    }
+
+    // 根据子任务id创建文件
+    @PostMapping(value = "/{proDesignLinkId}/uploadfiles")
+    public ResultEntity saveProDesignLinkFilesByProDesignId(@PathVariable(value = "proDesignLinkId") String proDesignLinkId, @RequestBody List<FileMetaEntity> fileMetaEntityList){
+        return ResultUtils.success(proDesignLinkFilesService.saveProDesignLinkFilesByProDesignId(proDesignLinkId, fileMetaEntityList));
     }
 
 }

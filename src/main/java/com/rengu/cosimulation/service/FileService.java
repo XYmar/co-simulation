@@ -55,24 +55,24 @@ public class FileService {
     }
 
     // 合并文件块
-    public synchronized FileEntity mergeChunks(ChunkEntity chunkEntity, FileEntity fileEntityArgs) throws IOException {
+    public synchronized FileEntity mergeChunks(ChunkEntity chunkEntity) throws IOException {
         if (hasFileByMD5(chunkEntity.getIdentifier())) {
             return getFileByMD5(chunkEntity.getIdentifier());
         } else {
             File file = null;
             String extension = FilenameUtils.getExtension(chunkEntity.getFilename());
             if (StringUtils.isEmpty(extension)) {
-                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + fileEntityArgs.getType() + File.separator + chunkEntity.getIdentifier());
+                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + chunkEntity.getIdentifier());
             } else {
-                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + fileEntityArgs.getType() + File.separator + chunkEntity.getIdentifier() + "." + FilenameUtils.getExtension(chunkEntity.getFilename()));
+                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + chunkEntity.getIdentifier() + "." + FilenameUtils.getExtension(chunkEntity.getFilename()));
             }
-            return mergeChunks(file, chunkEntity, fileEntityArgs);
+            return mergeChunks(file, chunkEntity);
         }
     }
 
     // 保存文件信息
     @CacheEvict(value = "File_Cache", allEntries = true)
-    public FileEntity saveFile(File file, FileEntity fileEntityArgs) throws IOException {
+    public FileEntity saveFile(File file) throws IOException {
         FileEntity fileEntity = new FileEntity();
         @Cleanup FileInputStream fileInputStream = new FileInputStream(file);
         String MD5 = DigestUtils.md5Hex(fileInputStream);
@@ -82,12 +82,9 @@ public class FileService {
         fileEntity.setMD5(MD5);                                                           // MD5
         fileEntity.setPostfix(FilenameUtils.getExtension(file.getName()));                // 后缀
         fileEntity.setFileSize(FileUtils.sizeOf(file));                                   // 大小
-        fileEntity.setType(fileEntityArgs.getType());                                     // 文件类型
-        fileEntity.setSecretClass(fileEntityArgs.getSecretClass());                       // 文件密级
         fileEntity.setLocalPath(file.getAbsolutePath());                                  // 路径
         return fileRepository.save(fileEntity);
     }
-
     // 根据Id删除文件
     @CacheEvict(value = "File_Cache", allEntries = true)
     public FileEntity deleteFileById(String fileId) throws IOException {
@@ -136,7 +133,7 @@ public class FileService {
 
 
 
-    private FileEntity mergeChunks(File file, ChunkEntity chunkEntity, FileEntity fileEntity) throws IOException {
+    private FileEntity mergeChunks(File file, ChunkEntity chunkEntity) throws IOException {
         file.delete();
         file.getParentFile().mkdirs();
         file.createNewFile();
@@ -152,6 +149,6 @@ public class FileService {
         if (!chunkEntity.getIdentifier().equals(DigestUtils.md5Hex(fileInputStream))) {
             throw new RuntimeException("文件合并失败，请检查：" + file.getAbsolutePath() + "是否正确。");
         }
-        return saveFile(file, fileEntity);
+        return saveFile(file);
     }
 }

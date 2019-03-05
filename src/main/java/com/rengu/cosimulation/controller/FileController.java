@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -27,6 +28,14 @@ public class FileController {
         this.fileService = fileService;
     }
 
+    // 检查文件块是否存在
+    @GetMapping(value = "/chunks")
+    public void hasChunk(HttpServletResponse httpServletResponse, ChunkEntity chunkEntity) {
+        if (!fileService.hasChunk(chunkEntity)) {
+            httpServletResponse.setStatus(HttpServletResponse.SC_GONE);
+        }
+    }
+
     // 根据MD5检查文件是否存在
     @GetMapping(value = "/hasmd5")
     public ResultEntity hasFileByMD5(@RequestParam(value = "MD5") String MD5) {
@@ -41,7 +50,7 @@ public class FileController {
 
     // 合并文件块
     @PostMapping(value = "/chunks/merge")
-    public ResultEntity mergeChunks(ChunkEntity chunkEntity, FileEntity fileEntity) throws IOException {
-        return ResultUtils.success(fileService.mergeChunks(chunkEntity, fileEntity));
+    public ResultEntity mergeChunks(ChunkEntity chunkEntity) throws IOException {
+        return ResultUtils.success(fileService.mergeChunks(chunkEntity));
     }
 }

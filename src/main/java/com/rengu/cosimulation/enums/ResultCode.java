@@ -24,6 +24,7 @@ public enum ResultCode {
     USER_ID_NOT_FOUND_ERROR(10015,"未发现该用户ID"),
     USER_USERNAME_EXISTED_ERROR(10016,"该用户名已存在"),
     USER_ENABLED_NOT_SUPPORT_ERROR(10017,"不支持的权限类型"),
+    USER_ROLE_NOT_FOUND_ERROR(10018,"请指定用户角色"),
 
     // 项目相关    2000x
     PROJECT_ARGS_NOT_FOUND_ERROR(20001, "未发现项目参数"),
