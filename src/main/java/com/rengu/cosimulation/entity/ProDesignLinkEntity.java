@@ -25,7 +25,9 @@ public class ProDesignLinkEntity implements Serializable {
     private String finishTime;               // 子任务节点
 
     @ManyToOne
-    private UserEntity userEntity;      // 负责人
+    private UserEntity userEntity;             // 负责人
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<UserEntity> assessorSet;       // 审核人员
 
     @ManyToOne
     private DesignLinkEntity designLinkEntity;    //设计环节

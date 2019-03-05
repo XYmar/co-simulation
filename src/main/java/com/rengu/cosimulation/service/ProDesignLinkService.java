@@ -1,9 +1,6 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.DesignLinkEntity;
-import com.rengu.cosimulation.entity.ProDesignLinkEntity;
-import com.rengu.cosimulation.entity.ProjectEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.ProDesignLinkRepository;
@@ -11,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -126,5 +124,32 @@ public class ProDesignLinkService {
         ProDesignLinkEntity proDesignLinkEntity = getProDesignLinkById(proDesignLinkId);
         proDesignLinkRepository.delete(proDesignLinkEntity);
         return proDesignLinkEntity;
+    }
+
+    // 根据子任务id为子任务添加审核员
+    public ProDesignLinkEntity arrangeAssessorsById(String proDesignLinkId, String userId, String[] userIds) {
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = userService.getUserById(userId);
+        if(!hasProDesignLinkById(proDesignLinkId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        ProDesignLinkEntity proDesignLinkEntity = getProDesignLinkById(proDesignLinkId);
+        if(!userEntity.getId().equals(proDesignLinkEntity.getUserEntity().getId())){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
+        }
+        if(userIds.length == 0){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ASSESSORS_NOT_FOUND_ERROR);
+        }
+
+        List<UserEntity> userEntityList = new ArrayList<>();
+        for (String id : userIds) {
+            userEntityList.add(userService.getUserById(id));
+        }
+        HashSet<UserEntity> userEntityHashSet = new HashSet<>(userEntityList);
+
+        proDesignLinkEntity.setAssessorSet(userEntityHashSet);
+        return proDesignLinkRepository.save(proDesignLinkEntity);
     }
 }

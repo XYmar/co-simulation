@@ -68,4 +68,10 @@ public class ProDesignLinkController {
         return ResultUtils.success(proDesignLinkFilesService.getProDesignLinkFilesByProDesignId(proDesignLinkId));
     }
 
+    // 根据子任务id为子任务添加审核员
+    @PatchMapping(value = "/{proDesignLinkId}/arrangeAssessors")
+    public ResultEntity arrangeAssessorsById(@PathVariable(value = "proDesignLinkId") String proDesignLinkId, String userId, @RequestParam(value = "ids") String[] userIds){
+        return ResultUtils.success(proDesignLinkService.arrangeAssessorsById(proDesignLinkId, userId, userIds));
+    }
+
 }
