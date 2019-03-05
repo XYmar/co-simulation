@@ -89,4 +89,11 @@ public class ProDesignLinkFilesService {
         return proDesignLinkFilesEntityList;
     }
 
+    // 根据子任务id查询子任务下的文件
+    public List<ProDesignLinkFilesEntity> getProDesignLinkFilesByProDesignId(String proDesignLinkId) {
+        if(!proDesignLinkService.hasProDesignLinkById(proDesignLinkId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        return proDesignLinkFilesRepository.findByProDesignLinkEntity(proDesignLinkService.getProDesignLinkById(proDesignLinkId));
+    }
 }

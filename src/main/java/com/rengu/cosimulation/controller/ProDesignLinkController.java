@@ -62,4 +62,10 @@ public class ProDesignLinkController {
         return ResultUtils.success(proDesignLinkFilesService.saveProDesignLinkFilesByProDesignId(proDesignLinkId, fileMetaEntityList));
     }
 
+    // 根据子任务id查询子任务下的文件
+    @GetMapping(value = "/{proDesignLinkId}/files")
+    public ResultEntity getProDesignLinkFilesByProDesignId(@PathVariable(value = "proDesignLinkId") String proDesignLinkId){
+        return ResultUtils.success(proDesignLinkFilesService.getProDesignLinkFilesByProDesignId(proDesignLinkId));
+    }
+
 }

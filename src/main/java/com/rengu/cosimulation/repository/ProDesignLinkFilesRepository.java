@@ -13,4 +13,6 @@ public interface ProDesignLinkFilesRepository extends JpaRepository<ProDesignLin
     boolean existsByNameAndPostfixAndProDesignLinkEntity(String name, String extension, ProDesignLinkEntity proDesignLinkEntity);
 
     Optional<ProDesignLinkFilesEntity> findByNameAndPostfixAndProDesignLinkEntity(String name, String postfix, ProDesignLinkEntity proDesignLinkEntity);
+
+    List<ProDesignLinkFilesEntity> findByProDesignLinkEntity(ProDesignLinkEntity proDesignLinkEntity);
 }
