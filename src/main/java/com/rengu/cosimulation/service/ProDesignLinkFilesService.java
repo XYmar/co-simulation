@@ -118,23 +118,7 @@ public class ProDesignLinkFilesService {
         return proDesignLinkFilesRepository.findById(proDesignLinkFileId).get();
     }
 
-    // 下载前判断下载权限
-    public boolean beforeExportProDesignLinkFile(String proDesignLinkFileId, String userId) {
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
-        int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
-        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
-        }
-        int proDesignLinkFileSecretClass = getProDesignLinkFileById(proDesignLinkFileId).getSecretClass();
-        // 用户只能下载小于等于自己密级的文件
-        if(userSecretClass <= proDesignLinkFileSecretClass){
-            return false;
-        }
-        return true;
-    }
-
+    // 根据子任务文件的id下载文件
     public File exportProDesignLinkFileById(String proDesignLinkFileId, String userId) throws IOException {
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
@@ -154,4 +138,24 @@ public class ProDesignLinkFilesService {
         return exportFile;
     }
 
+    // 根据子任务文件id修改文件基本信息(类型、密级、代号)
+    public ProDesignLinkFilesEntity updateProDesignLinkFileId(String proDesignLinkFileId, ProDesignLinkFilesEntity proDesignLinkFilesEntityArgs) {
+        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+        }
+        ProDesignLinkFilesEntity proDesignLinkFilesEntity = getProDesignLinkFileById(proDesignLinkFileId);
+        if(proDesignLinkFilesEntityArgs == null){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ARGS_NOT_FOUND_ERROR);
+        }
+        if(!StringUtils.isEmpty(proDesignLinkFilesEntityArgs.getType())){
+            proDesignLinkFilesEntity.setType(proDesignLinkFilesEntityArgs.getType());
+        }
+        if(!StringUtils.isEmpty(proDesignLinkFilesEntityArgs.getSecretClass())){
+            proDesignLinkFilesEntity.setSecretClass(proDesignLinkFilesEntityArgs.getSecretClass());
+        }
+        if(!StringUtils.isEmpty(proDesignLinkFilesEntityArgs.getCodeName())){
+            proDesignLinkFilesEntity.setCodeName(proDesignLinkFilesEntityArgs.getCodeName());
+        }
+        return proDesignLinkFilesRepository.save(proDesignLinkFilesEntity);
+    }
 }

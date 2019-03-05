@@ -1,12 +1,12 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.ProDesignLinkFilesEntity;
+import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.service.ProDesignLinkFilesService;
+import com.rengu.cosimulation.utils.ResultUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -40,5 +40,17 @@ public class ProDesignLinkFilesController {
         // 文件流输出
         IOUtils.copy(new FileInputStream(exportFile), httpServletResponse.getOutputStream());
         httpServletResponse.flushBuffer();
+    }
+
+    // 根据子任务文件id查询文件信息
+    @GetMapping(value = "/{proDesignLinkFileId}")
+    public ResultEntity getProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId){
+        return ResultUtils.success(proDesignLinkFilesService.getProDesignLinkFileById(proDesignLinkFileId));
+    }
+
+    // 根据子任务文件id修改文件基本信息
+    @PatchMapping(value = "/{proDesignLinkFileId}")
+    public ResultEntity updateProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId, ProDesignLinkFilesEntity proDesignLinkFilesEntity){
+        return ResultUtils.success(proDesignLinkFilesService.updateProDesignLinkFileId(proDesignLinkFileId, proDesignLinkFilesEntity));
     }
 }
