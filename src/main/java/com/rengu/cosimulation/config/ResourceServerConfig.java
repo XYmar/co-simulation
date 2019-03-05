@@ -42,6 +42,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests().antMatchers("/swagger-ui.html", "/webjars/**", "/swagger-resources/**", "/v2/api-docs").permitAll();
         // 放行新增角色接口
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/role").permitAll();
+        // 放行文件导出接口
+        http.authorizeRequests().antMatchers("/proDesignLink/*/export", "/proDesignLinkFiles/*/user/*/export").permitAll();
         // 放行actuator接口
         http.authorizeRequests().antMatchers("/actuator/**").permitAll();
         http.authorizeRequests().anyRequest().authenticated();

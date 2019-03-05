@@ -52,6 +52,10 @@ public enum ResultCode {
     PRODESIGN_LINK_ID_NOT_FOUND_ERROR(22005,"未发现该子任务ID"),
     PRODESIGN_LINK_FINISH_TIME_NOT_FOUND_ERROR(22006,"未发现该子任务节点"),
 
+    // 子任务文件相关  2300
+    PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR(23001,"未发现该子任务文件ID"),
+    PRODESIGN_LINK_FILE_DOWNLOAD_DENIED_ERROR(23002,"无权下载此文件"),
+
     // 文件块相关    3000x
     FILE_CHUNK_NOT_FOUND_ERROR(30001, "文件块不存在或不合法"),
     FILE_CHUNK_EXISTED_ERROR(30002, "该文件块已存在"),

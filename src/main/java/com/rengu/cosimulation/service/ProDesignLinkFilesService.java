@@ -1,23 +1,25 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.FileEntity;
-import com.rengu.cosimulation.entity.FileMetaEntity;
-import com.rengu.cosimulation.entity.ProDesignLinkEntity;
-import com.rengu.cosimulation.entity.ProDesignLinkFilesEntity;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.ProDesignLinkFilesRepository;
 import com.rengu.cosimulation.repository.ProDesignLinkRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Author: XYmar
@@ -29,6 +31,8 @@ public class ProDesignLinkFilesService {
     private final ProDesignLinkService proDesignLinkService;
     private final ProDesignLinkFilesRepository proDesignLinkFilesRepository;
     private final FileService fileService;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     public ProDesignLinkFilesService(FileService fileService, ProDesignLinkFilesRepository proDesignLinkFilesRepository, ProDesignLinkService proDesignLinkService) {
@@ -96,4 +100,58 @@ public class ProDesignLinkFilesService {
         }
         return proDesignLinkFilesRepository.findByProDesignLinkEntity(proDesignLinkService.getProDesignLinkById(proDesignLinkId));
     }
+
+    // 根据id查询子任务文件是否存在
+    public boolean hasProDesignLinkFileById(String proDesignLinkFileId) {
+        if (StringUtils.isEmpty(proDesignLinkFileId)) {
+            return false;
+        }
+        return proDesignLinkFilesRepository.existsById(proDesignLinkFileId);
+    }
+
+    // 根据id查询子任务文件
+    @Cacheable(value = "ProDesignLinkFile_Cache", key = "#proDesignLinkFileId")
+    public ProDesignLinkFilesEntity getProDesignLinkFileById(String proDesignLinkFileId) {
+        if (!hasProDesignLinkFileById(proDesignLinkFileId)) {
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+        }
+        return proDesignLinkFilesRepository.findById(proDesignLinkFileId).get();
+    }
+
+    // 下载前判断下载权限
+    public boolean beforeExportProDesignLinkFile(String proDesignLinkFileId, String userId) {
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
+        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+        }
+        int proDesignLinkFileSecretClass = getProDesignLinkFileById(proDesignLinkFileId).getSecretClass();
+        // 用户只能下载小于等于自己密级的文件
+        if(userSecretClass <= proDesignLinkFileSecretClass){
+            return false;
+        }
+        return true;
+    }
+
+    public File exportProDesignLinkFileById(String proDesignLinkFileId, String userId) throws IOException {
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
+        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+        }
+        int proDesignLinkFileSecretClass = getProDesignLinkFileById(proDesignLinkFileId).getSecretClass();
+        // 用户只能下载小于等于自己密级的文件
+        if(userSecretClass < proDesignLinkFileSecretClass){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_DOWNLOAD_DENIED_ERROR);
+        }
+        ProDesignLinkFilesEntity proDesignLinkFilesEntity = getProDesignLinkFileById(proDesignLinkFileId);
+        File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + proDesignLinkFilesEntity.getName() + "." + proDesignLinkFilesEntity.getFileEntity().getPostfix());
+        FileUtils.copyFile(new File(proDesignLinkFilesEntity.getFileEntity().getLocalPath()), exportFile);
+        return exportFile;
+    }
+
 }
