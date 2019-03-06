@@ -6,6 +6,7 @@ import com.rengu.cosimulation.service.ProDesignLinkFilesService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -52,5 +53,13 @@ public class ProDesignLinkFilesController {
     @PatchMapping(value = "/{proDesignLinkFileId}")
     public ResultEntity updateProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId, ProDesignLinkFilesEntity proDesignLinkFilesEntity){
         return ResultUtils.success(proDesignLinkFilesService.updateProDesignLinkFileId(proDesignLinkFileId, proDesignLinkFilesEntity));
+    }
+
+    // 根据子任务文件id删除文件
+    // TODO 只有项目管理员登录成功后，才能删除吗
+    @DeleteMapping(value = "/{proDesignLinkFileId}")
+    @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
+    public ResultEntity deleteProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId){
+        return ResultUtils.success(proDesignLinkFilesService.deleteProDesignLinkFileId(proDesignLinkFileId));
     }
 }

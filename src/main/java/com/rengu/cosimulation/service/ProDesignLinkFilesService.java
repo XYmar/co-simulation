@@ -158,4 +158,14 @@ public class ProDesignLinkFilesService {
         }
         return proDesignLinkFilesRepository.save(proDesignLinkFilesEntity);
     }
+
+    // 根据子任务文件id删除文件
+    public ProDesignLinkFilesEntity deleteProDesignLinkFileId(String proDesignLinkFileId) {
+        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+        }
+        ProDesignLinkFilesEntity proDesignLinkFilesEntity = getProDesignLinkFileById(proDesignLinkFileId);
+        proDesignLinkFilesRepository.delete(proDesignLinkFilesEntity);
+        return proDesignLinkFilesEntity;
+    }
 }
