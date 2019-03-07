@@ -3,7 +3,7 @@ package com.rengu.cosimulation.controller;
 import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.service.ProDesignLinkFilesService;
-import com.rengu.cosimulation.service.ProDesignLinkService;
+import com.rengu.cosimulation.service.SubtaskService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,44 +16,44 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/proDesignLink")
-public class ProDesignLinkController {
-    private final ProDesignLinkService proDesignLinkService;
+public class SubtaskController {
+    private final SubtaskService subtaskService;
     private final ProDesignLinkFilesService proDesignLinkFilesService;
 
     @Autowired
-    public ProDesignLinkController(ProDesignLinkService proDesignLinkService, ProDesignLinkFilesService proDesignLinkFilesService) {
-        this.proDesignLinkService = proDesignLinkService;
+    public SubtaskController(SubtaskService subtaskService, ProDesignLinkFilesService proDesignLinkFilesService) {
+        this.subtaskService = subtaskService;
         this.proDesignLinkFilesService = proDesignLinkFilesService;
     }
 
     // 根据项目id查询子任务
     @GetMapping(value = "/byProject/{projectId}")
     public ResultEntity findByProjectId(@PathVariable(value = "projectId") String projectId){
-        return ResultUtils.success(proDesignLinkService.findByProjectId(projectId));
+        return ResultUtils.success(subtaskService.findByProjectId(projectId));
     }
 
     // 保存子任务， 项目设置子任务(执行者，子任务，节点)
     @PatchMapping(value = "/byProject/{projectId}/setDesignLink")
     public ResultEntity setDesignLink(@PathVariable(value = "projectId") String projectId, String designLinkEntityId, String userId, String finishTime){
-        return ResultUtils.success(proDesignLinkService.setProDesignLink(projectId, designLinkEntityId, userId, finishTime));
+        return ResultUtils.success(subtaskService.setProDesignLink(projectId, designLinkEntityId, userId, finishTime));
     }
 
     // 根据id查询子任务
     @GetMapping(value = "/{proDesignLinkId}")
     public ResultEntity getProDesignLinkById(String proDesignLinkById){
-        return ResultUtils.success(proDesignLinkService.getProDesignLinkById(proDesignLinkById));
+        return ResultUtils.success(subtaskService.getProDesignLinkById(proDesignLinkById));
     }
 
     // 修改子任务(执行者，子任务，节点)
     @PatchMapping(value = "/{proDesignLinkById}/updateDesignLink")
     public ResultEntity updateProDesignLinkById(@PathVariable(value = "proDesignLinkById") String proDesignLinkById, String designLinkEntityId, String userId, String finishTime){
-        return ResultUtils.success(proDesignLinkService.updateProDesignLinkById(proDesignLinkById, designLinkEntityId, userId, finishTime));
+        return ResultUtils.success(subtaskService.updateProDesignLinkById(proDesignLinkById, designLinkEntityId, userId, finishTime));
     }
 
     // 删除子任务
     @DeleteMapping(value = "/{proDesignLinkId}")
     public ResultEntity deleteProDesignLinkById(@PathVariable(value = "proDesignLinkId") String proDesignLinkId){
-        return ResultUtils.success(proDesignLinkService.deleteProDesignLinkById(proDesignLinkId));
+        return ResultUtils.success(subtaskService.deleteProDesignLinkById(proDesignLinkId));
     }
 
     // 根据子任务id创建文件
@@ -71,7 +71,7 @@ public class ProDesignLinkController {
     // 根据子任务id为子任务添加审核员
     @PatchMapping(value = "/{proDesignLinkId}/arrangeAssessors")
     public ResultEntity arrangeAssessorsById(@PathVariable(value = "proDesignLinkId") String proDesignLinkId, String userId, @RequestParam(value = "ids") String[] userIds){
-        return ResultUtils.success(proDesignLinkService.arrangeAssessorsById(proDesignLinkId, userId, userIds));
+        return ResultUtils.success(subtaskService.arrangeAssessorsById(proDesignLinkId, userId, userIds));
     }
 
 }

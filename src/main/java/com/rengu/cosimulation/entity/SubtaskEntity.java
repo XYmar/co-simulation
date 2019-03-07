@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class ProDesignLinkEntity implements Serializable {
+public class SubtaskEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @NotBlank(message = ApplicationMessage.DESIGN_LINK_NAME_NOT_FOUND)
