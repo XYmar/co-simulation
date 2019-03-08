@@ -30,5 +30,5 @@ public class ProDesignLinkFilesEntity implements Serializable {
     @ManyToOne
     private FileEntity fileEntity;
     @ManyToOne
-    private ProDesignLinkEntity proDesignLinkEntity;
+    private SubtaskEntity subTaskEntity;
 }

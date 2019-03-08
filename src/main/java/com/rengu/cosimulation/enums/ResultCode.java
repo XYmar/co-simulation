@@ -67,6 +67,9 @@ public enum ResultCode {
     FILE_MD5_EXISTED_ERROR(30004,"该子任务称已存在"),
     FILE_ID_NOT_FOUND_ERROR(30005,"未发现该文件Id"),
 
+    // 流程节点相关   2400x
+    PROCESS_ARGS_NOT_FOUND_ERROR(24001, "流程节点参数不存在"),
+
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),
     ARGS_NOT_FOUND_ERROR(40003, "未传递参数"),

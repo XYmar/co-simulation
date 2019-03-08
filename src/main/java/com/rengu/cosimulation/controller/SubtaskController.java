@@ -2,6 +2,7 @@ package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.SubtaskEntity;
 import com.rengu.cosimulation.service.ProDesignLinkFilesService;
 import com.rengu.cosimulation.service.SubtaskService;
 import com.rengu.cosimulation.utils.ResultUtils;
@@ -15,7 +16,7 @@ import java.util.List;
  * Date: 2019/2/26 10:26
  */
 @RestController
-@RequestMapping(value = "/proDesignLink")
+@RequestMapping(value = "/subtasks")
 public class SubtaskController {
     private final SubtaskService subtaskService;
     private final ProDesignLinkFilesService proDesignLinkFilesService;
