@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class ProDesignLinkFilesEntity implements Serializable {
+public class SubtaskFilesEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

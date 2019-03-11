@@ -2,8 +2,7 @@ package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
-import com.rengu.cosimulation.entity.SubtaskEntity;
-import com.rengu.cosimulation.service.ProDesignLinkFilesService;
+import com.rengu.cosimulation.service.SubtaskFilesService;
 import com.rengu.cosimulation.service.SubtaskService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +18,12 @@ import java.util.List;
 @RequestMapping(value = "/subtasks")
 public class SubtaskController {
     private final SubtaskService subtaskService;
-    private final ProDesignLinkFilesService proDesignLinkFilesService;
+    private final SubtaskFilesService subtaskFilesService;
 
     @Autowired
-    public SubtaskController(SubtaskService subtaskService, ProDesignLinkFilesService proDesignLinkFilesService) {
+    public SubtaskController(SubtaskService subtaskService, SubtaskFilesService subtaskFilesService) {
         this.subtaskService = subtaskService;
-        this.proDesignLinkFilesService = proDesignLinkFilesService;
+        this.subtaskFilesService = subtaskFilesService;
     }
 
     // 根据项目id查询子任务
@@ -60,13 +59,13 @@ public class SubtaskController {
     // 根据子任务id创建文件
     @PostMapping(value = "/{proDesignLinkId}/uploadfiles")
     public ResultEntity saveProDesignLinkFilesByProDesignId(@PathVariable(value = "proDesignLinkId") String proDesignLinkId, @RequestBody List<FileMetaEntity> fileMetaEntityList){
-        return ResultUtils.success(proDesignLinkFilesService.saveProDesignLinkFilesByProDesignId(proDesignLinkId, fileMetaEntityList));
+        return ResultUtils.success(subtaskFilesService.saveProDesignLinkFilesByProDesignId(proDesignLinkId, fileMetaEntityList));
     }
 
     // 根据子任务id查询子任务下的文件
     @GetMapping(value = "/{proDesignLinkId}/files")
     public ResultEntity getProDesignLinkFilesByProDesignId(@PathVariable(value = "proDesignLinkId") String proDesignLinkId){
-        return ResultUtils.success(proDesignLinkFilesService.getProDesignLinkFilesByProDesignId(proDesignLinkId));
+        return ResultUtils.success(subtaskFilesService.getProDesignLinkFilesByProDesignId(proDesignLinkId));
     }
 
     // 根据子任务id为子任务添加审核员
