@@ -2,6 +2,7 @@ package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.SubtaskEntity;
 import com.rengu.cosimulation.service.SubtaskFilesService;
 import com.rengu.cosimulation.service.SubtaskService;
 import com.rengu.cosimulation.service.UserService;
@@ -81,6 +82,12 @@ public class SubtaskController {
     @GetMapping(value = "/byAssessorId/{assessorId}")
     public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId){
         return ResultUtils.success(subtaskService.findSubtasksByAssessor(userService.getUserById(assessorId)));
+    }
+
+    // 根据子任务id审核子任务
+    @PatchMapping(value = "/{subtaskId}/updateDesignLink")
+    public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs){
+        return ResultUtils.success(subtaskService.assessSubtaskById(subtaskId, subtaskEntityArgs));
     }
 
 }

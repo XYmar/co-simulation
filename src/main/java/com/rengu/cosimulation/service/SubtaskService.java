@@ -3,6 +3,7 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
+import com.rengu.cosimulation.repository.ProcessNodeRepository;
 import com.rengu.cosimulation.repository.SubtaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,16 @@ public class SubtaskService {
     private final SubtaskRepository subtaskRepository;
     private final ProjectService projectService;
     private final UserService userService;
-    @Autowired
-    private DesignLinkService designLinkService;
+    private final DesignLinkService designLinkService;
+    private final ProcessNodeRepository processNodeRepository;
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, DesignLinkService designLinkService, ProcessNodeRepository processNodeRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
+        this.designLinkService = designLinkService;
+        this.processNodeRepository = processNodeRepository;
     }
 
     // 根据项目id查询所有子任务
@@ -157,5 +160,47 @@ public class SubtaskService {
     // 根据审核人id查询待其审核的子任务
     public List<SubtaskEntity> findSubtasksByAssessor(UserEntity userEntity){
         return subtaskRepository.findByAssessorSetContaining(userEntity);
+    }
+
+    // 根据子任务id查询其后续任务
+    public List<SubtaskEntity> findNextSubtasksById(String subtaskId){
+        if(!hasSubtaskById(subtaskId)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        // 查询以此节点为父节点的节点
+        String sign = subtaskEntity.getProcessNodeEntity().getSign();
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByParentSign(sign);
+
+        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
+        }
+
+        return subtaskEntityList;
+    }
+
+    // 根据子任务id审核子任务
+    public SubtaskEntity assessSubtaskById(String subtaskById, SubtaskEntity subtaskEntityArgs){
+        if(!hasSubtaskById(subtaskById)){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+        }
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
+        if(StringUtils.isEmpty(String.valueOf(subtaskEntityArgs.getState()))){
+            throw new ResultException(ResultCode.PRODESIGN_LINK_STATE_NOT_FOUND_ERROR);
+        }
+        subtaskEntity.setState(subtaskEntityArgs.getState());
+        // 若通过则设置其后续的子任务状态为进行中
+        if(subtaskEntityArgs.getState() == 1){
+            List<SubtaskEntity> subtaskEntityList = findNextSubtasksById(subtaskById);
+            for(SubtaskEntity subtaskEntity1 : subtaskEntityList){
+                subtaskEntity1.setState(1);
+            }
+            subtaskRepository.saveAll(subtaskEntityList);
+        }
+        if(!StringUtils.isEmpty(subtaskEntityArgs.getIllustration())){
+            subtaskEntity.setIllustration(subtaskEntityArgs.getIllustration());
+        }
+        return subtaskRepository.save(subtaskEntity);
     }
 }
