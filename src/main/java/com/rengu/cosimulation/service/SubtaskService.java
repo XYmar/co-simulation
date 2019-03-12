@@ -50,7 +50,9 @@ public class SubtaskService {
         // 设置子任务相关内容
         subtaskEntity.setName(designLinkEntity.getName());                   // 名称
         subtaskEntity.setDescription(designLinkEntity.getDescription());     // 描述
-        subtaskEntity.setFinishTime(finishTime);
+        subtaskEntity.setFinishTime(finishTime);                             // 节点
+        subtaskEntity.setState(0);                                           // 子任务未进行
+        subtaskEntity.setPassState(0);                                       // 子任务未通过
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
