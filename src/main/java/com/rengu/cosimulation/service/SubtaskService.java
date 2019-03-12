@@ -151,4 +151,9 @@ public class SubtaskService {
         subtaskEntity.setAssessorSet(userEntityHashSet);
         return subtaskRepository.save(subtaskEntity);
     }
+
+    // 根据审核人id查询待其审核的子任务
+    public List<SubtaskEntity> findSubtasksByAssessor(UserEntity userEntity){
+        return subtaskRepository.findByAssessorSetContaining(userEntity);
+    }
 }

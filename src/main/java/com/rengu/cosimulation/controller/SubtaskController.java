@@ -2,8 +2,10 @@ package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.service.SubtaskFilesService;
 import com.rengu.cosimulation.service.SubtaskService;
+import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +21,13 @@ import java.util.List;
 public class SubtaskController {
     private final SubtaskService subtaskService;
     private final SubtaskFilesService subtaskFilesService;
+    private final UserService userService;
 
     @Autowired
-    public SubtaskController(SubtaskService subtaskService, SubtaskFilesService subtaskFilesService) {
+    public SubtaskController(SubtaskService subtaskService, SubtaskFilesService subtaskFilesService, UserService userService) {
         this.subtaskService = subtaskService;
         this.subtaskFilesService = subtaskFilesService;
+        this.userService = userService;
     }
 
     // 根据项目id查询子任务
@@ -72,6 +76,12 @@ public class SubtaskController {
     @PatchMapping(value = "/{proDesignLinkId}/arrangeAssessors")
     public ResultEntity arrangeAssessorsById(@PathVariable(value = "proDesignLinkId") String proDesignLinkId, String userId, @RequestParam(value = "ids") String[] userIds){
         return ResultUtils.success(subtaskService.arrangeAssessorsById(proDesignLinkId, userId, userIds));
+    }
+
+    // 根据审核人id查询待其审核的子任务的相关信息
+    @GetMapping(value = "/byAssessorId/{assessorId}")
+    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId){
+        return ResultUtils.success(subtaskService.findSubtasksByAssessor(userService.getUserById(assessorId)));
     }
 
 }
