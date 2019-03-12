@@ -37,6 +37,7 @@ public class SubtaskEntity implements Serializable {
     @ManyToOne
     private ProjectEntity projectEntity;        // 所属项目
 
-
+    @OneToOne
+    private ProcessNodeEntity processNodeEntity;  // 子任务对应的流程图节点
 
 }
