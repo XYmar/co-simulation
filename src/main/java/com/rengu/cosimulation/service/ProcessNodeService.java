@@ -37,20 +37,7 @@ public class ProcessNodeService {
         this.subtaskRepository = subtaskRepository;
     }
 
-    // 根据项目id保存项目流程节点信息
-    /*public ProjectEntity saveProcessNodes(String projectId, ProcessNodeEntity[] processNodeEntities) {
-        if(!projectService.hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
-        ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        if(processNodeEntities.length <= 0){
-            throw new ResultException(ResultCode.PROCESS_ARGS_NOT_FOUND_ERROR);
-        }
-        projectEntity.setProcessNodeEntityList(Arrays.asList(processNodeEntities));
-        return projectRepository.save(projectEntity);
-    }*/
-
-    // 根据项目id保存项目流程节点信息
+    // 根据项目id保存项目流程节点信息,并设置对应的子任务
     public List<ProcessNodeEntity> saveProcessNodes(String projectId, ProcessNodeEntity[] processNodeEntities) {
         if(!projectService.hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
@@ -69,11 +56,24 @@ public class ProcessNodeService {
             SubtaskEntity subtaskEntity = new SubtaskEntity();
             subtaskEntity.setName(processNodeEntity.getNodeName());
             subtaskEntity.setProjectEntity(processNodeEntity.getProjectEntity());
+            subtaskEntity.setProcessNodeEntity(processNodeEntity);               // 设置子任务对应节点
             subtaskEntityList.add(subtaskEntity);
         }
         subtaskRepository.saveAll(subtaskEntityList);
 
         // return processNodeRepository.saveAll(Arrays.asList(processNodeEntities));
         return processNodeRepository.saveAll(processNodeEntityList);
+    }
+
+    // 根据项目id以及父节点查询项目的第一个子任务(第一个可能多个)
+    public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity, String parentSign){
+        // 查看流程图上无父节点的节点
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, parentSign);
+        // 根据节点查询子任务信息
+        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
+        }
+        return subtaskEntityList;
     }
 }

@@ -1,5 +1,6 @@
 package com.rengu.cosimulation.repository;
 
+import com.rengu.cosimulation.entity.ProcessNodeEntity;
 import com.rengu.cosimulation.entity.SubtaskEntity;
 import com.rengu.cosimulation.entity.ProjectEntity;
 import com.rengu.cosimulation.entity.UserEntity;
@@ -19,4 +20,5 @@ public interface SubtaskRepository extends JpaRepository<SubtaskEntity, String> 
 
     boolean existsByName(String name);
     List<SubtaskEntity> findByAssessorSetContaining(UserEntity assessor);
+    SubtaskEntity findByProcessNodeEntity(ProcessNodeEntity processNodeEntity);
 }
