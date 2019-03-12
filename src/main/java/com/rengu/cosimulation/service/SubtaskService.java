@@ -38,7 +38,7 @@ public class SubtaskService {
 
     // 保存项目子任务
     // 项目设置子任务(执行者，子任务，节点)
-    public SubtaskEntity setProDesignLink(String projectId, String designLinkEntityId, String userId, String finishTime){
+    public SubtaskEntity setSubtask(String projectId, String designLinkEntityId, String userId, String finishTime){
         SubtaskEntity subtaskEntity = new SubtaskEntity();
 
         // 选择设计环节
@@ -68,15 +68,15 @@ public class SubtaskService {
     }
 
     // 根据id查询子任务是否存在
-    public boolean hasProDesignLinkById(String proDesignLinkById) {
-        if (StringUtils.isEmpty(proDesignLinkById)) {
+    public boolean hasSubtaskById(String subtaskById) {
+        if (StringUtils.isEmpty(subtaskById)) {
             return false;
         }
-        return subtaskRepository.existsById(proDesignLinkById);
+        return subtaskRepository.existsById(subtaskById);
     }
 
     // 根据子任务名称查询子任务是否存在
-    public boolean hasProDesignLinkByName(String name) {
+    public boolean hasSubtaskByName(String name) {
         if (StringUtils.isEmpty(name)) {
             return false;
         }
@@ -84,22 +84,22 @@ public class SubtaskService {
     }
 
     // 根据id查询子任务
-    public SubtaskEntity getProDesignLinkById(String proDesignLinkById) {
-        if(!hasProDesignLinkById(proDesignLinkById)){
+    public SubtaskEntity getSubtaskById(String subtaskById) {
+        if(!hasSubtaskById(subtaskById)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        return subtaskRepository.findById(proDesignLinkById).get();
+        return subtaskRepository.findById(subtaskById).get();
     }
 
     // 根据id修改子任务
-    public SubtaskEntity updateProDesignLinkById(String proDesignLinkById, String designLinkEntityId, String userId, String finishTime){
-        if(!hasProDesignLinkById(proDesignLinkById)){
+    public SubtaskEntity updateSubtaskById(String subtaskById, String designLinkEntityId, String userId, String finishTime){
+        if(!hasSubtaskById(subtaskById)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        SubtaskEntity subtaskEntity = getProDesignLinkById(proDesignLinkById);
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
         if(designLinkService.hasDesignLinkById(designLinkEntityId)){
             DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
-            if(hasProDesignLinkByName(designLinkEntity.getName())){
+            if(hasSubtaskByName(designLinkEntity.getName())){
                 throw new ResultException(ResultCode.PRODESIGN_LINK_NAME_EXISTED_ERROR);
             }
             subtaskEntity.setDesignLinkEntity(designLinkEntity);
@@ -116,25 +116,25 @@ public class SubtaskService {
     }
 
     // 删除子任务
-    public SubtaskEntity deleteProDesignLinkById(String proDesignLinkId){
-        if(!hasProDesignLinkById(proDesignLinkId)){
+    public SubtaskEntity deleteSubtaskById(String subtaskId){
+        if(!hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        SubtaskEntity subtaskEntity = getProDesignLinkById(proDesignLinkId);
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
         subtaskRepository.delete(subtaskEntity);
         return subtaskEntity;
     }
 
     // 根据子任务id为子任务添加审核员
-    public SubtaskEntity arrangeAssessorsById(String proDesignLinkId, String userId, String[] userIds) {
+    public SubtaskEntity arrangeAssessorsById(String subtaskId, String userId, String[] userIds) {
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
         UserEntity userEntity = userService.getUserById(userId);
-        if(!hasProDesignLinkById(proDesignLinkId)){
+        if(!hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        SubtaskEntity subtaskEntity = getProDesignLinkById(proDesignLinkId);
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
         if(!userEntity.getId().equals(subtaskEntity.getUserEntity().getId())){
             throw new ResultException(ResultCode.PRODESIGN_LINK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
         }
