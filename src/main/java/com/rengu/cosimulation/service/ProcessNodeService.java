@@ -66,9 +66,9 @@ public class ProcessNodeService {
     }
 
     // 根据项目id以及父节点查询项目的第一个子任务(第一个可能多个)
-    public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity, String parentSign){
+    public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity){
         // 查看流程图上无父节点的节点
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, parentSign);
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
         // 根据节点查询子任务信息
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
         for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
