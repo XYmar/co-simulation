@@ -169,7 +169,7 @@ public class SubtaskService {
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
         // 查询以此节点为父节点的节点
-        String sign = subtaskEntity.getProcessNodeEntity().getSign();
+        String sign = subtaskEntity.getProcessNodeEntity().getSelfSign();
         List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByParentSign(sign);
 
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();

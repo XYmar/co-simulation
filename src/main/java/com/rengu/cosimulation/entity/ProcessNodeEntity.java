@@ -27,7 +27,7 @@ public class ProcessNodeEntity implements Serializable {
     @NotBlank(message = "节点名称不能为空")
     private String nodeName;                           // 节点名称
     @NotBlank(message = "节点标识不存在")
-    private String sign;                                  // 节点标识
+    private String selfSign;                                  // 节点标识
     @NotNull (message = "父节点标识不存在")
     private String parentSign;                            // 父节点标识
     @NotBlank(message = "节点位置信息不能为空")

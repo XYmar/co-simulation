@@ -8,6 +8,7 @@ import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.ProcessNodeRepository;
 import com.rengu.cosimulation.repository.ProjectRepository;
 import com.rengu.cosimulation.repository.SubtaskRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,8 @@ import java.util.List;
  * Author: XYmar
  * Date: 2019/3/7 14:52
  */
+
+@Slf4j
 @Service
 @Transactional
 public class ProcessNodeService {
@@ -39,19 +42,39 @@ public class ProcessNodeService {
 
     // 根据项目id保存项目流程节点信息,并设置对应的子任务
     public List<ProcessNodeEntity> saveProcessNodes(String projectId, ProcessNodeEntity[] processNodeEntities) {
-        if(!projectService.hasProjectById(projectId)){
+        // 清空所有流程节点包括子任务
+        subtaskRepository.deleteAll();
+        processNodeRepository.deleteAll();
+        if (!projectService.hasProjectById(projectId)) {
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        if(processNodeEntities.length <= 0){
+        if (processNodeEntities.length <= 0) {
             throw new ResultException(ResultCode.PROCESS_ARGS_NOT_FOUND_ERROR);
         }
         List<ProcessNodeEntity> processNodeEntityList = new ArrayList<>();
-        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntities){
+
+        for (ProcessNodeEntity processNodeEntity : processNodeEntities) {         // 保存流程节点
             processNodeEntity.setProjectEntity(projectEntity);
             processNodeEntityList.add(processNodeEntity);
+        }
+        processNodeRepository.saveAll(processNodeEntityList);
 
+        List<ProcessNodeEntity> processSubtaskList = new ArrayList<>();         // 存放流程节点，sign重复的只保存一个
+        List<String> signList = new ArrayList<>();                              // 标识节点
+        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
+        for (ProcessNodeEntity processNodeEntity : processNodeEntities) {
+            // 标识去重并存储
+            if (!signList.contains(processNodeEntity.getSelfSign())) {
+                signList.add(processNodeEntity.getSelfSign());
+            }
+        }
+        for (String selfSign : signList) {
+            List<ProcessNodeEntity> pro2 = processNodeRepository.findBySelfSignAndProjectEntity(selfSign, projectEntity);
+            processSubtaskList.add(pro2.get(0));       // 取第一个
+        }
+
+        for(ProcessNodeEntity processNodeEntity : processSubtaskList){
             // 根据项目流程设置默认子任务（名称、项目）
             SubtaskEntity subtaskEntity = new SubtaskEntity();
             subtaskEntity.setName(processNodeEntity.getNodeName());
@@ -61,12 +84,11 @@ public class ProcessNodeService {
         }
         subtaskRepository.saveAll(subtaskEntityList);
 
-        // return processNodeRepository.saveAll(Arrays.asList(processNodeEntities));
-        return processNodeRepository.saveAll(processNodeEntityList);
+        return processNodeRepository.findAll();
     }
 
     // 根据项目id以及父节点查询项目的第一个子任务(第一个可能多个)
-    public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity){
+    /*public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity){
         // 查看流程图上无父节点的节点
         List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
         // 根据节点查询子任务信息
@@ -75,5 +97,5 @@ public class ProcessNodeService {
             subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
         }
         return subtaskEntityList;
-    }
+    }*/
 }
