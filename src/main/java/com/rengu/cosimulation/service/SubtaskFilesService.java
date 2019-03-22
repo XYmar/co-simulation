@@ -72,7 +72,8 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
                 subtaskFilesEntity.setType(fileMetaEntity.getType());
                 subtaskFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                subtaskFilesEntity.setCodeName(fileMetaEntity.getCodeName());
+                subtaskFilesEntity.setProductNo(fileMetaEntity.getProductNo());
+                subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 subtaskFilesEntity.setVersion(1);
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntityList.add(subtaskFilesRepository.save(subtaskFilesEntity));
@@ -82,7 +83,8 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
                 subtaskFilesEntity.setType(fileMetaEntity.getType());
                 subtaskFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                subtaskFilesEntity.setCodeName(fileMetaEntity.getCodeName());
+                subtaskFilesEntity.setProductNo(fileMetaEntity.getProductNo());
+                subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 subtaskFilesEntity.setVersion(1);
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntity.setSubTaskEntity(subTaskEntity);
@@ -153,8 +155,11 @@ public class SubtaskFilesService {
         if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getSecretClass())){
             subtaskFilesEntity.setSecretClass(subtaskFilesEntityArgs.getSecretClass());
         }
-        if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getCodeName())){
-            subtaskFilesEntity.setCodeName(subtaskFilesEntityArgs.getCodeName());
+        if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getProductNo())){
+            subtaskFilesEntity.setProductNo(subtaskFilesEntityArgs.getProductNo());
+        }
+        if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getFileNo())){
+            subtaskFilesEntity.setFileNo(subtaskFilesEntityArgs.getFileNo());
         }
         return subtaskFilesRepository.save(subtaskFilesEntity);
     }

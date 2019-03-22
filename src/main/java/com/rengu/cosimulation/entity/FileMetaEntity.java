@@ -20,5 +20,6 @@ public class FileMetaEntity implements Serializable {
     private String relativePath;
     private String type;                  // 类型：  0：参数文件  1：模型文件  2：报告文件  3：实验数据
     private int secretClass;              // 密级：  0：公开  1：内部  2：秘密  3：机密  4：绝密
-    private int codeName;                 // 代号：  0：产品型号  1：文件图号
+    private String productNo;                // 产品型号
+    private String fileNo;                   // 文件图号
 }

@@ -25,7 +25,8 @@ public class SubtaskFilesEntity implements Serializable {
     private String postfix;               // 后缀
     private String type;                  // 类型：  0：参数文件  1：模型文件  2：报告文件  3：实验数据
     private int secretClass;              // 密级：  0：公开  1：内部  2：秘密  3：机密  4：绝密
-    private int codeName;                 // 代号：  0：产品型号  1：文件图号
+    private String productNo;                // 产品型号
+    private String fileNo;                   // 文件图号
     private int version;               // 版本（根据提交次数累加，只有修改才变更版本）
     @ManyToOne
     private FileEntity fileEntity;
