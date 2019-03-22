@@ -30,7 +30,7 @@ public class SubtaskFilesController {
         this.subtaskFilesService = subtaskFilesService;
     }
 
-    // 根据Id导出组件文件
+    // 根据Id导出子任务文件
     @GetMapping(value = "/{subtaskFileId}/user/{userId}/export")
     public void exportSubtaskFileById(@PathVariable(value = "subtaskFileId") String subtaskFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
         File exportFile = subtaskFilesService.exportSubtaskFileById(subtaskFileId, userId);
@@ -58,7 +58,7 @@ public class SubtaskFilesController {
     // 根据子任务文件id删除文件
     // TODO 只有项目管理员登录成功后，才能删除吗
     @DeleteMapping(value = "/{subtaskFileId}")
-    @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
+    //@PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
     public ResultEntity deleteSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
         return ResultUtils.success(subtaskFilesService.deleteSubtaskFileId(subtaskFileId));
     }
