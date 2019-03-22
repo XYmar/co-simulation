@@ -41,7 +41,7 @@ public class SubtaskFilesService {
     }
 
     // 根据名称、后缀及子任务检查文件是否存在
-    public boolean hasProDesignLinkFilesByNameAndExtensionAndProDesignLink(String name, String postfix, SubtaskEntity subTaskEntity) {
+    public boolean hasSubtaskFilesByNameAndExtensionAndSubtask(String name, String postfix, SubtaskEntity subTaskEntity) {
         if (StringUtils.isEmpty(name) || StringUtils.isEmpty(postfix)) {
             return false;
         }
@@ -49,30 +49,31 @@ public class SubtaskFilesService {
     }
 
     // 根据名称、后缀及子任务查询文件
-    public SubtaskFilesEntity getProDesignLinkFilesByNameAndPostfixAndProDesignLink(String name, String postfix, SubtaskEntity subTaskEntity) {
+    public SubtaskFilesEntity getSubtaskFilesByNameAndPostfixAndSubtask(String name, String postfix, SubtaskEntity subTaskEntity) {
         return subtaskFilesRepository.findByNameAndPostfixAndSubTaskEntity(name, postfix, subTaskEntity).get();
     }
 
     // 根据子任务id创建文件
-    @CacheEvict(value = "ProDesignLinkFiles_Cache", allEntries = true)
-    public List<SubtaskFilesEntity> saveProDesignLinkFilesByProDesignId(String proDesignLinkId, List<FileMetaEntity> fileMetaEntityList) {
-        if(!subtaskService.hasProDesignLinkById(proDesignLinkId)){
+    @CacheEvict(value = "SubtaskFiles_Cache", allEntries = true)
+    public List<SubtaskFilesEntity> saveSubtaskFilesByProDesignId(String subtaskId, List<FileMetaEntity> fileMetaEntityList) {
+        if(!subtaskService.hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        SubtaskEntity subTaskEntity = subtaskService.getProDesignLinkById(proDesignLinkId);
+        SubtaskEntity subTaskEntity = subtaskService.getSubtaskById(subtaskId);
         List<SubtaskFilesEntity> subtaskFilesEntityList = new ArrayList<>();
         for (FileMetaEntity fileMetaEntity : fileMetaEntityList) {
             String path = fileMetaEntity.getRelativePath().split("/")[1];
 
             // 判断该节点是否存在
-            if (hasProDesignLinkFilesByNameAndExtensionAndProDesignLink(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity)) {
-                SubtaskFilesEntity subtaskFilesEntity = getProDesignLinkFilesByNameAndPostfixAndProDesignLink(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity);
+            if (hasSubtaskFilesByNameAndExtensionAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity)) {
+                SubtaskFilesEntity subtaskFilesEntity = getSubtaskFilesByNameAndPostfixAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity);
                 subtaskFilesEntity.setCreateTime(new Date());
                 subtaskFilesEntity.setName(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
                 subtaskFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
                 subtaskFilesEntity.setType(fileMetaEntity.getType());
                 subtaskFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                subtaskFilesEntity.setCodeName(fileMetaEntity.getCodeName());
+                subtaskFilesEntity.setProductNo(fileMetaEntity.getProductNo());
+                subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 subtaskFilesEntity.setVersion(1);
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntityList.add(subtaskFilesRepository.save(subtaskFilesEntity));
@@ -82,7 +83,8 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
                 subtaskFilesEntity.setType(fileMetaEntity.getType());
                 subtaskFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                subtaskFilesEntity.setCodeName(fileMetaEntity.getCodeName());
+                subtaskFilesEntity.setProductNo(fileMetaEntity.getProductNo());
+                subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 subtaskFilesEntity.setVersion(1);
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntity.setSubTaskEntity(subTaskEntity);
@@ -93,45 +95,45 @@ public class SubtaskFilesService {
     }
 
     // 根据子任务id查询子任务下的文件
-    public List<SubtaskFilesEntity> getProDesignLinkFilesByProDesignId(String proDesignLinkId) {
-        if(!subtaskService.hasProDesignLinkById(proDesignLinkId)){
+    public List<SubtaskFilesEntity> getSubtaskFilesByProDesignId(String subtaskId) {
+        if(!subtaskService.hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        return subtaskFilesRepository.findBySubTaskEntity(subtaskService.getProDesignLinkById(proDesignLinkId));
+        return subtaskFilesRepository.findBySubTaskEntity(subtaskService.getSubtaskById(subtaskId));
     }
 
     // 根据id查询子任务文件是否存在
-    public boolean hasProDesignLinkFileById(String proDesignLinkFileId) {
-        if (StringUtils.isEmpty(proDesignLinkFileId)) {
+    public boolean hasSubtaskFileById(String subtaskFileId) {
+        if (StringUtils.isEmpty(subtaskFileId)) {
             return false;
         }
-        return subtaskFilesRepository.existsById(proDesignLinkFileId);
+        return subtaskFilesRepository.existsById(subtaskFileId);
     }
 
     // 根据id查询子任务文件
-    @Cacheable(value = "ProDesignLinkFile_Cache", key = "#proDesignLinkFileId")
-    public SubtaskFilesEntity getProDesignLinkFileById(String proDesignLinkFileId) {
-        if (!hasProDesignLinkFileById(proDesignLinkFileId)) {
+    @Cacheable(value = "SubtaskFile_Cache", key = "#subtaskFileId")
+    public SubtaskFilesEntity getSubtaskFileById(String subtaskFileId) {
+        if (!hasSubtaskFileById(subtaskFileId)) {
             throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
         }
-        return subtaskFilesRepository.findById(proDesignLinkFileId).get();
+        return subtaskFilesRepository.findById(subtaskFileId).get();
     }
 
     // 根据子任务文件的id下载文件
-    public File exportProDesignLinkFileById(String proDesignLinkFileId, String userId) throws IOException {
+    public File exportSubtaskFileById(String subtaskFileId, String userId) throws IOException {
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
         int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
-        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+        if(!hasSubtaskFileById(subtaskFileId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
         }
-        int proDesignLinkFileSecretClass = getProDesignLinkFileById(proDesignLinkFileId).getSecretClass();
+        int subtaskFileSecretClass = getSubtaskFileById(subtaskFileId).getSecretClass();
         // 用户只能下载小于等于自己密级的文件
-        if(userSecretClass < proDesignLinkFileSecretClass){
+        if(userSecretClass < subtaskFileSecretClass){
             throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_DOWNLOAD_DENIED_ERROR);
         }
-        SubtaskFilesEntity subtaskFilesEntity = getProDesignLinkFileById(proDesignLinkFileId);
+        SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + subtaskFilesEntity.getName() + "." + subtaskFilesEntity.getFileEntity().getPostfix());
         FileUtils.copyFile(new File(subtaskFilesEntity.getFileEntity().getLocalPath()), exportFile);
         log.info(userService.getUserById(userId).getUsername() + "于" + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()) + "下载了：" + subtaskFilesEntity.getName());
@@ -139,11 +141,11 @@ public class SubtaskFilesService {
     }
 
     // 根据子任务文件id修改文件基本信息(类型、密级、代号)
-    public SubtaskFilesEntity updateProDesignLinkFileId(String proDesignLinkFileId, SubtaskFilesEntity subtaskFilesEntityArgs) {
-        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+    public SubtaskFilesEntity updateSubtaskFileId(String subtaskFileId, SubtaskFilesEntity subtaskFilesEntityArgs) {
+        if(!hasSubtaskFileById(subtaskFileId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
         }
-        SubtaskFilesEntity subtaskFilesEntity = getProDesignLinkFileById(proDesignLinkFileId);
+        SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         if(subtaskFilesEntityArgs == null){
             throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ARGS_NOT_FOUND_ERROR);
         }
@@ -153,18 +155,21 @@ public class SubtaskFilesService {
         if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getSecretClass())){
             subtaskFilesEntity.setSecretClass(subtaskFilesEntityArgs.getSecretClass());
         }
-        if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getCodeName())){
-            subtaskFilesEntity.setCodeName(subtaskFilesEntityArgs.getCodeName());
+        if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getProductNo())){
+            subtaskFilesEntity.setProductNo(subtaskFilesEntityArgs.getProductNo());
+        }
+        if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getFileNo())){
+            subtaskFilesEntity.setFileNo(subtaskFilesEntityArgs.getFileNo());
         }
         return subtaskFilesRepository.save(subtaskFilesEntity);
     }
 
     // 根据子任务文件id删除文件
-    public SubtaskFilesEntity deleteProDesignLinkFileId(String proDesignLinkFileId) {
-        if(!hasProDesignLinkFileById(proDesignLinkFileId)){
+    public SubtaskFilesEntity deleteSubtaskFileId(String subtaskFileId) {
+        if(!hasSubtaskFileById(subtaskFileId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
         }
-        SubtaskFilesEntity subtaskFilesEntity = getProDesignLinkFileById(proDesignLinkFileId);
+        SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         subtaskFilesRepository.delete(subtaskFilesEntity);
         return subtaskFilesEntity;
     }

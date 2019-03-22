@@ -23,6 +23,9 @@ public class SubtaskEntity implements Serializable {
     private String name;                     // 子任务名称
     private String description;              // 子任务描述
     private String finishTime;               // 子任务节点
+    private int state;                       // 子任务的执行状态       0：未进行   1：进行中   2：审核中   3：审核完成
+    private int passState;                   // 子任务审核通过与否     0：未通过   1：通过
+    private String illustration;             // 审核时的说明
 
     @ManyToOne
     private UserEntity userEntity;             // 负责人
@@ -34,4 +37,8 @@ public class SubtaskEntity implements Serializable {
 
     @ManyToOne
     private ProjectEntity projectEntity;        // 所属项目
+
+    @OneToOne
+    private ProcessNodeEntity processNodeEntity;  // 子任务对应的流程图节点
+
 }

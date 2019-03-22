@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
  * Date: 2019/3/5 11:03
  */
 @RestController
-@RequestMapping(value = "/proDesignLinkFiles")
+@RequestMapping(value = "/subtaskFiles")
 public class SubtaskFilesController {
     private final SubtaskFilesService subtaskFilesService;
 
@@ -30,10 +30,10 @@ public class SubtaskFilesController {
         this.subtaskFilesService = subtaskFilesService;
     }
 
-    // 根据Id导出组件文件
-    @GetMapping(value = "/{proDesignLinkFileId}/user/{userId}/export")
-    public void exportProDesignLinkFileById(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
-        File exportFile = subtaskFilesService.exportProDesignLinkFileById(proDesignLinkFileId, userId);
+    // 根据Id导出子任务文件
+    @GetMapping(value = "/{subtaskFileId}/user/{userId}/export")
+    public void exportSubtaskFileById(@PathVariable(value = "subtaskFileId") String subtaskFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
+        File exportFile = subtaskFilesService.exportSubtaskFileById(subtaskFileId, userId);
         String mimeType = URLConnection.guessContentTypeFromName(exportFile.getName()) == null ? "application/octet-stream" : URLConnection.guessContentTypeFromName(exportFile.getName());
         httpServletResponse.setContentType(mimeType);
         httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + new String(exportFile.getName().getBytes(StandardCharsets.UTF_8), "ISO8859-1"));
@@ -44,22 +44,22 @@ public class SubtaskFilesController {
     }
 
     // 根据子任务文件id查询文件信息
-    @GetMapping(value = "/{proDesignLinkFileId}")
-    public ResultEntity getProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId){
-        return ResultUtils.success(subtaskFilesService.getProDesignLinkFileById(proDesignLinkFileId));
+    @GetMapping(value = "/{subtaskFileId}")
+    public ResultEntity getSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
+        return ResultUtils.success(subtaskFilesService.getSubtaskFileById(subtaskFileId));
     }
 
     // 根据子任务文件id修改文件基本信息
-    @PatchMapping(value = "/{proDesignLinkFileId}")
-    public ResultEntity updateProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId, SubtaskFilesEntity subtaskFilesEntity){
-        return ResultUtils.success(subtaskFilesService.updateProDesignLinkFileId(proDesignLinkFileId, subtaskFilesEntity));
+    @PatchMapping(value = "/{subtaskFileId}")
+    public ResultEntity updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFilesEntity subtaskFilesEntity){
+        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFilesEntity));
     }
 
     // 根据子任务文件id删除文件
     // TODO 只有项目管理员登录成功后，才能删除吗
-    @DeleteMapping(value = "/{proDesignLinkFileId}")
-    @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
-    public ResultEntity deleteProDesignLinkFileId(@PathVariable(value = "proDesignLinkFileId") String proDesignLinkFileId){
-        return ResultUtils.success(subtaskFilesService.deleteProDesignLinkFileId(proDesignLinkFileId));
+    @DeleteMapping(value = "/{subtaskFileId}")
+    //@PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
+    public ResultEntity deleteSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
+        return ResultUtils.success(subtaskFilesService.deleteSubtaskFileId(subtaskFileId));
     }
 }
