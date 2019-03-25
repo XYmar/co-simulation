@@ -85,7 +85,7 @@ public class SubtaskController {
     }
 
     // 根据子任务id审核子任务
-    @PatchMapping(value = "/{subtaskId}/updateDesignLink")
+    @PatchMapping(value = "/{subtaskId}/assessSubtask")
     public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs){
         return ResultUtils.success(subtaskService.assessSubtaskById(subtaskId, subtaskEntityArgs));
     }
