@@ -74,7 +74,7 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
                 subtaskFilesEntity.setProductNo(fileMetaEntity.getProductNo());
                 subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
-                subtaskFilesEntity.setVersion(1);
+                subtaskFilesEntity.setVersion("M1");
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntityList.add(subtaskFilesRepository.save(subtaskFilesEntity));
             } else {
@@ -85,7 +85,7 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
                 subtaskFilesEntity.setProductNo(fileMetaEntity.getProductNo());
                 subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
-                subtaskFilesEntity.setVersion(1);
+                subtaskFilesEntity.setVersion("M1");
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntity.setSubTaskEntity(subTaskEntity);
                 subtaskFilesEntityList.add(subtaskFilesRepository.save(subtaskFilesEntity));
