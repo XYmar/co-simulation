@@ -227,6 +227,12 @@ public class ProjectService {
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+        if(StringUtils.isEmpty(projectEntity.getOrderNum())){
+            throw new ResultException(ResultCode.PROJECT_ORDER_NUM_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(projectEntity.getFinishTime())){
+            throw new ResultException(ResultCode.PROJECT_FINISH_TIME_NOT_FOUND_ERROR);
+        }
         projectEntity.setState(1);
 
         // 第一个开始的一系列子任务的状态改为进行中
