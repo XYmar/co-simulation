@@ -42,13 +42,13 @@ public class ProcessNodeService {
 
     // 根据项目id保存项目流程节点信息,并设置对应的子任务
     public List<ProcessNodeEntity> saveProcessNodes(String projectId, ProcessNodeEntity[] processNodeEntities) {
-        // 清空所有流程节点包括子任务
-        subtaskRepository.deleteAll();
-        processNodeRepository.deleteAll();
         if (!projectService.hasProjectById(projectId)) {
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
+        // 根据项目的清空所有流程节点包括子任务
+        subtaskRepository.deleteAllByProjectEntity(projectEntity);
+        processNodeRepository.deleteAllByProjectEntity(projectEntity);
         if (processNodeEntities.length <= 0) {
             throw new ResultException(ResultCode.PROCESS_ARGS_NOT_FOUND_ERROR);
         }

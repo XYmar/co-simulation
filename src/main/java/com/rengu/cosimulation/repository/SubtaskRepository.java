@@ -21,5 +21,6 @@ public interface SubtaskRepository extends JpaRepository<SubtaskEntity, String> 
     boolean existsByName(String name);
     List<SubtaskEntity> findByAssessorSetContaining(UserEntity assessor);
     SubtaskEntity findByProcessNodeEntity(ProcessNodeEntity processNodeEntity);
+    void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
 }
