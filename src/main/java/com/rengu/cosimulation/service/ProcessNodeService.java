@@ -87,15 +87,13 @@ public class ProcessNodeService {
         return processNodeRepository.findAll();
     }
 
-    // 根据项目id以及父节点查询项目的第一个子任务(第一个可能多个)
-   /* public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity){
-        // 查看流程图上无父节点的节点
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
-        // 根据节点查询子任务信息
-        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
+    // 根据项目返回流程节点信息
+    public List<ProcessNodeEntity> getProcessNodesByProjectId(String projectId) {
+        if(!projectService.hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
-        return subtaskEntityList;
-    }*/
+        ProjectEntity projectEntity = projectService.getProjectById(projectId);
+
+        return processNodeRepository.findByProjectEntity(projectEntity);
+    }
 }
