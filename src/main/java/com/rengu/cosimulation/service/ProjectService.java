@@ -1,12 +1,10 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.DesignLinkEntity;
-import com.rengu.cosimulation.entity.ProjectEntity;
-import com.rengu.cosimulation.entity.SubtaskEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.DesignLinkRepository;
+import com.rengu.cosimulation.repository.ProcessNodeRepository;
 import com.rengu.cosimulation.repository.ProjectRepository;
 import com.rengu.cosimulation.repository.SubtaskRepository;
 import org.apache.catalina.User;
@@ -17,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.xml.transform.Result;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Author: XYmar
@@ -33,6 +28,8 @@ public class ProjectService {
     private final DesignLinkService designLinkService;
     private final DesignLinkRepository designLinkRepository;
     private final SubtaskRepository subtaskRepository;
+    @Autowired
+    private ProcessNodeRepository processNodeRepository;
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository, SubtaskRepository subtaskRepository) {
@@ -225,7 +222,7 @@ public class ProjectService {
     }
 
     // 启动项目： 1.项目状态改为进行中   2：项目的第一个子任务状态改为进行中
-    /*public ProjectEntity startProject(String projectId){
+    public ProjectEntity startProject(String projectId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
@@ -233,12 +230,19 @@ public class ProjectService {
         projectEntity.setState(1);
 
         // 第一个开始的一系列子任务的状态改为进行中
-        List<SubtaskEntity> subtaskEntityList = processNodeService.findFirstSubtasks(projectEntity);
+        // 查看流程图上无父节点的节点
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
+        // 根据节点查询子任务信息
+        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
+        }
+        //List<SubtaskEntity> subtaskEntityList = processNodeService.findFirstSubtasks(projectEntity);
         for(SubtaskEntity subtaskEntity : subtaskEntityList){
             subtaskEntity.setState(1);
         }
 
         subtaskRepository.saveAll(subtaskEntityList);
         return projectRepository.save(projectEntity);
-    }*/
+    }
 }

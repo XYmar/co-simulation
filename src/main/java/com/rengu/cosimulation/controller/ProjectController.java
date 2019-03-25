@@ -85,9 +85,9 @@ public class ProjectController {
     }
 
     // 启动项目
-    /*@PatchMapping(value = "/{projectId}/startProject")
+    @PatchMapping(value = "/{projectId}/startProject")
     public ResultEntity startProject(@PathVariable(value = "projectId") String projectId){
         return ResultUtils.success(projectService.startProject(projectId));
-    }*/
+    }
 
 }
