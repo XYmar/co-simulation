@@ -32,16 +32,14 @@ public class ProjectService {
     private final UserService userService;
     private final DesignLinkService designLinkService;
     private final DesignLinkRepository designLinkRepository;
-    private final ProcessNodeService processNodeService;
     private final SubtaskRepository subtaskRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository, ProcessNodeService processNodeService, SubtaskRepository subtaskRepository) {
+    public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository, SubtaskRepository subtaskRepository) {
         this.projectRepository = projectRepository;
         this.userService = userService;
         this.designLinkService = designLinkService;
         this.designLinkRepository = designLinkRepository;
-        this.processNodeService = processNodeService;
         this.subtaskRepository = subtaskRepository;
     }
 
@@ -227,7 +225,7 @@ public class ProjectService {
     }
 
     // 启动项目： 1.项目状态改为进行中   2：项目的第一个子任务状态改为进行中
-    public ProjectEntity startProject(String projectId){
+    /*public ProjectEntity startProject(String projectId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
@@ -242,5 +240,5 @@ public class ProjectService {
 
         subtaskRepository.saveAll(subtaskEntityList);
         return projectRepository.save(projectEntity);
-    }
+    }*/
 }
