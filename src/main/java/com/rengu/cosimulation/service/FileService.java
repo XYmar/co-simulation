@@ -35,8 +35,12 @@ import java.io.IOException;
 @Service
 @Transactional
 public class FileService {
+    private final FileRepository fileRepository;
+
     @Autowired
-    private FileRepository fileRepository;
+    public FileService(FileRepository fileRepository) {
+        this.fileRepository = fileRepository;
+    }
 
     // 根据Md5判断文件是否存在
     public boolean hasFileByMD5(String MD5) {
