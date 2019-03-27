@@ -11,6 +11,7 @@ import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.web.ProjectedPayload;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -40,7 +41,7 @@ public class ProjectService {
         this.processNodeRepository = processNodeRepository;
     }
 
-    // 新建项目(创建者、名称、负责人)
+    // 新建项目(创建者、名称、负责人)  项目负责人密级限制
     @CacheEvict(value = "Project_Cache", allEntries = true)
     public ProjectEntity saveProject(ProjectEntity projectEntity, String creatorId, String picId){
         if(projectEntity == null){
@@ -64,7 +65,7 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
-    // 安全保密员修改用户密级
+    // 安全保密员修改项目密级
     @CacheEvict(value = "Project_Cache", key = "#projectId")
     public ProjectEntity updateSecretClassById(String projectId, int secretClass) {
         if(!hasProjectById(projectId)){
@@ -85,6 +86,18 @@ public class ProjectService {
     // 查询所有项目,根据用户Id(负责人)
     public List<ProjectEntity> getProjectsByUser(UserEntity userEntity, boolean deleted) {
         return projectRepository.findByPicAndDeleted(userEntity, deleted);
+    }
+
+    // 根据用户密级查询项目（返回小于等于用户密级的项目）
+    public List<ProjectEntity> getProjectsBySecretClass(int secretClass, boolean deleted) {
+        List<ProjectEntity> projectEntityList = projectRepository.findByDeleted(deleted);
+        List<ProjectEntity> projectEntities = new ArrayList<>();
+        for(ProjectEntity projectEntity : projectEntityList){
+            if(projectEntity.getSecretClass() <= secretClass){
+                projectEntities.add(projectEntity);
+            }
+        }
+        return projectEntities;
     }
 
     // 根据名称查询等项目是否存在

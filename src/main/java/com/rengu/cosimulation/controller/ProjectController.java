@@ -48,6 +48,12 @@ public class ProjectController {
         return ResultUtils.success(projectService.getProjectsByUser(userService.getUserById(userId), deleted));
     }
 
+    // 根据用户密级查询所有项目（返回小于等于用户密级的项目）
+    @GetMapping(value = "/byUserSecretClass/{userId}")
+    public ResultEntity getProjectsBySecretClass(@PathVariable(value = "userId") String userId, boolean deleted){
+        return ResultUtils.success(projectService.getProjectsBySecretClass(userService.getUserById(userId).getSecretClass(), deleted));
+    }
+
     // 根据ID查询项目
     @GetMapping(value = "/{projectId}")
     public ResultEntity getProjectById(@PathVariable(value = "projectId") String projectId){
