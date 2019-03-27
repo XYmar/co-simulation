@@ -84,10 +84,10 @@ public class ProjectController {
         return ResultUtils.success(projectService.updateProjectPic(projectId, creatorId, picId));
     }
 
-    // 启动项目
+/*    // 启动项目
     @PatchMapping(value = "/{projectId}/startProject")
     public ResultEntity startProject(@PathVariable(value = "projectId") String projectId){
         return ResultUtils.success(projectService.startProject(projectId));
-    }
+    }*/
 
 }

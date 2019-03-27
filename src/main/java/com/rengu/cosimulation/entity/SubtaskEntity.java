@@ -7,6 +7,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public class SubtaskEntity implements Serializable {
     @ManyToOne
     private ProjectEntity projectEntity;        // 所属项目
 
-    @OneToOne
-    private ProcessNodeEntity processNodeEntity;  // 子任务对应的流程图节点
+//    @OneToMany(mappedBy="subtaskEntity")
+//    private Set<ProcessNodeEntity> processNodeEntities;  // 子任务对应的流程图节点
 
 }

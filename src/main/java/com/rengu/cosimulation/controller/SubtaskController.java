@@ -33,7 +33,8 @@ public class SubtaskController {
     // 根据项目id查询子任务
     @GetMapping(value = "/byProject/{projectId}")
     public ResultEntity findByProjectId(@PathVariable(value = "projectId") String projectId){
-        return ResultUtils.success(subtaskService.findByProjectId(projectId));
+        List<SubtaskEntity> subtaskEntityList = subtaskService.findByProjectId(projectId);
+        return ResultUtils.success(subtaskEntityList);
     }
 
     // 保存子任务， 项目设置子任务(执行者，子任务，节点)
@@ -85,9 +86,9 @@ public class SubtaskController {
     }
 
     // 根据子任务id审核子任务
-    @PatchMapping(value = "/{subtaskId}/assessSubtask")
+    /*@PatchMapping(value = "/{subtaskId}/assessSubtask")
     public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs){
         return ResultUtils.success(subtaskService.assessSubtaskById(subtaskId, subtaskEntityArgs));
-    }
+    }*/
 
 }

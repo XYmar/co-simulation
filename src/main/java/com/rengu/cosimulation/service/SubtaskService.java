@@ -163,7 +163,7 @@ public class SubtaskService {
     }
 
     // 根据子任务id查询其后续任务
-    public List<SubtaskEntity> findNextSubtasksById(String subtaskId){
+    /*public List<SubtaskEntity> findNextSubtasksById(String subtaskId){
         if(!hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
@@ -178,10 +178,10 @@ public class SubtaskService {
         }
 
         return subtaskEntityList;
-    }
+    }*/
 
     // 根据子任务id审核子任务
-    public SubtaskEntity assessSubtaskById(String subtaskById, SubtaskEntity subtaskEntityArgs){
+    /*public SubtaskEntity assessSubtaskById(String subtaskById, SubtaskEntity subtaskEntityArgs){
         if(!hasSubtaskById(subtaskById)){
             throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
@@ -202,5 +202,5 @@ public class SubtaskService {
             subtaskEntity.setIllustration(subtaskEntityArgs.getIllustration());
         }
         return subtaskRepository.save(subtaskEntity);
-    }
+    }*/
 }

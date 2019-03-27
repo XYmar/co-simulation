@@ -221,7 +221,7 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
-    // 启动项目： 1.项目状态改为进行中   2：项目的第一个子任务状态改为进行中
+/*    // 启动项目： 1.项目状态改为进行中   2：项目的第一个子任务状态改为进行中
     public ProjectEntity startProject(String projectId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
@@ -250,5 +250,5 @@ public class ProjectService {
 
         subtaskRepository.saveAll(subtaskEntityList);
         return projectRepository.save(projectEntity);
-    }
+    }*/
 }
