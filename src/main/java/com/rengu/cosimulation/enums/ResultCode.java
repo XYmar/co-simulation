@@ -69,7 +69,8 @@ public enum ResultCode {
     FILE_ID_NOT_FOUND_ERROR(30005,"未发现该文件Id"),
 
     // 流程节点相关   2400x
-    PROCESS_ARGS_NOT_FOUND_ERROR(24001, "流程节点参数不存在"),
+    PROCESS_NODE_NOT_FOUND_ERROR(24001, "项目流程不存在"),
+    PROCESS_ARGS_NOT_FOUND_ERROR(24002, "流程节点参数不存在"),
 
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),

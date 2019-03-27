@@ -221,7 +221,7 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
-/*    // 启动项目： 1.项目状态改为进行中   2：项目的第一个子任务状态改为进行中
+    // 启动项目： 1.项目状态改为进行中   2：项目的第一个子任务状态改为进行中
     public ProjectEntity startProject(String projectId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
@@ -238,8 +238,15 @@ public class ProjectService {
         // 第一个开始的一系列子任务的状态改为进行中
         // 查看流程图上无父节点的节点
         List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
+        if(processNodeEntityList.size() == 0){
+            throw new ResultException(ResultCode.PROCESS_NODE_NOT_FOUND_ERROR);
+        }
+        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+            processNodeEntity.getSubtaskEntity().setState(1);
+        }
+        processNodeRepository.saveAll(processNodeEntityList);
         // 根据节点查询子任务信息
-        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
+        /*List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
         for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
             subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
         }
@@ -248,7 +255,8 @@ public class ProjectService {
             subtaskEntity.setState(1);
         }
 
-        subtaskRepository.saveAll(subtaskEntityList);
+        subtaskRepository.saveAll(subtaskEntityList);*/
         return projectRepository.save(projectEntity);
-    }*/
+    }
+
 }

@@ -47,9 +47,9 @@ public class ProcessNodeService {
         // 根据项目删除子任务和流程节点信息
         if(processNodeRepository.findByProjectEntity(projectEntity).size() > 0){
             processNodeRepository.deleteAllByProjectEntity(projectEntity);
+            //subtaskRepository.deleteAllByProjectEntity(projectEntity);
         }
 
-        //subtaskRepository.deleteAllByProjectEntity(projectEntity);
         Map<String,ProcessNodeEntity> processNodeEntityMap = new HashMap<>();
         Map<String,SubtaskEntity> subtaskEntityMap = new HashMap<>();
         for (ProcessNodeEntity processNodeEntity:processNodeEntities){
