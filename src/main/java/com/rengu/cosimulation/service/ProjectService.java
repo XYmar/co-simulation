@@ -61,6 +61,7 @@ public class ProjectService {
         }
         projectEntity.setPic(userService.getUserById(picId));
         projectEntity.setState(0);
+        projectEntity.setSecretClass(0);
         return projectRepository.save(projectEntity);
     }
 
@@ -217,6 +218,10 @@ public class ProjectService {
 
         if(!StringUtils.isEmpty(projectEntityArgs.getDescription())){
             projectEntity.setDescription(projectEntityArgs.getDescription());
+        }
+
+        if(!StringUtils.isEmpty(String.valueOf(projectEntityArgs.getSecretClass()))){
+            projectEntity.setSecretClass(projectEntityArgs.getSecretClass());
         }
         return projectRepository.save(projectEntity);
     }
