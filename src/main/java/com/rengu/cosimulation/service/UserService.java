@@ -53,13 +53,11 @@ public class UserService implements UserDetailsService {
         Set<RoleEntity> roleEntitySet = new HashSet<>();
         roleEntitySet.add(roleService.getRoleByName(roleName));
         userEntity.setRoleEntities(roleEntitySet);
-        /*if(userEntity.getRoleEntities() != null){                    // 设置三元等
-            userEntity.setRoleEntities(userEntity.getRoleEntities());
-        }else{                                                       // 设置普通用户
-            Set<RoleEntity> roleEntitySet = new HashSet<>();
-            roleEntitySet.add(roleService.getRoleByName(ApplicationConfig.DEFAULT_USER_ROLE_NAME));
-            userEntity.setRoleEntities(roleEntitySet);
-        }*/
+        if(StringUtils.isEmpty(String.valueOf(userEntity.getSecretClass()))){
+            userEntity.setSecretClass(0);
+        }else{
+            userEntity.setSecretClass(4);
+        }
 
         return userRepository.save(userEntity);
     }
@@ -131,10 +129,6 @@ public class UserService implements UserDetailsService {
             userEntity.setUsername(userEntityArgs.getUsername());
         }
 
-        if(!StringUtils.isEmpty(String.valueOf(userEntityArgs.getSecretClass()))){
-            userEntity.setSecretClass(userEntityArgs.getSecretClass());
-        }
-
         return userRepository.save(userEntity);
     }
 
@@ -160,6 +154,20 @@ public class UserService implements UserDetailsService {
         }
         UserEntity userEntity = getUserById(userId);
         userEntity.setPassword(new BCryptPasswordEncoder().encode(password));
+        return userRepository.save(userEntity);
+    }
+
+    // 安全保密员修改用户密级
+    @CacheEvict(value = "User_Cache", key = "#userId")
+    public UserEntity updateSecretClassById(String userId, int secretClass) {
+        if(!hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(secretClass)){
+            throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = getUserById(userId);
+        userEntity.setSecretClass(secretClass);
         return userRepository.save(userEntity);
     }
 

@@ -73,12 +73,31 @@ public class ApplicationInit  implements ApplicationRunner {
             }
         }
 
+        /**
+         * 初始化三元
+         * */
         // 初始化管理员用户
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME)) {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME);
             userEntity.setPassword(ApplicationConfig.DEFAULT_ADMIN_PASSWORD);
             userService.saveUser(userEntity, ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
+        }
+
+        // 初始化安全保密员用户
+        if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME)) {
+            UserEntity userEntity = new UserEntity();
+            userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME);
+            userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
+            userService.saveUser(userEntity, ApplicationConfig.DEFAULT_SECURITY_GUARD_ROLE_NAME);
+        }
+
+        // 初始化安全审计员用户
+        if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME)) {
+            UserEntity userEntity = new UserEntity();
+            userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME);
+            userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
+            userService.saveUser(userEntity, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
         }
 
         // 初始化设计环节

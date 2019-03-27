@@ -24,7 +24,8 @@ public enum ResultCode {
     USER_ID_NOT_FOUND_ERROR(10015,"未发现该用户ID"),
     USER_USERNAME_EXISTED_ERROR(10016,"该用户名已存在"),
     USER_ENABLED_NOT_SUPPORT_ERROR(10017,"不支持的权限类型"),
-    USER_ROLE_NOT_FOUND_ERROR(10018,"请指定用户角色"),
+    USER_SECRETCLASS_NOT_FOUND_ERROR(10018,"请指定用户密级"),
+    USER_ROLE_NOT_FOUND_ERROR(10019,"请指定用户角色"),
 
     // 项目相关    2000x
     PROJECT_ARGS_NOT_FOUND_ERROR(20001, "未发现项目参数"),
@@ -36,6 +37,7 @@ public enum ResultCode {
     PROJECT_ENABLED_NOT_SUPPORT_ERROR(20007,"不支持的权限类型"),
     PROJECT_ORDER_NUM_NOT_FOUND_ERROR(20008,"未发现该项目令号"),
     PROJECT_FINISH_TIME_NOT_FOUND_ERROR(20009,"未发现该项目节点"),
+    PROJECT_SECRETCLASS_NOT_FOUND_ERROR(20010,"请指定项目密级"),
 
     // 设计环节相关    2100x
     DESIGN_LINK_ARGS_NOT_FOUND_ERROR(21001, "未发现设计环节参数"),

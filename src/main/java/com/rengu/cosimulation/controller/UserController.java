@@ -71,6 +71,13 @@ public class UserController {
         return ResultUtils.success(userService.updatePasswordById(userId, password));
     }
 
+    // 安全保密员根据用户id修改用户密级
+    @PatchMapping(value = "/{userId}/secretClass")
+    @PreAuthorize(value = "hasRole('SECURITY_GUARD')")
+    public ResultEntity updateSecretClassById(@PathVariable(value = "userId") String userId, int secretClass){
+        return ResultUtils.success(userService.updateSecretClassById(userId, secretClass));
+    }
+
     // 根据ID为用户分配角色
     @PatchMapping(value = "/{userId}/distribute")
     public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId,  @RequestParam(value = "ids") String[] ids){

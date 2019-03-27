@@ -28,16 +28,16 @@ public class ProjectService {
     private final DesignLinkService designLinkService;
     private final DesignLinkRepository designLinkRepository;
     private final SubtaskRepository subtaskRepository;
-    @Autowired
-    private ProcessNodeRepository processNodeRepository;
+    private final ProcessNodeRepository processNodeRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository, SubtaskRepository subtaskRepository) {
+    public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository, SubtaskRepository subtaskRepository, ProcessNodeRepository processNodeRepository) {
         this.projectRepository = projectRepository;
         this.userService = userService;
         this.designLinkService = designLinkService;
         this.designLinkRepository = designLinkRepository;
         this.subtaskRepository = subtaskRepository;
+        this.processNodeRepository = processNodeRepository;
     }
 
     // 新建项目(创建者、名称、负责人)
@@ -61,7 +61,20 @@ public class ProjectService {
         }
         projectEntity.setPic(userService.getUserById(picId));
         projectEntity.setState(0);
-        projectEntity.setSecretClass(0);
+        return projectRepository.save(projectEntity);
+    }
+
+    // 安全保密员修改用户密级
+    @CacheEvict(value = "Project_Cache", key = "#projectId")
+    public ProjectEntity updateSecretClassById(String projectId, int secretClass) {
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(secretClass)){
+            throw new ResultException(ResultCode.PROJECT_SECRETCLASS_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = getProjectById(projectId);
+        projectEntity.setSecretClass(secretClass);
         return projectRepository.save(projectEntity);
     }
 
@@ -164,7 +177,7 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
-    // 项目管理员修改项目负责人
+    // 项目管理员指定项目负责人： 项目负责人密级高于或等于项目密级
     public ProjectEntity updateProjectPic(String projectId, String creatorId, String picId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);

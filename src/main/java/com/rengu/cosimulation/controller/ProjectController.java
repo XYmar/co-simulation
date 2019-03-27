@@ -72,6 +72,13 @@ public class ProjectController {
         return ResultUtils.success(projectService.restoreProjectById(projectId, userId));
     }
 
+    // 安全保密员根据项目id修改项目密级
+    @PatchMapping(value = "/{projectId}/secretClass")
+    @PreAuthorize(value = "hasRole('SECURITY_GUARD')")
+    public ResultEntity updateSecretClassById(@PathVariable(value = "projectId") String projectId, int secretClass){
+        return ResultUtils.success(userService.updateSecretClassById(projectId, secretClass));
+    }
+
     // 根据id修改项目
     @PatchMapping(value = "/{projectId}")
     public ResultEntity updateProjectById(@PathVariable(value = "projectId") String projectId, String userId, ProjectEntity projectEntityArgs){
