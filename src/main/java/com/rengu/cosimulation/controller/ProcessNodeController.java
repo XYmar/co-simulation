@@ -35,4 +35,10 @@ public class ProcessNodeController {
         return ResultUtils.success(processNodeService.saveProcessNodes(projectId, processNodeEntities));
     }
 
+    // 根据项目返回流程节点信息
+    @GetMapping(value = "/byProjectId/{projectId}")
+    public ResultEntity getProcessNodesByProjectId(@PathVariable(value = "projectId") String projectId){
+        return ResultUtils.success(processNodeService.getProcessNodesByProjectId(projectId));
+    }
+
 }

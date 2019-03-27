@@ -32,10 +32,4 @@ public class ProjectEntity implements Serializable {
     private int state;                             // 项目状态：0:未进行  1:进行中  2:已完成  3:超时
     private String description;
 
-    /*@OneToMany(cascade = CascadeType.ALL)
-    private List<ProcessNodeEntity> processNodeEntityList;        // 项目流程的节点信息*/
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<SubtaskEntity> subtaskEntitySet;   // 项目子任务
-
 }

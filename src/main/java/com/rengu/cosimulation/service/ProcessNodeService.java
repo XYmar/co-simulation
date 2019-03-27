@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Author: XYmar
@@ -42,13 +40,40 @@ public class ProcessNodeService {
 
     // 根据项目id保存项目流程节点信息,并设置对应的子任务
     public List<ProcessNodeEntity> saveProcessNodes(String projectId, ProcessNodeEntity[] processNodeEntities) {
-        // 清空所有流程节点包括子任务
-        subtaskRepository.deleteAll();
-        processNodeRepository.deleteAll();
         if (!projectService.hasProjectById(projectId)) {
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
+        // 根据项目删除子任务和流程节点信息
+        if(processNodeRepository.findByProjectEntity(projectEntity).size() > 0){
+            processNodeRepository.deleteAllByProjectEntity(projectEntity);
+        }
+
+        //subtaskRepository.deleteAllByProjectEntity(projectEntity);
+        Map<String,ProcessNodeEntity> processNodeEntityMap = new HashMap<>();
+        Map<String,SubtaskEntity> subtaskEntityMap = new HashMap<>();
+        for (ProcessNodeEntity processNodeEntity:processNodeEntities){
+            processNodeEntity.setProjectEntity(projectEntity);
+            if (!processNodeEntityMap.containsKey(processNodeEntity.getSelfSign())){
+                SubtaskEntity subtaskEntity = new SubtaskEntity();
+                subtaskEntity.setName(processNodeEntity.getNodeName());
+                subtaskEntity.setProjectEntity(projectEntity);
+                subtaskEntityMap.put(processNodeEntity.getSelfSign(),subtaskEntity);
+                processNodeEntity.setSubtaskEntity(subtaskEntity);
+                processNodeEntityMap.put(processNodeEntity.getSelfSign(),processNodeEntity);
+            }else {
+                processNodeEntity.setSubtaskEntity(subtaskEntityMap.get(processNodeEntity.getSelfSign()));
+            }
+        }
+
+        return processNodeRepository.saveAll(Arrays.asList(processNodeEntities));
+/*        if (!projectService.hasProjectById(projectId)) {
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = projectService.getProjectById(projectId);
+        // 根据项目的清空所有流程节点包括子任务
+        subtaskRepository.deleteAllByProjectEntity(projectEntity);
+        processNodeRepository.deleteAllByProjectEntity(projectEntity);
         if (processNodeEntities.length <= 0) {
             throw new ResultException(ResultCode.PROCESS_ARGS_NOT_FOUND_ERROR);
         }
@@ -84,18 +109,16 @@ public class ProcessNodeService {
         }
         subtaskRepository.saveAll(subtaskEntityList);
 
-        return processNodeRepository.findAll();
+        return processNodeRepository.findAll();*/
     }
 
-    // 根据项目id以及父节点查询项目的第一个子任务(第一个可能多个)
-    /*public List<SubtaskEntity> findFirstSubtasks(ProjectEntity projectEntity){
-        // 查看流程图上无父节点的节点
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
-        // 根据节点查询子任务信息
-        List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
+    // 根据项目返回流程节点信息
+    public List<ProcessNodeEntity> getProcessNodesByProjectId(String projectId) {
+        if(!projectService.hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
-        return subtaskEntityList;
-    }*/
+        ProjectEntity projectEntity = projectService.getProjectById(projectId);
+
+        return processNodeRepository.findByProjectEntity(projectEntity);
+    }
 }
