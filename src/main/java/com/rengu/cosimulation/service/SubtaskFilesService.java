@@ -30,14 +30,16 @@ public class SubtaskFilesService {
     private final SubtaskService subtaskService;
     private final SubtaskFilesRepository subtaskFilesRepository;
     private final FileService fileService;
-    @Autowired
-    private UserService userService;
+    private final ProjectService projectService;
+    private final UserService userService;
 
     @Autowired
-    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService) {
+    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService) {
         this.fileService = fileService;
         this.subtaskFilesRepository = subtaskFilesRepository;
         this.subtaskService = subtaskService;
+        this.projectService = projectService;
+        this.userService = userService;
     }
 
     // 根据名称、后缀及子任务检查文件是否存在
@@ -55,14 +57,21 @@ public class SubtaskFilesService {
 
     // 根据子任务id创建文件
     @CacheEvict(value = "SubtaskFiles_Cache", allEntries = true)
-    public List<SubtaskFilesEntity> saveSubtaskFilesByProDesignId(String subtaskId, List<FileMetaEntity> fileMetaEntityList) {
+    public List<SubtaskFilesEntity> saveSubtaskFilesByProDesignId(String subtaskId, String projectId, List<FileMetaEntity> fileMetaEntityList) {
+        if(!projectService.hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = projectService.getProjectById(projectId);
         if(!subtaskService.hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subTaskEntity = subtaskService.getSubtaskById(subtaskId);
         List<SubtaskFilesEntity> subtaskFilesEntityList = new ArrayList<>();
         for (FileMetaEntity fileMetaEntity : fileMetaEntityList) {
             String path = fileMetaEntity.getRelativePath().split("/")[1];
+            if(fileMetaEntity.getSecretClass() > projectEntity.getSecretClass()){  //文件密级只能低于等于该项目密级
+                throw new ResultException(ResultCode.SUBTASK_FILE_SECRETCLASS_NOT_SUPPORT_ERROR);
+            }
 
             // 判断该节点是否存在
             if (hasSubtaskFilesByNameAndExtensionAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity)) {
@@ -97,7 +106,7 @@ public class SubtaskFilesService {
     // 根据子任务id查询子任务下的文件
     public List<SubtaskFilesEntity> getSubtaskFilesByProDesignId(String subtaskId) {
         if(!subtaskService.hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         return subtaskFilesRepository.findBySubTaskEntity(subtaskService.getSubtaskById(subtaskId));
     }
@@ -114,7 +123,7 @@ public class SubtaskFilesService {
     @Cacheable(value = "SubtaskFile_Cache", key = "#subtaskFileId")
     public SubtaskFilesEntity getSubtaskFileById(String subtaskFileId) {
         if (!hasSubtaskFileById(subtaskFileId)) {
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
         return subtaskFilesRepository.findById(subtaskFileId).get();
     }
@@ -126,12 +135,12 @@ public class SubtaskFilesService {
         }
         int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
         if(!hasSubtaskFileById(subtaskFileId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
         int subtaskFileSecretClass = getSubtaskFileById(subtaskFileId).getSecretClass();
         // 用户只能下载小于等于自己密级的文件
         if(userSecretClass < subtaskFileSecretClass){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_DOWNLOAD_DENIED_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_DOWNLOAD_DENIED_ERROR);
         }
         SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + subtaskFilesEntity.getName() + "." + subtaskFilesEntity.getFileEntity().getPostfix());
@@ -143,11 +152,11 @@ public class SubtaskFilesService {
     // 根据子任务文件id修改文件基本信息(类型、密级、代号)
     public SubtaskFilesEntity updateSubtaskFileId(String subtaskFileId, SubtaskFilesEntity subtaskFilesEntityArgs) {
         if(!hasSubtaskFileById(subtaskFileId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
         SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         if(subtaskFilesEntityArgs == null){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ARGS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_ARGS_NOT_FOUND_ERROR);
         }
         if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getType())){
             subtaskFilesEntity.setType(subtaskFilesEntityArgs.getType());
@@ -167,7 +176,7 @@ public class SubtaskFilesService {
     // 根据子任务文件id删除文件
     public SubtaskFilesEntity deleteSubtaskFileId(String subtaskFileId) {
         if(!hasSubtaskFileById(subtaskFileId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_FILE_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
         SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         subtaskFilesRepository.delete(subtaskFilesEntity);

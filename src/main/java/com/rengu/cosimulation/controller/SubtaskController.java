@@ -63,8 +63,8 @@ public class SubtaskController {
 
     // 根据子任务id创建文件
     @PostMapping(value = "/{subtaskId}/uploadfiles")
-    public ResultEntity saveSubtaskFilesByProDesignId(@PathVariable(value = "subtaskId") String subtaskId, @RequestBody List<FileMetaEntity> fileMetaEntityList){
-        return ResultUtils.success(subtaskFilesService.saveSubtaskFilesByProDesignId(subtaskId, fileMetaEntityList));
+    public ResultEntity saveSubtaskFilesByProDesignId(@PathVariable(value = "subtaskId") String subtaskId, @RequestHeader(value = "projectId") String projectId, @RequestBody List<FileMetaEntity> fileMetaEntityList){
+        return ResultUtils.success(subtaskFilesService.saveSubtaskFilesByProDesignId(subtaskId, projectId, fileMetaEntityList));
     }
 
     // 根据子任务id查询子任务下的文件

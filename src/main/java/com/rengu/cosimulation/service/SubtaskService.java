@@ -40,10 +40,21 @@ public class SubtaskService {
     }
 
     // 保存项目子任务
-    // 项目设置子任务(执行者，子任务，节点)
+    // 项目设置子任务(执行者，子任务，节点)-->子任务负责人密级大于等于项目密级
     public SubtaskEntity setSubtask(String projectId, String designLinkEntityId, String userId, String finishTime){
-        SubtaskEntity subtaskEntity = new SubtaskEntity();
+        if(!projectService.hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = projectService.getProjectById(projectId);
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = userService.getUserById(userId);
+        if(userEntity.getSecretClass() < projectEntity.getSecretClass()){
+            throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
+        }
 
+        SubtaskEntity subtaskEntity = new SubtaskEntity();
         // 选择设计环节
         if(!designLinkService.hasDesignLinkById(designLinkEntityId)){
             throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
@@ -56,17 +67,8 @@ public class SubtaskService {
         subtaskEntity.setFinishTime(finishTime);                             // 节点
         subtaskEntity.setState(0);                                           // 子任务未进行
         subtaskEntity.setPassState(0);                                       // 子任务未通过
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
-        UserEntity userEntity = userService.getUserById(userId);
+
         subtaskEntity.setUserEntity(userEntity);                            // 负责人
-
-        if(!projectService.hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
-        ProjectEntity projectEntity = projectService.getProjectById(projectId);
-
         subtaskEntity.setProjectEntity(projectEntity);                      // 所属项目
 
         return subtaskRepository.save(subtaskEntity);
@@ -91,7 +93,7 @@ public class SubtaskService {
     // 根据id查询子任务
     public SubtaskEntity getSubtaskById(String subtaskById) {
         if(!hasSubtaskById(subtaskById)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         return subtaskRepository.findById(subtaskById).get();
     }
@@ -99,13 +101,13 @@ public class SubtaskService {
     // 根据id修改子任务
     public SubtaskEntity updateSubtaskById(String subtaskById, String designLinkEntityId, String userId, String finishTime){
         if(!hasSubtaskById(subtaskById)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
         if(designLinkService.hasDesignLinkById(designLinkEntityId)){
             DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
             if(hasSubtaskByName(designLinkEntity.getName())){
-                throw new ResultException(ResultCode.PRODESIGN_LINK_NAME_EXISTED_ERROR);
+                throw new ResultException(ResultCode.SUBTASK_NAME_EXISTED_ERROR);
             }
             subtaskEntity.setDesignLinkEntity(designLinkEntity);
         }
@@ -123,7 +125,7 @@ public class SubtaskService {
     // 删除子任务
     public SubtaskEntity deleteSubtaskById(String subtaskId){
         if(!hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
         subtaskRepository.delete(subtaskEntity);
@@ -137,14 +139,14 @@ public class SubtaskService {
         }
         UserEntity userEntity = userService.getUserById(userId);
         if(!hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
         if(!userEntity.getId().equals(subtaskEntity.getUserEntity().getId())){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
         }
         if(userIds.length == 0){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ASSESSORS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ASSESSORS_NOT_FOUND_ERROR);
         }
 
         List<UserEntity> userEntityList = new ArrayList<>();
@@ -165,7 +167,7 @@ public class SubtaskService {
     // 根据子任务id查询其后续任务
     /*public List<SubtaskEntity> findNextSubtasksById(String subtaskId){
         if(!hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
         // 查询以此节点为父节点的节点
@@ -183,11 +185,11 @@ public class SubtaskService {
     // 根据子任务id审核子任务
     /*public SubtaskEntity assessSubtaskById(String subtaskById, SubtaskEntity subtaskEntityArgs){
         if(!hasSubtaskById(subtaskById)){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_ID_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
         if(StringUtils.isEmpty(String.valueOf(subtaskEntityArgs.getState()))){
-            throw new ResultException(ResultCode.PRODESIGN_LINK_STATE_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.SUBTASK_STATE_NOT_FOUND_ERROR);
         }
         subtaskEntity.setState(subtaskEntityArgs.getState());
         // 若通过则设置其后续的子任务状态为进行中
