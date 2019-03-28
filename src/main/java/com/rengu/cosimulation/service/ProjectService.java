@@ -79,8 +79,22 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
+    // 查询所有项目(所有人都可以查询所有项目)
     public List<ProjectEntity> getAllByDeleted(boolean deleted) {
         return projectRepository.findByDeleted(deleted);
+    }
+
+    // 根据密级控制查看项目详情
+    public boolean getProjectDetails(String projectId, String userId){
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = getProjectById(projectId);
+        UserEntity userEntity = userService.getUserById(userId);
+        return userEntity.getSecretClass() >= projectEntity.getSecretClass();
     }
 
     // 查询所有项目,根据用户Id(负责人)
@@ -191,22 +205,19 @@ public class ProjectService {
     }
 
     // 项目管理员指定项目负责人： 项目负责人密级高于或等于项目密级
-    public ProjectEntity updateProjectPic(String projectId, String creatorId, String picId){
+    public ProjectEntity updateProjectPic(String projectId, String picId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
-        if(!userService.hasUserById(creatorId)){
-            throw new ResultException(ResultCode.PROJECT_CREATOR_ARGS_NOT_FOUND_ERROR);
-        }
-
-        if(!projectEntity.getCreator().getId().equals(creatorId)){
-            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
-        }
         if(StringUtils.isEmpty(picId)){
             throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
         }
-        projectEntity.setPic(userService.getUserById(picId));
+        UserEntity userEntity = userService.getUserById(picId);
+        if(userEntity.getSecretClass() < projectEntity.getSecretClass()){
+            throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
+        }
+        projectEntity.setPic(userEntity);
         return projectRepository.save(projectEntity);
     }
 

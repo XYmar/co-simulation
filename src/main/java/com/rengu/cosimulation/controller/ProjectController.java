@@ -6,6 +6,7 @@ import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.service.ProjectService;
 import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
+import org.jboss.logging.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,11 +36,16 @@ public class ProjectController {
         return ResultUtils.success(projectService.saveProject(projectEntity, creatorId, picId));
     }
 
-    // 项目管理员查询所有项目
+    // 所有人查询所有项目
     @GetMapping
-    @PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
     public ResultEntity getProjects(boolean deleted){
         return ResultUtils.success(projectService.getAllByDeleted(deleted));
+    }
+
+    // 根据密级查看项目详情
+    @GetMapping(value = "/{projectId}/projectDetails")
+    public ResultEntity getProjectDetails(@PathVariable(value = "projectId") String projectId, String userId){
+        return ResultUtils.success(projectService.getProjectDetails(projectId, userId));
     }
 
     // 根据用户id查询所有项目(负责人)
@@ -93,8 +99,8 @@ public class ProjectController {
 
     // 管理员修改项目负责人
     @PatchMapping(value = "/{projectId}/updatePic")
-    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String creatorId, String picId){
-        return ResultUtils.success(projectService.updateProjectPic(projectId, creatorId, picId));
+    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String picId){
+        return ResultUtils.success(projectService.updateProjectPic(projectId, picId));
     }
 
     // 启动项目
