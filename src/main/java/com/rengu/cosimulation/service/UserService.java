@@ -56,7 +56,7 @@ public class UserService implements UserDetailsService {
         if(StringUtils.isEmpty(String.valueOf(userEntity.getSecretClass()))){
             userEntity.setSecretClass(0);
         }else{
-            userEntity.setSecretClass(4);
+            userEntity.setSecretClass(3);
         }
 
         return userRepository.save(userEntity);
