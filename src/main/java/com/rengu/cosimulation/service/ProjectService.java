@@ -51,6 +51,10 @@ public class ProjectService {
             throw new ResultException(ResultCode.PROJECT_CREATOR_ARGS_NOT_FOUND_ERROR);
         }
         projectEntity.setCreator(userService.getUserById(creatorId));
+        UserEntity userEntity = userService.getUserById(picId);
+        if(userEntity.getSecretClass() < projectEntity.getSecretClass()){
+            throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
+        }
         if(StringUtils.isEmpty(projectEntity.getName())){
             throw new ResultException(ResultCode.PROJECT_NAME_ARGS_NOT_FOUND_ERROR);
         }
@@ -205,15 +209,19 @@ public class ProjectService {
     }
 
     // 项目管理员指定项目负责人： 项目负责人密级高于或等于项目密级
-    public ProjectEntity updateProjectPic(String projectId, String picId){
+    public ProjectEntity updateProjectPic(String projectId, String creatorId, String picId){
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+        if(!projectEntity.getCreator().getId().equals(creatorId)){
+            throw new ResultException(ResultCode.AUTHORITY_DENIED_ERROR);
+        }
         if(StringUtils.isEmpty(picId)){
             throw new ResultException(ResultCode.PROJECT_PIC_ARGS_NOT_FOUND_ERROR);
         }
         UserEntity userEntity = userService.getUserById(picId);
+
         if(userEntity.getSecretClass() < projectEntity.getSecretClass()){
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
         }

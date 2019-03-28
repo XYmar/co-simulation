@@ -99,8 +99,8 @@ public class ProjectController {
 
     // 管理员修改项目负责人
     @PatchMapping(value = "/{projectId}/updatePic")
-    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String picId){
-        return ResultUtils.success(projectService.updateProjectPic(projectId, picId));
+    public ResultEntity updateProjectPic(@PathVariable(value = "projectId") String projectId, String creatorId, String picId){
+        return ResultUtils.success(projectService.updateProjectPic(projectId, creatorId, picId));
     }
 
     // 启动项目
