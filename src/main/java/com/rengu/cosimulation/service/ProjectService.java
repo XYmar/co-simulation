@@ -301,4 +301,18 @@ public class ProjectService {
         return projectRepository.save(projectEntity);
     }
 
+    // 根据项目id查询高于等于该项目密级的用户
+    public List<UserEntity> getUsersByProjectId(String projectId){
+        if(!hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        int secretClass = getProjectById(projectId).getSecretClass();
+        List<UserEntity> userEntityList = new ArrayList<>();
+        for(UserEntity userEntity : userService.getAll()){
+            if(userEntity.getSecretClass() >= secretClass){
+                userEntityList.add(userEntity);
+            }
+        }
+        return userEntityList;
+    }
 }

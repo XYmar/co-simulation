@@ -109,4 +109,9 @@ public class ProjectController {
         return ResultUtils.success(projectService.startProject(projectId));
     }
 
+    // 根据项目id返回高于等于该项目密级的用户
+    @GetMapping(value = "/{projectId}/getUsers")
+    public ResultEntity getUsersByProjectId(@PathVariable(value = "projectId") String projectId){
+        return ResultUtils.success(projectService.getUsersByProjectId(projectId));
+    }
 }
