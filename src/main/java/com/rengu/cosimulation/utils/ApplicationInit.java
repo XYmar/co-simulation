@@ -81,6 +81,7 @@ public class ApplicationInit  implements ApplicationRunner {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME);
             userEntity.setPassword(ApplicationConfig.DEFAULT_ADMIN_PASSWORD);
+            userEntity.setSecretClass(3);
             userService.saveUser(userEntity, ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
         }
 
@@ -89,6 +90,7 @@ public class ApplicationInit  implements ApplicationRunner {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME);
             userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
+            userEntity.setSecretClass(3);
             userService.saveUser(userEntity, ApplicationConfig.DEFAULT_SECURITY_GUARD_ROLE_NAME);
         }
 
@@ -97,6 +99,7 @@ public class ApplicationInit  implements ApplicationRunner {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME);
             userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
+            userEntity.setSecretClass(3);
             userService.saveUser(userEntity, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
         }
 
