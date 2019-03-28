@@ -37,12 +37,6 @@ public class SubtaskController {
         return ResultUtils.success(subtaskEntityList);
     }
 
-    // 保存子任务， 项目设置子任务(执行者，子任务，节点)
-    @PatchMapping(value = "/byProject/{projectId}/setDesignLink")
-    public ResultEntity setDesignLink(@PathVariable(value = "projectId") String projectId, String designLinkEntityId, String userId, String finishTime){
-        return ResultUtils.success(subtaskService.setSubtask(projectId, designLinkEntityId, userId, finishTime));
-    }
-
     // 根据id查询子任务
     @GetMapping(value = "/{subtaskId}")
     public ResultEntity getSubtaskById(String subtaskId){
@@ -50,9 +44,9 @@ public class SubtaskController {
     }
 
     // 修改子任务(执行者，子任务，节点)
-    @PatchMapping(value = "/{subtaskId}/updateDesignLink")
-    public ResultEntity updateSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, String designLinkEntityId, String userId, String finishTime){
-        return ResultUtils.success(subtaskService.updateSubtaskById(subtaskId, designLinkEntityId, userId, finishTime));
+    @PatchMapping(value = "/{subtaskId}/byProject/{projectId}")
+    public ResultEntity updateSubtaskById(@PathVariable(value = "projectId") String projectId, @PathVariable(value = "subtaskId") String subtaskId, String userId, String finishTime){
+        return ResultUtils.success(subtaskService.updateSubtaskById(projectId, subtaskId, userId, finishTime));
     }
 
     // 删除子任务

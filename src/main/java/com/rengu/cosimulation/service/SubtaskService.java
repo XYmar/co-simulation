@@ -5,10 +5,12 @@ import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.ProcessNodeRepository;
 import com.rengu.cosimulation.repository.SubtaskRepository;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.xml.transform.Result;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,56 +24,19 @@ public class SubtaskService {
     private final SubtaskRepository subtaskRepository;
     private final ProjectService projectService;
     private final UserService userService;
-    private final DesignLinkService designLinkService;
     private final ProcessNodeRepository processNodeRepository;
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, DesignLinkService designLinkService, ProcessNodeRepository processNodeRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository processNodeRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
-        this.designLinkService = designLinkService;
         this.processNodeRepository = processNodeRepository;
     }
 
     // 根据项目id查询所有子任务
     public List<SubtaskEntity> findByProjectId(String projectId) {
         return subtaskRepository.findByProjectEntity(projectService.getProjectById(projectId));
-    }
-
-    // 保存项目子任务
-    // 项目设置子任务(执行者，子任务，节点)-->子任务负责人密级大于等于项目密级
-    public SubtaskEntity setSubtask(String projectId, String designLinkEntityId, String userId, String finishTime){
-        if(!projectService.hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
-        ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
-        UserEntity userEntity = userService.getUserById(userId);
-        if(userEntity.getSecretClass() < projectEntity.getSecretClass()){
-            throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
-        }
-
-        SubtaskEntity subtaskEntity = new SubtaskEntity();
-        // 选择设计环节
-        if(!designLinkService.hasDesignLinkById(designLinkEntityId)){
-            throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
-        }
-        DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
-
-        // 设置子任务相关内容
-        subtaskEntity.setName(designLinkEntity.getName());                   // 名称
-        subtaskEntity.setDescription(designLinkEntity.getDescription());     // 描述
-        subtaskEntity.setFinishTime(finishTime);                             // 节点
-        subtaskEntity.setState(0);                                           // 子任务未进行
-        subtaskEntity.setPassState(0);                                       // 子任务未通过
-
-        subtaskEntity.setUserEntity(userEntity);                            // 负责人
-        subtaskEntity.setProjectEntity(projectEntity);                      // 所属项目
-
-        return subtaskRepository.save(subtaskEntity);
     }
 
     // 根据id查询子任务是否存在
@@ -98,23 +63,24 @@ public class SubtaskService {
         return subtaskRepository.findById(subtaskById).get();
     }
 
-    // 根据id修改子任务
-    public SubtaskEntity updateSubtaskById(String subtaskById, String designLinkEntityId, String userId, String finishTime){
+    // 根据id修改子任务-->子任务负责人密级大于等于项目密级
+    public SubtaskEntity updateSubtaskById(String projectId, String subtaskById, String userId, String finishTime){
+        if(!projectService.hasProjectById(projectId)){
+            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+        }
+        ProjectEntity projectEntity = projectService.getProjectById(projectId);
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = userService.getUserById(userId);
+        if(userEntity.getSecretClass() < projectEntity.getSecretClass()){
+            throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
+        }
         if(!hasSubtaskById(subtaskById)){
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
-        if(designLinkService.hasDesignLinkById(designLinkEntityId)){
-            DesignLinkEntity designLinkEntity = designLinkService.getDesignLinkById(designLinkEntityId);
-            if(hasSubtaskByName(designLinkEntity.getName())){
-                throw new ResultException(ResultCode.SUBTASK_NAME_EXISTED_ERROR);
-            }
-            subtaskEntity.setDesignLinkEntity(designLinkEntity);
-        }
-        if(userService.hasUserById(userId)){
-            UserEntity userEntity = userService.getUserById(userId);
-            subtaskEntity.setUserEntity(userEntity);
-        }
+        subtaskEntity.setUserEntity(userEntity);
         if(!StringUtils.isEmpty(finishTime)){
             subtaskEntity.setFinishTime(finishTime);
         }
