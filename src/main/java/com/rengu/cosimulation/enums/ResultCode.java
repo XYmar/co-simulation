@@ -75,6 +75,9 @@ public enum ResultCode {
     PROCESS_NODE_NOT_FOUND_ERROR(24001, "项目流程不存在"),
     PROCESS_ARGS_NOT_FOUND_ERROR(24002, "流程节点参数不存在"),
 
+    // 库相关   2500x
+    LIBRARY_ID_NOT_FOUND_ERROR(25001, "未发现该库id"),
+
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),
     ARGS_NOT_FOUND_ERROR(40003, "未传递参数"),
