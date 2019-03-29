@@ -39,8 +39,12 @@ public class ApplicationInit  implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        // 初始化库（4个）
+
+        // 初始化子库
+
         // 创建角色数组
-        RoleEntity[] roles = new RoleEntity[7];
+        /*RoleEntity[] roles = new RoleEntity[7];
 
         // 实例化每一个角色
         for(int i=0;i<roles.length;i++){
@@ -72,7 +76,7 @@ public class ApplicationInit  implements ApplicationRunner {
                 roleService.saveRole(role);
             }
         }
-
+*/
         /**
          * 初始化三元
          * */
