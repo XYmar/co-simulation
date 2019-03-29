@@ -7,7 +7,9 @@ import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SubLibraryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import javax.xml.transform.Result;
 import java.util.List;
 
 /**
@@ -34,4 +36,54 @@ public class SubLibraryService {
         return subLibraryRepository.findByLibraryEntity(libraryEntity);
     }
 
+    // 根据id查询子库是否存在
+    public boolean hasSublibraryById(String id){
+        if(StringUtils.isEmpty(id)){
+            return false;
+        }
+        return subLibraryRepository.existsById(id);
+    }
+
+    // 根据id查询子库
+    public SublibraryEntity getSublibraryById(String id){
+        if(!hasSublibraryById(id)){
+            throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
+        }
+        return subLibraryRepository.findById(id).get();
+    }
+
+    // 新增子库
+    public SublibraryEntity saveSublibrary(SublibraryEntity sublibraryEntity,String libraryId){
+        if(!libraryService.hasLibraryById(libraryId)){
+            throw new ResultException(ResultCode.LIBRARY_ID_NOT_FOUND_ERROR);
+        }
+        LibraryEntity libraryEntity = libraryService.getLibraryById(libraryId);
+        sublibraryEntity.setLibraryEntity(libraryEntity);
+        return subLibraryRepository.save(sublibraryEntity);
+    }
+
+    // 删除子库
+    public SublibraryEntity deleteSublibraryById(String id){
+        if(!hasSublibraryById(id)){
+            throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
+        }
+        SublibraryEntity sublibraryEntity = getSublibraryById(id);
+        subLibraryRepository.delete(sublibraryEntity);
+        return sublibraryEntity;
+    }
+
+    // 修改子库
+    public SublibraryEntity updateSublibraryById(String id, SublibraryEntity sublibraryEntityArgs){
+        if(!hasSublibraryById(id)){
+            throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
+        }
+        SublibraryEntity sublibraryEntity = getSublibraryById(id);
+        if(!StringUtils.isEmpty(sublibraryEntityArgs.getType()) && !sublibraryEntity.getType().equals(sublibraryEntityArgs.getType())){
+            sublibraryEntity.setType(sublibraryEntityArgs.getType());
+        }
+        if(!StringUtils.isEmpty(sublibraryEntityArgs.getDescription())){
+            sublibraryEntity.setDescription(sublibraryEntityArgs.getDescription());
+        }
+        return subLibraryRepository.save(sublibraryEntity);
+    }
 }

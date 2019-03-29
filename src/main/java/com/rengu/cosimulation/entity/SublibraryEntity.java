@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class SublibraryEntity implements Serializable {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
+    @NotBlank(message = "子库类型不能为空")
     private String type;                    // 子库类型
     private String description;             // 子库描述
     @ManyToOne(cascade= CascadeType.ALL)
