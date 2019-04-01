@@ -1,7 +1,9 @@
 package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.LibraryEntity;
+import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.service.LibraryService;
+import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +29,7 @@ public class LibraryController {
 
     // 查询所有库
     @GetMapping
-    public List<LibraryEntity> getAll(){
-        return libraryService.getAll();
+    public ResultEntity getAll(){
+        return ResultUtils.success(libraryService.getAll());
     }
 }
