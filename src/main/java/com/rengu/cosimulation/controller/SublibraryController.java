@@ -2,7 +2,7 @@ package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.entity.SublibraryEntity;
-import com.rengu.cosimulation.service.SubLibraryService;
+import com.rengu.cosimulation.service.SublibraryService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/sublibraries")
 public class SublibraryController {
-    private final SubLibraryService subLibraryService;
+    private final SublibraryService subLibraryService;
 
     @Autowired
-    public SublibraryController(SubLibraryService subLibraryService) {
+    public SublibraryController(SublibraryService subLibraryService) {
         this.subLibraryService = subLibraryService;
     }
 

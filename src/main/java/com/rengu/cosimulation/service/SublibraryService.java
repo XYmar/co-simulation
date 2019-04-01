@@ -17,12 +17,12 @@ import java.util.List;
  * Date: 2019/3/29 16:09
  */
 @Service
-public class SubLibraryService {
+public class SublibraryService {
     private final SubLibraryRepository subLibraryRepository;
     private final LibraryService libraryService;
 
     @Autowired
-    public SubLibraryService(SubLibraryRepository subLibraryRepository, LibraryService libraryService) {
+    public SublibraryService(SubLibraryRepository subLibraryRepository, LibraryService libraryService) {
         this.subLibraryRepository = subLibraryRepository;
         this.libraryService = libraryService;
     }
