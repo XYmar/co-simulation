@@ -7,15 +7,9 @@ import com.rengu.cosimulation.service.RoleService;
 import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Author: XYmar
@@ -37,7 +31,7 @@ public class UserController {
     // 新增用户（只有系统管理员可执行此操作）
     @PostMapping
     @PreAuthorize(value = "hasRole('ADMIN')")
-    public ResultEntity saveUser(@RequestBody @Valid UserEntity userEntity, @RequestHeader(name = "roleName") String roleName){
+    public ResultEntity saveUser(UserEntity userEntity, @RequestHeader(name = "roleName") String roleName){
         return ResultUtils.success(userService.saveUser(userEntity, roleName));
     }
 

@@ -24,11 +24,9 @@ public class UserEntity implements UserDetails, Serializable {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @NotBlank(message = "用户名不能为空")
     private String username;
-    @NotBlank(message = "密码不能为空")
+    @JsonIgnore
     private String password;
-    @Range(min = 0, max = 4, message = "请设置0-4的范围")
     private int secretClass;                       // 人员密级
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
