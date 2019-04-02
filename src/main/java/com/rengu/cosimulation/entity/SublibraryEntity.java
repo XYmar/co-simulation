@@ -23,7 +23,7 @@ public class SublibraryEntity implements Serializable {
     @NotBlank(message = "子库类型不能为空")
     private String type;                    // 子库类型
     private String description;             // 子库描述
-    @ManyToOne(cascade= CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "LibraryEntity_id")  // 外键
     private LibraryEntity libraryEntity;
 }
