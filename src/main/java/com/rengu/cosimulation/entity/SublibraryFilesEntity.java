@@ -46,5 +46,7 @@ public class SublibraryFilesEntity {
     private Set<UserEntity> countersignUserSet;  // 会签人
     @OneToMany
     private Set<UserEntity> approveUserSet;  // 批准人
+    @ManyToOne
+    private UserEntity userEntity;
 
 }
