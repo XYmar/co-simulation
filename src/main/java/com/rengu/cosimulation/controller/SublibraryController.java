@@ -1,12 +1,16 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.entity.SublibraryEntity;
+import com.rengu.cosimulation.service.SublibraryFilesService;
 import com.rengu.cosimulation.service.SublibraryService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Author: XYmar
@@ -17,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/sublibraries")
 public class SublibraryController {
     private final SublibraryService subLibraryService;
+    @Autowired
+    private SublibraryFilesService sublibraryFilesService;
 
     @Autowired
     public SublibraryController(SublibraryService subLibraryService) {
@@ -45,5 +51,11 @@ public class SublibraryController {
     @GetMapping(value = "/byLibraryId/{libraryId}")
     public ResultEntity getSublibrariesByLibraryId(@PathVariable(value = "libraryId") String libraryId){
         return ResultUtils.success(subLibraryService.getSublibrariesByLibraryId(libraryId));
+    }
+
+    // 根据子库id创建文件
+    @PostMapping(value = "/{sublibraryId}/uploadfiles")
+    public ResultEntity saveSublibraryFilesBySublibraryId(@PathVariable(value = "sublibraryId") String sublibraryId,  @RequestBody List<FileMetaEntity> fileMetaEntityList){
+        return ResultUtils.success(sublibraryFilesService.saveSublibraryFilesBySublibraryId(sublibraryId, fileMetaEntityList));
     }
 }

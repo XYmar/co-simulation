@@ -14,4 +14,5 @@ import java.util.List;
 @Repository
 public interface SubLibraryRepository extends JpaRepository<SublibraryEntity, String> {
     List<SublibraryEntity> findByLibraryEntity(LibraryEntity libraryEntity);
+    boolean existsByType(String type);
 }

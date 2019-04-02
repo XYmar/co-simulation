@@ -57,6 +57,9 @@ public class SublibraryService {
         if(!libraryService.hasLibraryById(libraryId)){
             throw new ResultException(ResultCode.LIBRARY_ID_NOT_FOUND_ERROR);
         }
+        if(hasSublibraryByType(sublibraryEntity.getType())){
+            throw new ResultException(ResultCode.SUBLIBRARY_TYPE_EXISTED_ERROR);
+        }
         LibraryEntity libraryEntity = libraryService.getLibraryById(libraryId);
         sublibraryEntity.setLibraryEntity(libraryEntity);
         return subLibraryRepository.save(sublibraryEntity);
@@ -79,11 +82,22 @@ public class SublibraryService {
         }
         SublibraryEntity sublibraryEntity = getSublibraryById(id);
         if(!StringUtils.isEmpty(sublibraryEntityArgs.getType()) && !sublibraryEntity.getType().equals(sublibraryEntityArgs.getType())){
+            if(hasSublibraryByType(sublibraryEntityArgs.getType())){
+                throw new ResultException(ResultCode.SUBLIBRARY_TYPE_EXISTED_ERROR);
+            }
             sublibraryEntity.setType(sublibraryEntityArgs.getType());
         }
         if(!StringUtils.isEmpty(sublibraryEntityArgs.getDescription())){
             sublibraryEntity.setDescription(sublibraryEntityArgs.getDescription());
         }
         return subLibraryRepository.save(sublibraryEntity);
+    }
+
+    // 根据类型判断子库是否存在
+    public boolean hasSublibraryByType(String type){
+        if(StringUtils.isEmpty(type)){
+           return false;
+        }
+        return subLibraryRepository.existsByType(type);
     }
 }

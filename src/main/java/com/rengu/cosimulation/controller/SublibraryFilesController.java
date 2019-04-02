@@ -61,4 +61,10 @@ public class SublibraryFilesController {
     public ResultEntity deleteSublibraryFileId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
         return ResultUtils.success(sublibraryFilesService.deleteSublibraryFileId(sublibraryFileId));
     }
+
+    // 根据子库id查询所有文件
+    @GetMapping(value = "bySublibraryId/{sublibraryId}/files")
+    public ResultEntity getSublibraryFilesByLibraryId(@PathVariable(value = "sublibraryId") String sublibraryId, boolean ifApprove){
+        return ResultUtils.success(sublibraryFilesService.getSublibraryFilesBySublibraryAndIfApprove(sublibraryId, ifApprove));
+    }
 }

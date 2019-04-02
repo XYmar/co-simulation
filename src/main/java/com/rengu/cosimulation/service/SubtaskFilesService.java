@@ -16,9 +16,7 @@ import org.springframework.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Author: XYmar
@@ -32,14 +30,16 @@ public class SubtaskFilesService {
     private final FileService fileService;
     private final ProjectService projectService;
     private final UserService userService;
+    private final SublibraryService sublibraryService;
 
     @Autowired
-    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService) {
+    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService, SublibraryService sublibraryService) {
         this.fileService = fileService;
         this.subtaskFilesRepository = subtaskFilesRepository;
         this.subtaskService = subtaskService;
         this.projectService = projectService;
         this.userService = userService;
+        this.sublibraryService = sublibraryService;
     }
 
     // 根据名称、后缀及子任务检查文件是否存在
@@ -73,6 +73,10 @@ public class SubtaskFilesService {
                 throw new ResultException(ResultCode.SUBTASK_FILE_SECRETCLASS_NOT_SUPPORT_ERROR);
             }
 
+            if(StringUtils.isEmpty(fileMetaEntity.getSublibraryId())){
+                throw new ResultException(ResultCode.SUBLIBRARY_NOT__APPOINT_ERROR);
+            }
+            SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(fileMetaEntity.getSublibraryId());      // 子库
             // 判断该节点是否存在
             if (hasSubtaskFilesByNameAndExtensionAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity)) {
                 SubtaskFilesEntity subtaskFilesEntity = getSubtaskFilesByNameAndPostfixAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTaskEntity);
@@ -85,6 +89,9 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 subtaskFilesEntity.setVersion("M1");
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
+                Set<SublibraryEntity> sublibraryEntities = subtaskFilesEntity.getSublibraryEntitySet();
+                sublibraryEntities.add(sublibraryEntity);
+                subtaskFilesEntity.setSublibraryEntitySet(sublibraryEntities);
                 subtaskFilesEntityList.add(subtaskFilesRepository.save(subtaskFilesEntity));
             } else {
                 SubtaskFilesEntity subtaskFilesEntity = new SubtaskFilesEntity();
@@ -97,6 +104,9 @@ public class SubtaskFilesService {
                 subtaskFilesEntity.setVersion("M1");
                 subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 subtaskFilesEntity.setSubTaskEntity(subTaskEntity);
+                Set<SublibraryEntity> sublibraryEntities = subtaskFilesEntity.getSublibraryEntitySet() == null ? new HashSet<>() : subtaskFilesEntity.getSublibraryEntitySet();
+                sublibraryEntities.add(sublibraryEntity);
+                subtaskFilesEntity.setSublibraryEntitySet(sublibraryEntities);
                 subtaskFilesEntityList.add(subtaskFilesRepository.save(subtaskFilesEntity));
             }
         }

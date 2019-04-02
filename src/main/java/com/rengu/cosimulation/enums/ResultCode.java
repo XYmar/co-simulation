@@ -78,8 +78,10 @@ public enum ResultCode {
     // 库相关   2500x
     LIBRARY_ID_NOT_FOUND_ERROR(25001, "未发现该库id"),
 
-    // 库相关   2600x
+    // 子库相关   2600x
     SUBLIBRARY_ID_NOT_FOUND_ERROR(26001, "未发现该子库id"),
+    SUBLIBRARY_TYPE_EXISTED_ERROR(26002, "该子库类型已存在"),
+    SUBLIBRARY_NOT__APPOINT_ERROR(26003, "请指定库"),
 
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),

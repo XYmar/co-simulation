@@ -14,5 +14,6 @@ public interface SublibraryFilesRepository extends JpaRepository<SublibraryFiles
 
     Optional<SublibraryFilesEntity> findByNameAndPostfixAndSublibraryEntity(String name, String postfix, SublibraryEntity sublibraryEntity);
 
-    List<SublibraryFilesEntity> findBySublibraryEntity(SublibraryEntity sublibraryEntity);
+    List<SublibraryFilesEntity> findBySublibraryEntityAndIfApprove(SublibraryEntity sublibraryEntity, boolean ifApprove);
+
 }

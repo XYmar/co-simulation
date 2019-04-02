@@ -3,11 +3,10 @@ package com.rengu.cosimulation.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -32,4 +31,6 @@ public class SubtaskFilesEntity implements Serializable {
     private FileEntity fileEntity;
     @ManyToOne
     private SubtaskEntity subTaskEntity;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<SublibraryEntity> sublibraryEntitySet;
 }

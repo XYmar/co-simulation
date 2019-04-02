@@ -53,7 +53,7 @@ public class SublibraryFilesService {
 
     // 根据子库id创建文件
     @CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
-    public List<SublibraryFilesEntity> saveSublibraryFilesByProDesignId(String sublibraryId, List<FileMetaEntity> fileMetaEntityList) {
+    public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, List<FileMetaEntity> fileMetaEntityList) {
         if(!sublibraryService.hasSublibraryById(sublibraryId)){
             throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
         }
@@ -73,6 +73,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
                 sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 sublibraryFilesEntity.setVersion("M1");
+                sublibraryFilesEntity.setIfApprove(false);
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
             } else {
@@ -84,6 +85,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
                 sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 sublibraryFilesEntity.setVersion("M1");
+                sublibraryFilesEntity.setIfApprove(false);
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
                 sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
@@ -92,12 +94,12 @@ public class SublibraryFilesService {
         return sublibraryFilesEntityList;
     }
 
-    // 根据子任务id查询子任务下的文件
-    public List<SublibraryFilesEntity> getSublibraryFilesByProDesignId(String sublibraryId) {
+    // 根据子库id查询子库下的文件
+    public List<SublibraryFilesEntity> getSublibraryFilesBySublibraryAndIfApprove(String sublibraryId, boolean ifApprove) {
         if(!sublibraryService.hasSublibraryById(sublibraryId)){
             throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
         }
-        return sublibraryFilesRepository.findBySublibraryEntity(sublibraryService.getSublibraryById(sublibraryId));
+        return sublibraryFilesRepository.findBySublibraryEntityAndIfApprove(sublibraryService.getSublibraryById(sublibraryId), ifApprove);
     }
 
     // 根据id查询子库文件是否存在
@@ -108,7 +110,7 @@ public class SublibraryFilesService {
         return sublibraryFilesRepository.existsById(sublibraryFileId);
     }
 
-    // 根据id查询子库文件
+    // 根据文件id查询子库文件
     @Cacheable(value = "SublibraryFiles_Cache", key = "#sublibraryFileId")
     public SublibraryFilesEntity getSublibraryFileById(String sublibraryFileId) {
         if (!hasSublibraryFileById(sublibraryFileId)) {
