@@ -17,10 +17,7 @@ import org.springframework.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Author: XYmar
@@ -175,22 +172,34 @@ public class SublibraryFilesService {
         sublibraryFilesRepository.delete(sublibraryFilesEntity);
         return sublibraryFilesEntity;
     }
-    // 选择文件的审核模式及四类审核人
-    /*public SublibraryFilesEntity arrangeAudit(String sublibraryFileId, int mode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
+
+    // 选择文件（一批文件）的审核模式及四类审核人
+    public List<SublibraryFilesEntity> arrangeAudit(String[] sublibraryFileId, int mode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
         if(StringUtils.isEmpty(sublibraryFileId)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
-        SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
-        for(){
-
+        List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
+        for(String id : sublibraryFileId){
+            SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(id);
+            sublibraryFilesEntity.setProofreadUserSet(idsToSet(proofreadUserIds));
+            sublibraryFilesEntity.setAuditUserSet(idsToSet(auditUserIds));
+            sublibraryFilesEntity.setCountersignUserSet(idsToSet(countersignUserIds));
+            sublibraryFilesEntity.setApproveUserSet(idsToSet(approveUserIds));
+            sublibraryFilesEntity.setMode(mode);
+            sublibraryFilesEntityList.add(getSublibraryFileById(id));
         }
 
+        return sublibraryFilesRepository.saveAll(sublibraryFilesEntityList);
     }
 
-    // 根据用户id数组，将用户转为set
-    public Set<UserEntity> idsToSet(String[] ids){
+    // 根据用户id数组，将用户数组转为set集合
+    private Set<UserEntity> idsToSet(String[] ids){
+        Set<UserEntity> userEntities = new HashSet<>();
         if(!ArrayUtils.isEmpty(ids)){
-
+            for(String id : ids){
+                userEntities.add(userService.getUserById(id));
+            }
         }
-    }*/
+        return userEntities;
+    }
 }
