@@ -70,7 +70,7 @@ public class SublibraryFilesController {
 
     // 选择子库提交文件（一批）审核人
     @PatchMapping(value = "/arrangeAudit")
-    public ResultEntity arrangeAudit(String[] sublibraryFileId, int mode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
-        return ResultUtils.success(sublibraryFilesService.arrangeAudit(sublibraryFileId, mode, proofreadUserIds, auditUserIds, countersignUserIds,approveUserIds));
+    public ResultEntity arrangeAudit(String[] sublibraryFileId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
+        return ResultUtils.success(sublibraryFilesService.arrangeAudit(sublibraryFileId, auditMode, proofreadUserIds, auditUserIds, countersignUserIds,approveUserIds));
     }
 }

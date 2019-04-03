@@ -174,7 +174,7 @@ public class SublibraryFilesService {
     }
 
     // 选择文件（一批文件）的审核模式及四类审核人
-    public List<SublibraryFilesEntity> arrangeAudit(String[] sublibraryFileId, int mode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
+    public List<SublibraryFilesEntity> arrangeAudit(String[] sublibraryFileId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
         if(StringUtils.isEmpty(sublibraryFileId)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
@@ -185,7 +185,7 @@ public class SublibraryFilesService {
             sublibraryFilesEntity.setAuditUserSet(idsToSet(auditUserIds));
             sublibraryFilesEntity.setCountersignUserSet(idsToSet(countersignUserIds));
             sublibraryFilesEntity.setApproveUserSet(idsToSet(approveUserIds));
-            sublibraryFilesEntity.setMode(mode);
+            sublibraryFilesEntity.setAuditMode(auditMode);
             sublibraryFilesEntityList.add(getSublibraryFileById(id));
         }
 
@@ -201,5 +201,15 @@ public class SublibraryFilesService {
             }
         }
         return userEntities;
+    }
+
+    // 审核操作
+    public SublibraryFilesEntity sublibraryFileAudit(String sublibraryFileId){
+        if(!hasSublibraryFileById(sublibraryFileId)){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
+        }
+        SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+
+        return sublibraryFilesEntity;
     }
 }
