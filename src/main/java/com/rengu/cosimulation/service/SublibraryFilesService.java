@@ -179,6 +179,21 @@ public class SublibraryFilesService {
         if(StringUtils.isEmpty(sublibraryFileId)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
+        if(StringUtils.isEmpty(String.valueOf(auditMode))){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_AUDITMODE_NOT_FOUND_ERROR);
+        }
+        if(ArrayUtils.isEmpty(proofreadUserIds)){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_PROOFREADUSERS_NOT_FOUND_ERROR);
+        }
+        if(ArrayUtils.isEmpty(auditUserIds)){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_AUDITUSERS_NOT_FOUND_ERROR);
+        }
+        if(ArrayUtils.isEmpty(countersignUserIds)){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_COUNTERSIGNUSERS_NOT_FOUND_ERROR);
+        }
+        if(ArrayUtils.isEmpty(approveUserIds)){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_APPROVEUSERS_NOT_FOUND_ERROR);
+        }
         List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
         for(String id : sublibraryFileId){
             SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(id);
