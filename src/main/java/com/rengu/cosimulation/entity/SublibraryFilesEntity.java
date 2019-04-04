@@ -38,13 +38,13 @@ public class SublibraryFilesEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name = "subibraryEntity_id")
     private SublibraryEntity sublibraryEntity;
-    @OneToMany
+    @ManyToMany
     private Set<UserEntity> proofreadUserSet;  // 校对人
-    @OneToMany
+    @ManyToMany
     private Set<UserEntity> auditUserSet;  // 审核人
-    @OneToMany
+    @ManyToMany
     private Set<UserEntity> countersignUserSet;  // 会签人
-    @OneToMany
+    @ManyToMany
     private Set<UserEntity> approveUserSet;  // 批准人
     @ManyToOne
     @JoinColumn(name = "userEntity_id")

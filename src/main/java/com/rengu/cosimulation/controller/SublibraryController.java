@@ -54,8 +54,8 @@ public class SublibraryController {
     }
 
     // 根据子库id创建文件
-    @PostMapping(value = "/{sublibraryId}/uploadfiles")
-    public ResultEntity saveSublibraryFilesBySublibraryId(@PathVariable(value = "sublibraryId") String sublibraryId,  @RequestBody List<FileMetaEntity> fileMetaEntityList){
-        return ResultUtils.success(sublibraryFilesService.saveSublibraryFilesBySublibraryId(sublibraryId, fileMetaEntityList));
+    @PostMapping(value = "/{sublibraryId}/uploadfiles/byUser/{userId}")
+    public ResultEntity saveSublibraryFilesBySublibraryId(@PathVariable(value = "sublibraryId") String sublibraryId, @PathVariable(value = "userId") String userId,  @RequestBody List<FileMetaEntity> fileMetaEntityList){
+        return ResultUtils.success(sublibraryFilesService.saveSublibraryFilesBySublibraryId(sublibraryId, userId, fileMetaEntityList));
     }
 }

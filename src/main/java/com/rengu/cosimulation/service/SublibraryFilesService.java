@@ -6,6 +6,7 @@ import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
 import com.rengu.cosimulation.repository.SublibraryFilesRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -23,6 +25,7 @@ import java.util.*;
  * Author: XYmar
  * Date: 2019/4/1 10:50
  */
+@Slf4j
 @Service
 public class SublibraryFilesService {
     private final SublibraryFilesRepository sublibraryFilesRepository;
@@ -55,7 +58,7 @@ public class SublibraryFilesService {
 
     // 根据子库id创建文件
     @CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
-    public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, List<FileMetaEntity> fileMetaEntityList) {
+    public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, String userId, List<FileMetaEntity> fileMetaEntityList) {
         if(!sublibraryService.hasSublibraryById(sublibraryId)){
             throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
         }
@@ -77,6 +80,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setVersion("M1");
                 sublibraryFilesEntity.setIfApprove(false);
                 sublibraryFilesEntity.setManyCounterSignState(0);          // 多人会签模式，此时无人开始会签
+                sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
             } else {
@@ -90,6 +94,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setVersion("M1");
                 sublibraryFilesEntity.setIfApprove(false);
                 sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
+                sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
                 sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
@@ -191,21 +196,28 @@ public class SublibraryFilesService {
         if(ArrayUtils.isEmpty(auditUserIds)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_AUDITUSERS_NOT_FOUND_ERROR);
         }
-        if(ArrayUtils.isEmpty(countersignUserIds)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_COUNTERSIGNUSERS_NOT_FOUND_ERROR);
+        if(auditMode != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN){
+            if(ArrayUtils.isEmpty(countersignUserIds)){
+                throw new ResultException(ResultCode.SUBLIBRARY_FILE_COUNTERSIGNUSERS_NOT_FOUND_ERROR);
+            }
         }
         if(ArrayUtils.isEmpty(approveUserIds)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_APPROVEUSERS_NOT_FOUND_ERROR);
         }
         List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
         for(String id : sublibraryFileId){
+            if(!hasSublibraryFileById(id)){
+                throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
+            }
             SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(id);
             sublibraryFilesEntity.setProofreadUserSet(idsToSet(proofreadUserIds));
             sublibraryFilesEntity.setAuditUserSet(idsToSet(auditUserIds));
-            sublibraryFilesEntity.setCountersignUserSet(idsToSet(countersignUserIds));
+            if(auditMode != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN){
+                sublibraryFilesEntity.setCountersignUserSet(idsToSet(countersignUserIds));
+            }
             sublibraryFilesEntity.setApproveUserSet(idsToSet(approveUserIds));
             sublibraryFilesEntity.setAuditMode(auditMode);
-            sublibraryFilesEntityList.add(getSublibraryFileById(id));
+            sublibraryFilesEntityList.add(sublibraryFilesEntity);
         }
 
         return sublibraryFilesRepository.saveAll(sublibraryFilesEntityList);
