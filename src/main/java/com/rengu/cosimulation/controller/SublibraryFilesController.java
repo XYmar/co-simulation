@@ -73,4 +73,10 @@ public class SublibraryFilesController {
     public ResultEntity arrangeAudit(String[] sublibraryFileId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
         return ResultUtils.success(sublibraryFilesService.arrangeAudit(sublibraryFileId, auditMode, proofreadUserIds, auditUserIds, countersignUserIds,approveUserIds));
     }
+
+    // 根据用户id查询待校对、待审核、待会签、待批准
+    @GetMapping(value = "/{userId}")
+    public ResultEntity findToBeAuditedFilesByUserId(@PathVariable(value = "userId") String userId){
+        return ResultUtils.success(sublibraryFilesService.findToBeAuditedFilesByUserId(userId));
+    }
 }

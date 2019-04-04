@@ -1,10 +1,12 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.*;
+import com.rengu.cosimulation.entity.FileMetaEntity;
+import com.rengu.cosimulation.entity.SublibraryEntity;
+import com.rengu.cosimulation.entity.SublibraryFilesEntity;
+import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SublibraryFilesRepository;
-import com.sun.deploy.util.ArrayUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -16,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -202,6 +203,20 @@ public class SublibraryFilesService {
         }
         return userEntities;
     }
+
+    // 根据用户id查询待校对、待审核、待会签、待批准
+     public Map<String, List<SublibraryFilesEntity>> findToBeAuditedFilesByUserId(String userId){
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = userService.getUserById(userId);
+        Map<String, List<SublibraryFilesEntity>> sublibraryFilesToBeAudited = new HashMap<>();
+        sublibraryFilesToBeAudited.put("proofreadFiles", sublibraryFilesRepository.findByProofreadUserSetContaining(userEntity));
+        sublibraryFilesToBeAudited.put("auditFiles", sublibraryFilesRepository.findByAuditUserSetContaining(userEntity));
+        sublibraryFilesToBeAudited.put("countersignFiles", sublibraryFilesRepository.findByCountersignUserSetContaining(userEntity));
+        sublibraryFilesToBeAudited.put("approveFiles", sublibraryFilesRepository.findByApproveUserSet(userEntity));
+        return sublibraryFilesToBeAudited;
+     }
 
     // 审核操作
     public SublibraryFilesEntity sublibraryFileAudit(String sublibraryFileId){
