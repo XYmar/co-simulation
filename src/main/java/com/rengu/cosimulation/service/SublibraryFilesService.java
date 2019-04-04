@@ -277,7 +277,7 @@ public class SublibraryFilesService {
             }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN && sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN){
                 // 当前为会签 且模式为多人会签
                 // 若当前用户已会签过则报错，您已会签过
-                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityContainingAAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
+                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityContainingAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
                     throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
                 }
                 if(sublibraryFilesEntity.getManyCounterSignState() != sublibraryFilesEntity.getCountersignUserSet().size()){
