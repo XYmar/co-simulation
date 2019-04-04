@@ -38,6 +38,19 @@ public class ApplicationConfig {
     public static final String DEFAULT_MECHANICAL_SIMULATION_NAME = "mechanical_simulation";         //力学仿真
     public static final String DEFAULT_ASSEMBLY_SIMULATION_NAME = "assembly_simulation";             //结构建模
 
+    // 子库文件审核环节
+    public static final int SUBLIBRARY_FILE_PROOFREAD = 1;             // 校对中
+    public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
+    public static final int SUBLIBRARY_FILE_COUNTERSIGN = 3;           // 会签中
+    public static final int SUBLIBRARY_FILE_APPROVE = 4;               // 批准中
+    public static final int SUBLIBRARY_FILE_PASS = 5;                  // 审核通过
+    public static final int SUBLIBRARY_FILE_NOTPASS = 6;               // 审核未通过
+
+    // 子库文件审核模式 1：无会签  2：一人会签  3：多人会签
+    public static final int SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN = 1;               // 无会签
+    public static final int SUBLIBRARY_FILE_AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
+    public static final int SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
+
     // 文件块保存路径
     public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");
     // 文件保存路径

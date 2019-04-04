@@ -1,12 +1,11 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.FileMetaEntity;
-import com.rengu.cosimulation.entity.SublibraryEntity;
-import com.rengu.cosimulation.entity.SublibraryFilesEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
+import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
 import com.rengu.cosimulation.repository.SublibraryFilesRepository;
+import com.rengu.cosimulation.utils.ApplicationConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -30,13 +29,15 @@ public class SublibraryFilesService {
     private final SublibraryService sublibraryService;
     private final FileService fileService;
     private final UserService userService;
+    private final SublibraryFilesAuditRepository sublibraryFilesAuditRepository;
 
     @Autowired
-    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService) {
+    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository) {
         this.sublibraryFilesRepository = sublibraryFilesRepository;
         this.fileService = fileService;
         this.sublibraryService = sublibraryService;
         this.userService = userService;
+        this.sublibraryFilesAuditRepository = sublibraryFilesAuditRepository;
     }
 
     // 根据名称、后缀及子库检查文件是否存在
@@ -75,6 +76,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 sublibraryFilesEntity.setVersion("M1");
                 sublibraryFilesEntity.setIfApprove(false);
+                sublibraryFilesEntity.setManyCounterSignState(0);          // 多人会签模式，此时无人开始会签
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
             } else {
@@ -87,6 +89,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 sublibraryFilesEntity.setVersion("M1");
                 sublibraryFilesEntity.setIfApprove(false);
+                sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
                 sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
                 sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
@@ -234,11 +237,70 @@ public class SublibraryFilesService {
      }
 
     // 审核操作
-    public SublibraryFilesEntity sublibraryFileAudit(String sublibraryFileId){
+    public SublibraryFilesEntity sublibraryFileAudit(String sublibraryFileId, String userId, SublibraryFilesEntity sublibraryFilesEntityArgs, SublibraryFilesAuditEntity sublibraryFilesAuditEntityArgs){
         if(!hasSublibraryFileById(sublibraryFileId)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+
+        if(!userService.hasUserById(userId)){
+            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        }
+        UserEntity userEntity = userService.getUserById(userId);             // 登录的用户
+
+        if(StringUtils.isEmpty(String.valueOf(sublibraryFilesEntityArgs.getState()))){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_STATE_NOT_FOUND_ERROR);
+        }
+
+        /**
+         *  子库文件流程控制：
+         *  当前审核结果： pass --> 当前审核人：自己--> 报错，无通过权限
+         *                                      其他人--> 设置子库文件进入下一模式：
+         *                                                当前阶段为审核时-->  1)无会签：审核-->批准
+         *                                                                     2)一人/多人会签：审核-->会签
+         *                                                当前阶段为会签时-->  1)一人会签：会签-->批准（同上）
+         *          *                                      @todo               2)多人会签：多人审核通过审核-->批准
+         *                                                                                 若当前用户已会签过则报错，您已会签过
+         *                                                当前阶段为批准时-->  修改子文件的通过状态为true
+         *                 no   --> 停留当前模式   （--> 子库文件状态改为进行中）
+         * */
+        if(sublibraryFilesAuditEntityArgs.isIfPass()){
+            if(sublibraryFilesEntity.getUserEntity().getId().equals(userId)){    // 自己无权通过
+                throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_PASS_DENIED_ERROR);
+            }
+            if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT){               // 当前为审核
+                if(sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN){  // 无会签
+                    sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_APPROVE);
+                }else{
+                    sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN);
+                }
+            }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN && sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN){
+                // 当前为会签 且模式为多人会签
+                // 若当前用户已会签过则报错，您已会签过
+                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityContainingAAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
+                    throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
+                }
+                if(sublibraryFilesEntity.getManyCounterSignState() != sublibraryFilesEntity.getCountersignUserSet().size()){
+                    sublibraryFilesEntity.setManyCounterSignState(sublibraryFilesEntity.getManyCounterSignState() + 1);
+                }else{                          // 所有人都已会签过
+                    sublibraryFilesEntity.setState(sublibraryFilesEntity.getState() + 1);
+                }
+            }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_APPROVE){           // 当前为批准
+                sublibraryFilesEntity.setIfApprove(true);                                                          // 子库文件通过审核
+            }else{
+                sublibraryFilesEntity.setState(sublibraryFilesEntity.getState() + 1);
+            }
+        }
+        /**
+         * 审核模式、审核阶段、审核结果、审核人、审核意见
+         * */
+        SublibraryFilesAuditEntity sublibraryFilesAuditEntity = new SublibraryFilesAuditEntity();      // 审核详情
+        sublibraryFilesAuditEntity.setIfPass(sublibraryFilesAuditEntityArgs.isIfPass());               // 审核结果
+        sublibraryFilesAuditEntity.setUserEntity(userEntity);                                          // 审核人
+        sublibraryFilesAuditEntity.setSublibraryFilesEntity(sublibraryFilesEntity);                    // 审核详情所属子库文件
+        sublibraryFilesAuditEntity.setAuditDescription(sublibraryFilesAuditEntityArgs.getAuditDescription());   // 审核意见
+        sublibraryFilesAuditRepository.save(sublibraryFilesAuditEntity);
+
 
         return sublibraryFilesEntity;
     }

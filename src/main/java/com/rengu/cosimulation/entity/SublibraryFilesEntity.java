@@ -29,6 +29,7 @@ public class SublibraryFilesEntity implements Serializable {
     private String version;               // 版本（根据提交次数累加，只有修改才变更版本）
 
     private int state;                    // 状态：:1：校对中  2：审核中  3：会签中  4：批准中
+    private int manyCounterSignState;      // 多人会签时，文件状态(几人已会签过)
     private boolean ifApprove;             // 审核是否通过
     private int auditMode;                     // 模式： 1：无会签  2：一人会签  3：多人会签
 

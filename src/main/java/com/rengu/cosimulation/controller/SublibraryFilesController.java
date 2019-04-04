@@ -1,6 +1,7 @@
 package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.SublibraryFilesAuditEntity;
 import com.rengu.cosimulation.entity.SublibraryFilesEntity;
 import com.rengu.cosimulation.service.SublibraryFilesService;
 import com.rengu.cosimulation.utils.ResultUtils;
@@ -78,5 +79,11 @@ public class SublibraryFilesController {
     @GetMapping(value = "/{userId}")
     public ResultEntity findToBeAuditedFilesByUserId(@PathVariable(value = "userId") String userId){
         return ResultUtils.success(sublibraryFilesService.findToBeAuditedFilesByUserId(userId));
+    }
+
+    // 审核操作
+    @PatchMapping(value = "/{sublibraryFileId}/sublibraryFileAudit")
+    public ResultEntity sublibraryFileAudit(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String userId, SublibraryFilesEntity sublibraryFilesEntityArgs, SublibraryFilesAuditEntity sublibraryFilesAuditEntityArgs){
+        return ResultUtils.success(sublibraryFilesService.sublibraryFileAudit(sublibraryFileId, userId,sublibraryFilesEntityArgs, sublibraryFilesAuditEntityArgs));
     }
 }
