@@ -76,7 +76,7 @@ public class SublibraryFilesController {
     }
 
     // 根据用户id查询待校对、待审核、待会签、待批准
-    @GetMapping(value = "/{userId}")
+    @GetMapping(value = "/{userId}/findToBeAuditedFiles")
     public ResultEntity findToBeAuditedFilesByUserId(@PathVariable(value = "userId") String userId){
         return ResultUtils.success(sublibraryFilesService.findToBeAuditedFilesByUserId(userId));
     }
