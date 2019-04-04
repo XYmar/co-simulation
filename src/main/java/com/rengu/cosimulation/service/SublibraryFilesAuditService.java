@@ -1,12 +1,18 @@
 package com.rengu.cosimulation.service;
 
 import com.rengu.cosimulation.entity.SublibraryFilesAuditEntity;
+import com.rengu.cosimulation.entity.SublibraryFilesEntity;
+import com.rengu.cosimulation.entity.SubtaskFilesEntity;
+import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * Author: XYmar
@@ -25,15 +31,28 @@ public class SublibraryFilesAuditService {
         this.sublibraryFilesService = sublibraryFilesService;
     }
 
-    // 保存审核详情
-   /* public SublibraryFilesAuditEntity save(SublibraryFilesAuditEntity sublibraryFilesAuditEntity, String userId, String sublibraryFileId){
-        if(StringUtils.isEmpty(sublibraryFilesAuditEntity.isIfPass())){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_IFPASS_NOT_FOUND_ERROR);
+    // 根据用户id及子库文件id查询该文件审核详情
+    public List<SublibraryFilesAuditEntity> getSublibraryFilesAudits(String sublibraryFileId, String userId){
+        UserEntity userEntity = userService.getUserById(userId);
+        SublibraryFilesEntity sublibraryFilesEntity = sublibraryFilesService.getSublibraryFileById(sublibraryFileId);
+        return sublibraryFilesAuditRepository.findBySublibraryFilesEntityAndUserEntity(sublibraryFilesEntity, userEntity);
+    }
+
+    // 根据id查询子任务文件是否存在
+    public boolean hasSublibraryFileById(String sublibraryFileAuditId) {
+        if (StringUtils.isEmpty(sublibraryFileAuditId)) {
+            return false;
         }
-        if(StringUtils.isEmpty(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
+        return sublibraryFilesAuditRepository.existsById(sublibraryFileAuditId);
+    }
+
+    // 根据id查询子任务文件
+    @Cacheable(value = "SublibraryFile_Cache", key = "#sublibraryFileAuditId")
+    public SublibraryFilesAuditEntity getSublibraryFilesAuditById(String sublibraryFileAuditId) {
+        if (!hasSublibraryFileById(sublibraryFileAuditId)) {
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
-        sublibraryFilesAuditEntity.setUserEntity(userService.getUserById(userId));             // 审核人
-        return sublibraryFilesAuditRepository.save(sublibraryFilesAuditEntity);
-    }*/
+        return sublibraryFilesAuditRepository.findById(sublibraryFileAuditId).get();
+    }
+
 }

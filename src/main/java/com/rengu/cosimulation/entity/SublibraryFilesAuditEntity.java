@@ -27,7 +27,7 @@ public class SublibraryFilesAuditEntity implements Serializable {
     private String auditDescription;              // 审核意见
     private boolean ifPass;                       // 审核是否通过   0：未通过  1： 通过
 
-    @OneToOne
+    @ManyToOne
     private SublibraryFilesEntity sublibraryFilesEntity;
     @ManyToOne
     private UserEntity userEntity;                 // 此文件审核人
