@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface SublibraryFilesAuditRepository extends JpaRepository<SublibraryFilesAuditEntity, String> {
     boolean existsBySublibraryFilesEntityAndUserEntityContainingAndState(SublibraryFilesEntity sublibraryFilesEntity, UserEntity userEntity, int state);
-    List<SublibraryFilesAuditEntity> findBySublibraryFilesEntityAndUserEntity(SublibraryFilesEntity sublibraryFilesEntity, UserEntity userEntity);
+    List<SublibraryFilesAuditEntity> findBySublibraryFilesEntity(SublibraryFilesEntity sublibraryFilesEntity);
 }

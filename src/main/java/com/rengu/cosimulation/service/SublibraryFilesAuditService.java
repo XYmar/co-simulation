@@ -32,10 +32,9 @@ public class SublibraryFilesAuditService {
     }
 
     // 根据用户id及子库文件id查询该文件审核详情
-    public List<SublibraryFilesAuditEntity> getSublibraryFilesAudits(String sublibraryFileId, String userId){
-        UserEntity userEntity = userService.getUserById(userId);
+    public List<SublibraryFilesAuditEntity> getSublibraryFilesAudits(String sublibraryFileId){
         SublibraryFilesEntity sublibraryFilesEntity = sublibraryFilesService.getSublibraryFileById(sublibraryFileId);
-        return sublibraryFilesAuditRepository.findBySublibraryFilesEntityAndUserEntity(sublibraryFilesEntity, userEntity);
+        return sublibraryFilesAuditRepository.findBySublibraryFilesEntity(sublibraryFilesEntity);
     }
 
     // 根据id查询子任务文件是否存在

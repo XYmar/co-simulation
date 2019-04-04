@@ -21,7 +21,7 @@ public class SublibraryFilesAuditController {
     }
 
     @GetMapping(value = "/{sublibraryFileId}")
-    public ResultEntity getSublibraryFilesAuditId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, @RequestHeader(value = "userId") String userId){
-        return ResultUtils.success(sublibraryFilesAuditService.getSublibraryFilesAudits(sublibraryFileId, userId));
+    public ResultEntity getSublibraryFilesAuditId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
+        return ResultUtils.success(sublibraryFilesAuditService.getSublibraryFilesAudits(sublibraryFileId));
     }
 }
