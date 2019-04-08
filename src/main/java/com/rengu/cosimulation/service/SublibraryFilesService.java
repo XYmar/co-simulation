@@ -253,14 +253,7 @@ public class SublibraryFilesService {
 
     // 审核操作
     public SublibraryFilesEntity sublibraryFileAudit(String sublibraryFileId, String userId, SublibraryFilesEntity sublibraryFilesEntityArgs, SublibraryFilesAuditEntity sublibraryFilesAuditEntityArgs){
-        if(!hasSublibraryFileById(sublibraryFileId)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
-        }
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
-
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
         UserEntity userEntity = userService.getUserById(userId);             // 登录的用户
 
         if(StringUtils.isEmpty(String.valueOf(sublibraryFilesEntityArgs.getState()))){
@@ -281,6 +274,10 @@ public class SublibraryFilesService {
          *                                                当前阶段为批准时-->  修改子文件的通过状态为true
          *                 no   --> 停留当前模式   （--> 子库文件状态改为进行中）
          * */
+        if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndState(sublibraryFilesEntity,userEntity,sublibraryFilesEntityArgs.getState())){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
+        }
+
         if(sublibraryFilesAuditEntityArgs.isIfPass()){
             if(sublibraryFilesEntity.getUserEntity().getId().equals(userId)){    // 自己无权通过
                 throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_PASS_DENIED_ERROR);
@@ -295,9 +292,6 @@ public class SublibraryFilesService {
             }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN && sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN){
                 // 当前为会签 且模式为多人会签
                 // 若当前用户已会签过则报错，您已会签过
-                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
-                    throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
-                }
                 if(sublibraryFilesEntity.getManyCounterSignState() != sublibraryFilesEntity.getCountersignUserSet().size()){
                     sublibraryFilesEntity.setManyCounterSignState(sublibraryFilesEntity.getManyCounterSignState() + 1);
                 }else{                          // 所有人都已会签过
@@ -319,6 +313,8 @@ public class SublibraryFilesService {
                     throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
                 }
             }
+            sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
+
             sublibraryFilesEntity.setIfReject(true);           // 设置驳回状态为true
         }
         /**
@@ -329,6 +325,15 @@ public class SublibraryFilesService {
         sublibraryFilesAuditEntity.setSublibraryFilesEntity(sublibraryFilesEntity);                    // 审核详情所属子库文件
         sublibraryFilesAuditEntity.setAuditDescription(sublibraryFilesAuditEntityArgs.getAuditDescription());   // 审核意见
         sublibraryFilesAuditRepository.save(sublibraryFilesAuditEntity);
+
+
+        return sublibraryFilesEntity;
+    }
+
+    // 驳回后  修改
+    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId){
+        SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+
 
 
         return sublibraryFilesEntity;
