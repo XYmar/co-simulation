@@ -292,7 +292,7 @@ public class SublibraryFilesService {
             }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN && sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN){
                 // 当前为会签 且模式为多人会签
                 // 若当前用户已会签过则报错，您已会签过
-                if(sublibraryFilesEntity.getManyCounterSignState() != sublibraryFilesEntity.getCountersignUserSet().size()){
+                if((sublibraryFilesEntity.getManyCounterSignState() + 1) != sublibraryFilesEntity.getCountersignUserSet().size()){
                     sublibraryFilesEntity.setManyCounterSignState(sublibraryFilesEntity.getManyCounterSignState() + 1);
                 }else{                          // 所有人都已会签过
                     sublibraryFilesEntity.setState(sublibraryFilesEntityArgs.getState() + 1);
@@ -330,10 +330,26 @@ public class SublibraryFilesService {
         return sublibraryFilesEntity;
     }
 
-    // 驳回后  修改
-    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId){
+    // 申请二次修改
+    public SublibraryFilesEntity applyForModify(String sublibraryFileId){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
 
+        return null;
+    }
+
+    // 驳回后  修改  id 修改方式 文件 版本（二次修改需要）
+    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, int modifyWay, FileMetaEntity fileMetaEntity, String version){
+        SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+
+        if(StringUtils.isEmpty(modifyWay)){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_MODIFYWAY_NOT_FOUND_ERROR);
+        }
+        if(modifyWay == ApplicationConfig.SUBLIBRARY_FILE_SECOND_MODIFY){        // 二次修改
+            // TODO 判断文件是否通过二次修改申请
+            if(StringUtils.isEmpty(version)){
+                throw new ResultException(ResultCode.SUBLIBRARY_FILE_VERSION_NOT_FOUND_ERROR);
+            }
+        }
 
 
         return sublibraryFilesEntity;

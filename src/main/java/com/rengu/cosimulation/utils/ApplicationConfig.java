@@ -51,6 +51,10 @@ public class ApplicationConfig {
     public static final int SUBLIBRARY_FILE_AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
     public static final int SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
 
+    // 子库文件驳回后的修改方式  1： 直接修改  2： 二次修改
+    public static final int SUBLIBRARY_FILE_DIRECTOR_MODIFY = 1;               // 直接修改
+    public static final int SUBLIBRARY_FILE_SECOND_MODIFY = 2;               // 二次修改
+
     // 文件块保存路径
     public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");
     // 文件保存路径
