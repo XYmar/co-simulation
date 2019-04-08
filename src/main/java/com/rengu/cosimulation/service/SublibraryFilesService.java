@@ -79,6 +79,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 sublibraryFilesEntity.setVersion("M1");
                 sublibraryFilesEntity.setIfApprove(false);
+                sublibraryFilesEntity.setIfReject(false);
                 sublibraryFilesEntity.setManyCounterSignState(0);          // 多人会签模式，此时无人开始会签
                 sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
@@ -93,6 +94,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
                 sublibraryFilesEntity.setVersion("M1");
                 sublibraryFilesEntity.setIfApprove(false);
+                sublibraryFilesEntity.setIfReject(false);
                 sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
                 sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
                 sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
@@ -264,6 +266,8 @@ public class SublibraryFilesService {
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_STATE_NOT_FOUND_ERROR);
         }
 
+        SublibraryFilesAuditEntity sublibraryFilesAuditEntity = new SublibraryFilesAuditEntity();      // 审核详情
+
         /**
          *  子库文件流程控制：
          *  当前审核结果： pass --> 当前审核人：自己--> 报错，无通过权限
@@ -286,27 +290,32 @@ public class SublibraryFilesService {
                 }else{
                     sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN);
                 }
+                sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN && sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN){
                 // 当前为会签 且模式为多人会签
                 // 若当前用户已会签过则报错，您已会签过
-                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityContainingAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
+                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
                     throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
                 }
                 if(sublibraryFilesEntity.getManyCounterSignState() != sublibraryFilesEntity.getCountersignUserSet().size()){
                     sublibraryFilesEntity.setManyCounterSignState(sublibraryFilesEntity.getManyCounterSignState() + 1);
                 }else{                          // 所有人都已会签过
-                    sublibraryFilesEntity.setState(sublibraryFilesEntity.getState() + 1);
+                    sublibraryFilesEntity.setState(sublibraryFilesEntityArgs.getState() + 1);
                 }
+                sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }else if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_APPROVE){           // 当前为批准
                 sublibraryFilesEntity.setIfApprove(true);                                                          // 子库文件通过审核
+                sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }else{
-                sublibraryFilesEntity.setState(sublibraryFilesEntity.getState() + 1);
+                sublibraryFilesEntity.setState(sublibraryFilesEntityArgs.getState() + 1);
+                sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }
+        }else{                // 驳回设置驳回状态为true
+            sublibraryFilesEntity.setIfReject(true);
         }
         /**
          * 审核模式、审核阶段、审核结果、审核人、审核意见
          * */
-        SublibraryFilesAuditEntity sublibraryFilesAuditEntity = new SublibraryFilesAuditEntity();      // 审核详情
         sublibraryFilesAuditEntity.setIfPass(sublibraryFilesAuditEntityArgs.isIfPass());               // 审核结果
         sublibraryFilesAuditEntity.setUserEntity(userEntity);                                          // 审核人
         sublibraryFilesAuditEntity.setSublibraryFilesEntity(sublibraryFilesEntity);                    // 审核详情所属子库文件
