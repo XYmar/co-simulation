@@ -237,16 +237,17 @@ public class SublibraryFilesService {
     }
 
     // 根据用户id查询待校对、待审核、待会签、待批准
-     public Map<String, List<SublibraryFilesEntity>> findToBeAuditedFilesByUserId(String userId){
+     public Map<String, List> findToBeAuditedFilesByUserId(String userId){
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
         UserEntity userEntity = userService.getUserById(userId);
-        Map<String, List<SublibraryFilesEntity>> sublibraryFilesToBeAudited = new HashMap<>();
+        Map<String, List> sublibraryFilesToBeAudited = new HashMap<>();
         sublibraryFilesToBeAudited.put("proofreadFiles", sublibraryFilesRepository.findByProofreadUserSetContaining(userEntity));
         sublibraryFilesToBeAudited.put("auditFiles", sublibraryFilesRepository.findByAuditUserSetContaining(userEntity));
         sublibraryFilesToBeAudited.put("countersignFiles", sublibraryFilesRepository.findByCountersignUserSetContaining(userEntity));
         sublibraryFilesToBeAudited.put("approveFiles", sublibraryFilesRepository.findByApproveUserSet(userEntity));
+        sublibraryFilesToBeAudited.put("alreadyAudit", sublibraryFilesAuditRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN));
         return sublibraryFilesToBeAudited;
      }
 
@@ -310,8 +311,15 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setState(sublibraryFilesEntityArgs.getState() + 1);
                 sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }
-        }else{                // 驳回设置驳回状态为true
-            sublibraryFilesEntity.setIfReject(true);
+        }else{                // 驳回
+            if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN && sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN){
+                // 当前为会签 且模式为多人会签
+                // 若当前用户已会签过则报错，您已会签过
+                if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndState(sublibraryFilesEntity,userEntity,ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN)){
+                    throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
+                }
+            }
+            sublibraryFilesEntity.setIfReject(true);           // 设置驳回状态为true
         }
         /**
          * 审核模式、审核阶段、审核结果、审核人、审核意见
