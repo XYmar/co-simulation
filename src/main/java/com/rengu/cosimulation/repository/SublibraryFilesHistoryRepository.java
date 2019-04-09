@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface SublibraryFilesHistoryRepository extends JpaRepository<SublibraryFilesHistoryEntity, String> {
     boolean existsBySublibraryEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
     SublibraryFilesHistoryEntity findBySublibraryEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
+    SublibraryFilesHistoryEntity findBySublibraryEntityAndIfDirectModifyAndVersion(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify, String version);
 
 }

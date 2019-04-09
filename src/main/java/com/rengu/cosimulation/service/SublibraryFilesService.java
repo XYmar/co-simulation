@@ -341,9 +341,7 @@ public class SublibraryFilesService {
                 sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }
         }else{                // 驳回
-            if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_APPROVE){           // 当前为批准
-                sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);                          // 审批结束
-            }
+            sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);                          // 审批结束
             sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
 
             sublibraryFilesEntity.setIfReject(true);           // 设置驳回状态为true
@@ -364,7 +362,7 @@ public class SublibraryFilesService {
     public SublibraryFilesEntity applyForModify(String sublibraryFileId){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY);
-        return sublibraryFilesEntity;
+        return sublibraryFilesRepository.save(sublibraryFilesEntity);
     }
 
     // 系统管理员查询所有待审核的二次修改申请
@@ -381,17 +379,17 @@ public class SublibraryFilesService {
         }else{
             sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);
         }
-        return sublibraryFilesEntity;
+        return sublibraryFilesRepository.save(sublibraryFilesEntity);
     }
 
-    // 驳回后  修改  [id 修改方式 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
-    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, int modifyWay, boolean ifBackToStart, FileMetaEntity fileMetaEntity, String version){
+    // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
+    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, boolean ifDirectModify, boolean ifBackToStart, FileMetaEntity fileMetaEntity, String version){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
 
-        if(StringUtils.isEmpty(modifyWay)){
+        if(StringUtils.isEmpty(ifDirectModify)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_MODIFYWAY_NOT_FOUND_ERROR);
         }
-        if(modifyWay == ApplicationConfig.SUBLIBRARY_FILE_DIRECTOR_MODIFY){            // 直接修改
+        if(ifDirectModify){            // 直接修改
             // 修改前存储此文件的备份 若备份已存在删除上一备份
             if(sublibraryFilesHistoryRepository.existsBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true)){
                 sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true));
@@ -443,5 +441,43 @@ public class SublibraryFilesService {
         copyNode.setLeastSublibraryFilesEntity(sourceNode);
         copyNode.setIfDirectModify(ifDirectModify);
         sublibraryFilesHistoryRepository.save(copyNode);
+    }
+
+    // 从子库文件历史生成子库文件
+    public void saveSublibraryFilesBySublibraryFile(SublibraryFilesEntity coverNode, SublibraryFilesHistoryEntity sourceNode) {
+        BeanUtils.copyProperties(sourceNode, coverNode, "create_time", "leastSublibraryFilesEntity", "ifDirectModify");
+        sublibraryFilesRepository.save(coverNode);
+    }
+
+    // 根据子库文件id查询其临时历史文件是否存在
+    public boolean ifHasTemp(String sublibraryFileId){
+        return sublibraryFilesHistoryRepository.existsBySublibraryEntityAndIfDirectModify(getSublibraryFileById(sublibraryFileId), true);
+    }
+
+    // 撤销文件操作（直接修改）  更换版本（二次修改可恢复其中任意版本）
+    public SublibraryFilesEntity revokeModify(String sublibraryFileId, boolean ifDirectModify, String version){
+        if(!ifHasTemp(sublibraryFileId)){       // 当前文件不存在可撤销的文件
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE);
+        }
+        // 当前文件
+        SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        // 需撤销至的文件
+        SublibraryFilesHistoryEntity sourceNode = new SublibraryFilesHistoryEntity();
+        if(ifDirectModify){      // 直接修改撤销，获取此目标文件的临时历史文件
+            sourceNode = sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true);
+        }else{    // 二次修改撤销，选择撤销到的版本
+            if(StringUtils.isEmpty(version)){
+                throw new ResultException(ResultCode.SUBLIBRARY_FILE_VERSION_NOT_CHOOSE_ERROR);
+            }
+            sourceNode = sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModifyAndVersion(sublibraryFilesEntity, false, version);
+        }
+
+        // 当前文件存为历史
+        saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
+        // 历史版本提为当前文件
+        saveSublibraryFilesBySublibraryFile(sublibraryFilesEntity, sourceNode);
+
+        sublibraryFilesHistoryRepository.delete(sourceNode);
+        return getSublibraryFileById(sublibraryFileId);
     }
 }

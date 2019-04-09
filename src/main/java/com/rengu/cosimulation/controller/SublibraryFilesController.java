@@ -113,7 +113,13 @@ public class SublibraryFilesController {
 
     // 驳回后的提交
     @PostMapping(value = "/{sublibraryFileId}/modifySublibraryFile")
-    public ResultEntity modifySublibraryFile(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, int modifyWay, boolean ifBackToStart, FileMetaEntity fileMetaEntity, String version){
-        return ResultUtils.success(sublibraryFilesService.modifySublibraryFile(sublibraryFileId, modifyWay, ifBackToStart, fileMetaEntity, version));
+    public ResultEntity modifySublibraryFile(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, boolean ifDirectModify, boolean ifBackToStart, FileMetaEntity fileMetaEntity, String version){
+        return ResultUtils.success(sublibraryFilesService.modifySublibraryFile(sublibraryFileId, ifDirectModify, ifBackToStart, fileMetaEntity, version));
+    }
+
+    // 撤销修改
+    @PatchMapping(value = "/{sublibraryFileId}/revokeModify")
+    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, boolean ifDirectModify, String version){
+        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId, ifDirectModify, version));
     }
 }
