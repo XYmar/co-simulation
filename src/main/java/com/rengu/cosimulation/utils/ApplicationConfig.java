@@ -43,15 +43,20 @@ public class ApplicationConfig {
     public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
     public static final int SUBLIBRARY_FILE_COUNTERSIGN = 3;           // 会签中
     public static final int SUBLIBRARY_FILE_APPROVE = 4;               // 批准中
-    public static final int SUBLIBRARY_FILE_PASS = 5;                  // 审核通过
-    public static final int SUBLIBRARY_FILE_NOTPASS = 6;               // 审核未通过
+    public static final int SUBLIBRARY_FILE_AUDIT_OVER = 5;                  // 审批结束
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY = 6;      // 申请二次修改中
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE = 7;      // 二次修改中
+
+    public static final int SUBLIBRARY_FILE_IFAPPROVE = 1;                  // 审核通过
+    public static final int SUBLIBRARY_FILE_IFREJECT = 2;               // 审核未通过
 
     // 子库文件审核模式 1：无会签  2：一人会签  3：多人会签
     public static final int SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN = 1;               // 无会签
     public static final int SUBLIBRARY_FILE_AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
     public static final int SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
 
-    // 子库文件驳回后的修改方式  1： 直接修改  2： 二次修改
+    // 子库文件上传  0：第一次上传  1： 直接修改  2： 二次修改
+    public static final int SUBLIBRARY_FILE_FIRST_UPLOAD = 0;               // 子库文件第一次上传
     public static final int SUBLIBRARY_FILE_DIRECTOR_MODIFY = 1;               // 直接修改
     public static final int SUBLIBRARY_FILE_SECOND_MODIFY = 2;               // 二次修改
 

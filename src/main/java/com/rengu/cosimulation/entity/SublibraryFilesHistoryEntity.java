@@ -11,12 +11,12 @@ import java.util.UUID;
 
 /**
  * Author: XYmar
- * Date: 2019/4/1 9:37
- * Des: 子库文件历史版本
+ * Date: 2019/4/9 10:30
+ * 子库文件历史、临时文件实体
  */
 @Entity
 @Data
-public class SublibraryFilesEntity implements Serializable {
+public class SublibraryFilesHistoryEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -35,12 +35,16 @@ public class SublibraryFilesEntity implements Serializable {
     private boolean ifApprove;             // 审核是否通过
     private int auditMode;                     // 模式： 1：无会签  2：一人会签  3：多人会签
     private boolean ifModifyApprove;       // 二次修改申请是否通过
+    private boolean ifDirectModify;        // 是否为直接修改
 
     @ManyToOne
     private FileEntity fileEntity;
     @ManyToOne
     @JoinColumn(name = "subibraryEntity_id")
     private SublibraryEntity sublibraryEntity;
+    @ManyToOne
+    @JoinColumn(name = "subibraryFilesEntity_id")
+    private SublibraryFilesEntity leastSublibraryFilesEntity;                 // 历史文件对应的子库文件
     @ManyToMany
     private Set<UserEntity> proofreadUserSet;  // 校对人
     @ManyToMany
