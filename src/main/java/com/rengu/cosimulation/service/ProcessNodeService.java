@@ -12,9 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Author: XYmar
@@ -51,13 +53,15 @@ public class ProcessNodeService {
         }
 
         Map<String,ProcessNodeEntity> processNodeEntityMap = new HashMap<>();
-        Map<String,SubtaskEntity> subtaskEntityMap = new HashMap<>();
+        Map<String, SubtaskEntity> subtaskEntityMap = new HashMap<>();
         for (ProcessNodeEntity processNodeEntity:processNodeEntities){
             processNodeEntity.setProjectEntity(projectEntity);
             if (!processNodeEntityMap.containsKey(processNodeEntity.getSelfSign())){
                 SubtaskEntity subtaskEntity = new SubtaskEntity();
                 subtaskEntity.setName(processNodeEntity.getNodeName());
                 subtaskEntity.setProjectEntity(projectEntity);
+                subtaskEntity.setManyCountersignState(1);
+                subtaskEntity.setPassState(2);
                 subtaskEntityMap.put(processNodeEntity.getSelfSign(),subtaskEntity);
                 processNodeEntity.setSubtaskEntity(subtaskEntity);
                 processNodeEntityMap.put(processNodeEntity.getSelfSign(),processNodeEntity);

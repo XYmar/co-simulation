@@ -61,28 +61,56 @@ public class SubtaskController {
         return ResultUtils.success(subtaskFilesService.saveSubtaskFilesByProDesignId(subtaskId, projectId, fileMetaEntityList));
     }
 
-    // 根据子任务id查询子任务下的文件
-    @GetMapping(value = "/{subtaskId}/files")
-    public ResultEntity getSubtaskFilesByProDesignId(@PathVariable(value = "subtaskId") String subtaskId){
-        return ResultUtils.success(subtaskFilesService.getSubtaskFilesByProDesignId(subtaskId));
-    }
-
-    // 根据子任务id为子任务添加审核员
-    @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
-    public ResultEntity arrangeAssessorsById(@PathVariable(value = "subtaskId") String subtaskId, String userId, @RequestParam(value = "ids") String[] userIds){
-        return ResultUtils.success(subtaskService.arrangeAssessorsById(subtaskId, userId, userIds));
-    }
-
     // 根据审核人id查询待其审核的子任务的相关信息
     @GetMapping(value = "/byAssessorId/{assessorId}")
-    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId){
-        return ResultUtils.success(subtaskService.findSubtasksByAssessor(userService.getUserById(assessorId)));
+    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId) {
+        return ResultUtils.success(subtaskService.findSubtasksByAllAssessor(userService.getUserById(assessorId)));
     }
+
+//    // 根据子任务id为子任务添加审核员
+//    @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
+//    public ResultEntity arrangeAssessorsById(@PathVariable(value = "subtaskId") String subtaskId, String userId, @RequestParam(value = "ids") String[] userIds){
+//        return ResultUtils.success(subtaskService.arrangeAssessorsById(subtaskId, userId, userIds));
+//    }
+//
+//    // 根据审核人id查询待其审核的子任务的相关信息
+//    @GetMapping(value = "/byAssessorId/{assessorId}")
+//    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId){
+//        return ResultUtils.success(subtaskService.findSubtasksByAssessor(userService.getUserById(assessorId)));
+//    }
 
     // 根据子任务id审核子任务
     /*@PatchMapping(value = "/{subtaskId}/assessSubtask")
     public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs){
         return ResultUtils.success(subtaskService.assessSubtaskById(subtaskId, subtaskEntityArgs));
     }*/
+    // 根据子任务id为子任务添加审核员以及会签状态
+    @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
+    public ResultEntity arrangeAssessorsByIds(@PathVariable(value = "subtaskId") String subtaskId, String userId, int countersignState, String[] collatorIds, String[] auditIds, String[] countersignIds, String[] approverIds) {
+        return ResultUtils.success(subtaskService.arrangeAssessorsByIds(subtaskId, userId, countersignState, collatorIds, auditIds, countersignIds, approverIds));
+    }
 
+    // 根据子任务id查询子任务下的文件
+    @GetMapping(value = "/{subtaskId}/files")
+    public ResultEntity getSubtaskFilesByProDesignId(@PathVariable(value = "subtaskId") String subtaskId) {
+        return ResultUtils.success(subtaskFilesService.getSubtaskFilesByProDesignId(subtaskId));
+    }
+
+    // 根据子任务id审核子任务
+    @PatchMapping(value = "/{subtaskId}/assessSubtask")
+    public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs, String userId) {
+        return ResultUtils.success(subtaskService.assessSubtaskByIds(subtaskId, subtaskEntityArgs, userService.getUserById(userId)));
+    }
+
+    //  根据当前审核状态的ID查询审核意见
+    @GetMapping(value = "/{assessStateId}/illustration")
+    public ResultEntity illustrationByAssessStateIds(@PathVariable(value = "assessStateId") String assessStateId) {
+        return ResultUtils.success(subtaskService.illustrationByAssessStateIds(assessStateId));
+    }
+
+    //  根据子任务Id查询审核所有的流程
+    @GetMapping(value = "/{subtaskId}/Allillustration")
+    public ResultEntity AllillustrationBySubtaskId(@PathVariable(value = "subtaskId") String subtaskId) {
+        return ResultUtils.success(subtaskService.allIllustrationBysubtaskId(subtaskService.getSubtaskById(subtaskId)));
+    }
 }
