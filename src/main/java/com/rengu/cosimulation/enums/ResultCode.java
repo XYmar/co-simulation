@@ -68,7 +68,7 @@ public enum ResultCode {
     FILE_CHUNK_NOT_FOUND_ERROR(30001, "文件块不存在或不合法"),
     FILE_CHUNK_EXISTED_ERROR(30002, "该文件块已存在"),
     FILE_MD5_NOT_FOUND_ERROR(30003, "未发现该文件MD5"),
-    FILE_MD5_EXISTED_ERROR(30004,"该子任务称已存在"),
+    FILE_MD5_EXISTED_ERROR(30004,"该文件MD5已存在"),
     FILE_ID_NOT_FOUND_ERROR(30005,"未发现该文件Id"),
 
     // 流程节点相关   2400x

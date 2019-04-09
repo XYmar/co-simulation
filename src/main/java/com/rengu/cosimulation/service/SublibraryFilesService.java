@@ -367,6 +367,11 @@ public class SublibraryFilesService {
         return sublibraryFilesEntity;
     }
 
+    // 系统管理员查询所有待审核的二次修改申请
+    public List<SublibraryFilesEntity> findByState(){
+        return sublibraryFilesRepository.findByState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY);
+    }
+
     // 系统管理员处理二次修改申请
     public SublibraryFilesEntity handleModifyApply(String sublibraryFileId, boolean ifModifyApprove){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);

@@ -21,4 +21,5 @@ public interface SublibraryFilesRepository extends JpaRepository<SublibraryFiles
     List<SublibraryFilesEntity> findByAuditUserSetContaining(UserEntity userEntity);
     List<SublibraryFilesEntity> findByCountersignUserSetContaining(UserEntity userEntity);
     List<SublibraryFilesEntity> findByApproveUserSet(UserEntity userEntity);
+    List<SublibraryFilesEntity> findByState(int state);
 }
