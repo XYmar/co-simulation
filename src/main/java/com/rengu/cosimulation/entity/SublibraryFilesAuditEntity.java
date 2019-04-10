@@ -26,6 +26,7 @@ public class SublibraryFilesAuditEntity implements Serializable {
     private int state;                            // 阶段：:1：校对中  2：审核中  3：会签中  4：批准中
     private String auditDescription;              // 审核意见
     private boolean ifPass;                       // 审核是否通过   0：未通过  1： 通过
+    private boolean ifOver;                       // 本阶段的审批是否结束
 
     @ManyToOne
     private SublibraryFilesEntity sublibraryFilesEntity;

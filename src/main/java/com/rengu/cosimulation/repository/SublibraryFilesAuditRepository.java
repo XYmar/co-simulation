@@ -10,7 +10,8 @@ import java.util.List;
 
 @Repository
 public interface SublibraryFilesAuditRepository extends JpaRepository<SublibraryFilesAuditEntity, String> {
-    boolean existsBySublibraryFilesEntityAndUserEntityAndState(SublibraryFilesEntity sublibraryFilesEntity, UserEntity userEntity, int state);
+    boolean existsBySublibraryFilesEntityAndUserEntityAndStateAndIfOver(SublibraryFilesEntity sublibraryFilesEntity, UserEntity userEntity, int state, boolean ifOver);
     List<SublibraryFilesAuditEntity> findByUserEntityAndState(UserEntity userEntity, int state);
     List<SublibraryFilesAuditEntity> findBySublibraryFilesEntity(SublibraryFilesEntity sublibraryFilesEntity);
+    List<SublibraryFilesAuditEntity> findBySublibraryFilesEntityAndIfOver(SublibraryFilesEntity sublibraryFilesEntity, boolean ifOver);
 }

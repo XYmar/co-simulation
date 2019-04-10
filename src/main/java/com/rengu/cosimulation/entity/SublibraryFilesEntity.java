@@ -35,6 +35,7 @@ public class SublibraryFilesEntity implements Serializable {
     private boolean ifApprove;             // 审核是否通过
     private int auditMode;                     // 模式： 1：无会签  2：一人会签  3：多人会签
     private boolean ifModifyApprove;       // 二次修改申请是否通过
+    private int rejectState;               // 记录被驳回的流程
 
     @ManyToOne
     private FileEntity fileEntity;

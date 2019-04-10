@@ -31,10 +31,10 @@ public class SublibraryFilesAuditService {
         this.sublibraryFilesService = sublibraryFilesService;
     }
 
-    // 根据用户id及子库文件id查询该文件审核详情
+    // 根据用户id及子库文件id查询该文件审核详情(当前的)
     public List<SublibraryFilesAuditEntity> getSublibraryFilesAudits(String sublibraryFileId){
         SublibraryFilesEntity sublibraryFilesEntity = sublibraryFilesService.getSublibraryFileById(sublibraryFileId);
-        return sublibraryFilesAuditRepository.findBySublibraryFilesEntity(sublibraryFilesEntity);
+        return sublibraryFilesAuditRepository.findBySublibraryFilesEntityAndIfOver(sublibraryFilesEntity, false);
     }
 
     // 根据id查询子任务文件是否存在

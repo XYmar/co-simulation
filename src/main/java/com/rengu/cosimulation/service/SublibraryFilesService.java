@@ -309,7 +309,7 @@ public class SublibraryFilesService {
          *                 no   --> 停留当前模式   （--> 子库文件状态改为进行中）
          * */
         // 若当前用户已审批过过则报错，您已执行过审批操作
-        if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndState(sublibraryFilesEntity,userEntity,sublibraryFilesEntityArgs.getState())){
+        if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndStateAndIfOver(sublibraryFilesEntity,userEntity,sublibraryFilesEntityArgs.getState(), false)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
         }
 
@@ -338,16 +338,17 @@ public class SublibraryFilesService {
                 sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
             }else{
                 sublibraryFilesEntity.setState(sublibraryFilesEntityArgs.getState() + 1);
-                sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
+                sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());                         // 在哪步驳回
             }
         }else{                // 驳回
             sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);                          // 审批结束
             sublibraryFilesAuditEntity.setState(sublibraryFilesEntityArgs.getState());
+            sublibraryFilesEntity.setRejectState(sublibraryFilesEntityArgs.getState());
 
             sublibraryFilesEntity.setIfReject(true);           // 设置驳回状态为true
         }
         /**
-         * 审核模式、审核阶段、审核结果、审核人、审核意见
+         * 审核模式、审核阶段、审核结果、审核人、审核意见、当前步骤结束
          * */
         sublibraryFilesAuditEntity.setIfPass(sublibraryFilesAuditEntityArgs.isIfPass());               // 审核结果
         sublibraryFilesAuditEntity.setUserEntity(userEntity);                                          // 审核人
@@ -355,6 +356,14 @@ public class SublibraryFilesService {
         sublibraryFilesAuditEntity.setAuditDescription(sublibraryFilesAuditEntityArgs.getAuditDescription());   // 审核意见
         sublibraryFilesAuditRepository.save(sublibraryFilesAuditEntity);
 
+        // 批准通过后 或 驳回后, 将详情改为已结束
+        if(!(sublibraryFilesAuditEntityArgs.isIfPass()) || sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_APPROVE){
+            List<SublibraryFilesAuditEntity> sublibraryFilesAuditEntityList = sublibraryFilesAuditRepository.findBySublibraryFilesEntity(sublibraryFilesEntity);
+            for(SublibraryFilesAuditEntity sublibraryFilesAuditEntity1 : sublibraryFilesAuditEntityList){
+                sublibraryFilesAuditEntity1.setIfOver(true);
+            }
+            sublibraryFilesAuditRepository.saveAll(sublibraryFilesAuditEntityList);
+        }
         return sublibraryFilesEntity;
     }
 
@@ -397,6 +406,8 @@ public class SublibraryFilesService {
             saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
             if(fileMetaEntity.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
                 sublibraryFilesEntity.setState(0);
+            }else{
+                sublibraryFilesEntity.setState(sublibraryFilesEntity.getRejectState());
             }
 
         }else{                 // 二次修改
@@ -433,6 +444,7 @@ public class SublibraryFilesService {
         sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
         sublibraryFilesEntity.setIfApprove(false);
         sublibraryFilesEntity.setIfReject(false);
+        sublibraryFilesEntity.setRejectState(0);
         sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
         sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
 
