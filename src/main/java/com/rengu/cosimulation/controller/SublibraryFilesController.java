@@ -117,9 +117,15 @@ public class SublibraryFilesController {
         return ResultUtils.success(sublibraryFilesService.modifySublibraryFile(sublibraryFileId, fileMetaEntity));
     }
 
+    // 根据子库文件id查找其历史版本文件
+    @GetMapping(value = "/{sublibraryFileId}/getSublibraryHistoriesFiles")
+    public ResultEntity getSublibraryHistoriesFiles(@PathVariable(value = "sublibraryFileId") String sublibraryFileId) {
+        return ResultUtils.success(sublibraryFilesService.getSublibraryHistoriesFiles(sublibraryFileId));
+    }
+
     // 撤销修改
     @PatchMapping(value = "/{sublibraryFileId}/revokeModify")
-    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, boolean ifDirectModify, String version){
-        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId, ifDirectModify, version));
+    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String version){
+        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId, version));
     }
 }
