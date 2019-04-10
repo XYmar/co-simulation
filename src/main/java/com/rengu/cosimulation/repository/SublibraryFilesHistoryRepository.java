@@ -9,9 +9,9 @@ import java.util.List;
 
 @Repository
 public interface SublibraryFilesHistoryRepository extends JpaRepository<SublibraryFilesHistoryEntity, String> {
-    boolean existsBySublibraryEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
-    boolean existsBySublibraryEntity(SublibraryFilesEntity sublibraryFilesEntity);
-    List<SublibraryFilesHistoryEntity> findBySublibraryEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
-    SublibraryFilesHistoryEntity findBySublibraryEntityAndIfDirectModifyAndVersion(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify, String version);
+    boolean existsByLeastSublibraryFilesEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
+    boolean existsByLeastSublibraryFilesEntity(SublibraryFilesEntity sublibraryFilesEntity);
+    List<SublibraryFilesHistoryEntity> findByLeastSublibraryFilesEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
+    SublibraryFilesHistoryEntity findByLeastSublibraryFilesEntityAndIfDirectModifyAndVersion(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify, String version);
 
 }

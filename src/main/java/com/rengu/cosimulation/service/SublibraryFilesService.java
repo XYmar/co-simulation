@@ -391,8 +391,8 @@ public class SublibraryFilesService {
         }
         if(fileMetaEntity.isIfDirectModify()){            // 直接修改
             // 修改前存储此文件的备份 若备份已存在删除上一备份
-            if(sublibraryFilesHistoryRepository.existsBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true)){
-                sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0));
+            if(sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true)){
+                sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0));
             }
             saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
             if(fileMetaEntity.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
@@ -412,6 +412,10 @@ public class SublibraryFilesService {
                 throw new ResultException(ResultCode.SUBLIBRARY_FILE_VERSION_NOT_FOUND_ERROR);
             }
             sublibraryFilesEntity.setState(0);
+            sublibraryFilesEntity.setAuditMode(0);
+            sublibraryFilesEntity.setIfModifyApprove(false);
+            sublibraryFilesEntity.setIfApprove(false);
+
             // 四类审核人重置
             Set<UserEntity> userEntitySet = new HashSet<>();
             sublibraryFilesEntity.setVersion(fileMetaEntity.getVersion());
@@ -452,12 +456,12 @@ public class SublibraryFilesService {
 
     // 根据子库文件id查询其临时文件是否存在
     public boolean ifHasTemp(String sublibraryFileId){
-        return sublibraryFilesHistoryRepository.existsBySublibraryEntity(getSublibraryFileById(sublibraryFileId));
+        return sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntity(getSublibraryFileById(sublibraryFileId));
     }
 
     // 根据子库文件id查找其历史版本文件
     public List<SublibraryFilesHistoryEntity> getSublibraryHistoriesFiles(String sublibraryFileId){
-        return sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModify(getSublibraryFileById(sublibraryFileId), false);
+        return sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(getSublibraryFileById(sublibraryFileId), false);
     }
 
     // 撤销文件操作（直接修改）  更换版本（二次修改可恢复其中任意版本）   版本为空则为直接修改，否则为二次修改，切换到指定版本
@@ -470,9 +474,9 @@ public class SublibraryFilesService {
         // 需撤销至的文件
         SublibraryFilesHistoryEntity sourceNode = new SublibraryFilesHistoryEntity();
         if(StringUtils.isEmpty(version)){         // 直接修改撤销，获取此目标文件的临时历史文件
-            sourceNode = sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0);
+            sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0);
         }else{    // 二次修改撤销，选择撤销到的版本
-            sourceNode = sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModifyAndVersion(sublibraryFilesEntity, false, version);
+            sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModifyAndVersion(sublibraryFilesEntity, false, version);
         }
 
         // 当前文件存为历史
