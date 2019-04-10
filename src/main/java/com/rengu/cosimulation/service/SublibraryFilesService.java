@@ -383,19 +383,19 @@ public class SublibraryFilesService {
     }
 
     // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
-    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, boolean ifDirectModify, boolean ifBackToStart, FileMetaEntity fileMetaEntity, String version){
+    public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, FileMetaEntity fileMetaEntity){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
 
-        if(StringUtils.isEmpty(ifDirectModify)){
+        if(StringUtils.isEmpty(fileMetaEntity.isIfDirectModify())){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_MODIFYWAY_NOT_FOUND_ERROR);
         }
-        if(ifDirectModify){            // 直接修改
+        if(fileMetaEntity.isIfDirectModify()){            // 直接修改
             // 修改前存储此文件的备份 若备份已存在删除上一备份
             if(sublibraryFilesHistoryRepository.existsBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true)){
                 sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findBySublibraryEntityAndIfDirectModify(sublibraryFilesEntity, true));
             }
             saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
-            if(ifBackToStart){                // 驳回后的修改提交到第一个流程
+            if(fileMetaEntity.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
                 sublibraryFilesEntity.setState(0);
             }
 
@@ -408,12 +408,13 @@ public class SublibraryFilesService {
             saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, false);
 
             // 二次修改
-            if(StringUtils.isEmpty(version)){
+            if(StringUtils.isEmpty(fileMetaEntity.getVersion())){
                 throw new ResultException(ResultCode.SUBLIBRARY_FILE_VERSION_NOT_FOUND_ERROR);
             }
+            sublibraryFilesEntity.setState(0);
             // 四类审核人重置
             Set<UserEntity> userEntitySet = new HashSet<>();
-            sublibraryFilesEntity.setVersion(version);
+            sublibraryFilesEntity.setVersion(fileMetaEntity.getVersion());
             sublibraryFilesEntity.setProofreadUserSet(userEntitySet);
             sublibraryFilesEntity.setAuditUserSet(userEntitySet);
             sublibraryFilesEntity.setCountersignUserSet(userEntitySet);
