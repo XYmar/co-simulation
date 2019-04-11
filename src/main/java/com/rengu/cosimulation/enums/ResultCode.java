@@ -108,6 +108,11 @@ public enum ResultCode {
     SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE(28004,"当前文件无可撤销版本"),
     SUBLIBRARY_FILE_VERSION_NOT_CHOOSE_ERROR(28005,"请选择恢复至哪个版本"),
 
+    // 设备相关3000x
+    DEVICE_ID_NOT_FOUND(30001, "未找到该设备"),
+    DEVICE_IS_OFFLINE(30002, "该设备已离线"),
+    SCAN_DISK_TIME_OUT(30003, "获取设备磁盘信息超时"),
+    SCAN_PROCESS_TIME_OUT(30004, "获取设备进程信息超时"),
 
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),

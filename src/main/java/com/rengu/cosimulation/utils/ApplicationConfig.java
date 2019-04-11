@@ -9,6 +9,13 @@ import java.io.File;
  * Date: 2019/2/12 17:25
  */
 public class ApplicationConfig {
+    // 服务器连接地址、端口
+    public static final int TCP_RECEIVE_PORT = 6005;
+    public static final int UDP_RECEIVE_PORT = 6004;
+    public static final int UDP_SEND_PORT = 3087;
+    // 扫描超时时间
+    public static final long SCAN_TIME_OUT = 1000 * 5;
+
     // 默认角色
     public static final String DEFAULT_ADMIN_ROLE_NAME = "admin";                              //系统管理员
     public static final String DEFAULT_SECURITY_GUARD_ROLE_NAME = "security_guard";            //安全保密员
@@ -74,6 +81,7 @@ public class ApplicationConfig {
     public static final int MANY_PEOPLE_COUNTERSIGNSTATE = 3; //  多人会签
     public static final boolean ASSESS_STATE_NOT_PASS = false;  //  当前审核未通过
     public static final boolean ASSESS_STATE_PASS = true;  // 审核通过
+
 
     // 文件块保存路径
     public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");
