@@ -43,7 +43,7 @@ public class ApplicationInit  implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // 启动UDP消息接受线程
-        udpReceiveThread.UDPMessageReceiver();
+        // udpReceiveThread.UDPMessageReceiver();
 
         // 初始化库（4个）
 

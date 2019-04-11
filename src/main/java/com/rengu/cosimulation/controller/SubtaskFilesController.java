@@ -31,7 +31,7 @@ public class SubtaskFilesController {
     }
 
     // 根据Id导出子任务文件
-    @GetMapping(value = "subtaskFile/{subtaskFileId}/user/{userId}/export")
+    @GetMapping(value = "/{subtaskFileId}/user/{userId}/export")
     public void exportSubtaskFileById(@PathVariable(value = "subtaskFileId") String subtaskFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
         File exportFile = subtaskFilesService.exportSubtaskFileById(subtaskFileId, userId);
         String mimeType = URLConnection.guessContentTypeFromName(exportFile.getName()) == null ? "application/octet-stream" : URLConnection.guessContentTypeFromName(exportFile.getName());

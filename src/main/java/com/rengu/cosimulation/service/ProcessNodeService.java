@@ -60,8 +60,7 @@ public class ProcessNodeService {
                 SubtaskEntity subtaskEntity = new SubtaskEntity();
                 subtaskEntity.setName(processNodeEntity.getNodeName());
                 subtaskEntity.setProjectEntity(projectEntity);
-                subtaskEntity.setManyCountersignState(1);
-                subtaskEntity.setPassState(2);
+                subtaskEntity.setManyCounterSignState(0);                            // 多人会签模式，此时无人开始会签
                 subtaskEntityMap.put(processNodeEntity.getSelfSign(),subtaskEntity);
                 processNodeEntity.setSubtaskEntity(subtaskEntity);
                 processNodeEntityMap.put(processNodeEntity.getSelfSign(),processNodeEntity);

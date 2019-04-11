@@ -19,13 +19,10 @@ public interface SubtaskRepository extends JpaRepository<SubtaskEntity, String> 
 
     boolean existsByName(String name);
 
-    List<SubtaskEntity> findByCollatorSetContaining(UserEntity assessor);
-
-    List<SubtaskEntity> findByAuditorSetContaining(UserEntity assessor);
-
-    List<SubtaskEntity> findByCountersignSetContaining(UserEntity assessor);
-
-    List<SubtaskEntity> findByApporverSetContaining(UserEntity assessor);
+    List<SubtaskEntity> findByProofreadUserSetContaining(UserEntity userEntity);
+    List<SubtaskEntity> findByAuditUserSetContaining(UserEntity userEntity);
+    List<SubtaskEntity> findByCountersignUserSetContaining(UserEntity userEntity);
+    List<SubtaskEntity> findByApproveUserSet(UserEntity userEntity);
 
     List<SubtaskEntity> findById(UserEntity userEntity);
 

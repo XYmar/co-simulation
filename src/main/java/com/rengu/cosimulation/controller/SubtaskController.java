@@ -2,6 +2,7 @@ package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.SubtaskAuditEntity;
 import com.rengu.cosimulation.entity.SubtaskEntity;
 import com.rengu.cosimulation.service.SubtaskFilesService;
 import com.rengu.cosimulation.service.SubtaskService;
@@ -61,33 +62,17 @@ public class SubtaskController {
         return ResultUtils.success(subtaskFilesService.saveSubtaskFilesByProDesignId(subtaskId, projectId, fileMetaEntityList));
     }
 
-    // 根据审核人id查询待其审核的子任务的相关信息
+    // 根据用户id查询待校对、待审核、待会签、待批准
     @GetMapping(value = "/byAssessorId/{assessorId}")
-    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId) {
-        return ResultUtils.success(subtaskService.findSubtasksByAllAssessor(userService.getUserById(assessorId)));
+    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String userId) {
+        return ResultUtils.success(subtaskService.findToBeAuditedsSubtasksByUserId(userId));
     }
 
-//    // 根据子任务id为子任务添加审核员
-//    @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
-//    public ResultEntity arrangeAssessorsById(@PathVariable(value = "subtaskId") String subtaskId, String userId, @RequestParam(value = "ids") String[] userIds){
-//        return ResultUtils.success(subtaskService.arrangeAssessorsById(subtaskId, userId, userIds));
-//    }
-//
-//    // 根据审核人id查询待其审核的子任务的相关信息
-//    @GetMapping(value = "/byAssessorId/{assessorId}")
-//    public ResultEntity findSubtasksByAssessor(@PathVariable(value = "assessorId") String assessorId){
-//        return ResultUtils.success(subtaskService.findSubtasksByAssessor(userService.getUserById(assessorId)));
-//    }
 
-    // 根据子任务id审核子任务
-    /*@PatchMapping(value = "/{subtaskId}/assessSubtask")
-    public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs){
-        return ResultUtils.success(subtaskService.assessSubtaskById(subtaskId, subtaskEntityArgs));
-    }*/
     // 根据子任务id为子任务添加审核员以及会签状态
     @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
-    public ResultEntity arrangeAssessorsByIds(@PathVariable(value = "subtaskId") String subtaskId, String userId, int countersignState, String[] collatorIds, String[] auditIds, String[] countersignIds, String[] approverIds) {
-        return ResultUtils.success(subtaskService.arrangeAssessorsByIds(subtaskId, userId, countersignState, collatorIds, auditIds, countersignIds, approverIds));
+    public ResultEntity arrangeAssessorsByIds(@PathVariable(value = "subtaskId") String subtaskId, String userId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
+        return ResultUtils.success(subtaskService.arrangeAssessorsByIds(subtaskId, userId, auditMode, proofreadUserIds, auditUserIds, countersignUserIds, approveUserIds));
     }
 
     // 根据子任务id查询子任务下的文件
@@ -97,9 +82,9 @@ public class SubtaskController {
     }
 
     // 根据子任务id审核子任务
-    @PatchMapping(value = "/{subtaskId}/assessSubtask")
-    public ResultEntity assessSubtaskById(@PathVariable(value = "subtaskId") String subtaskId, SubtaskEntity subtaskEntityArgs, String userId) {
-        return ResultUtils.success(subtaskService.assessSubtaskByIds(subtaskId, subtaskEntityArgs, userService.getUserById(userId)));
+    @PatchMapping(value = "/{subtaskId}/subtaskAudit")
+    public ResultEntity subtaskAudit(@PathVariable(value = "subtaskId") String subtaskId, String userId, SubtaskEntity subtaskEntityArgs, SubtaskAuditEntity subtaskAuditEntityArgs) {
+        return ResultUtils.success(subtaskService.subtaskAudit(subtaskId, userId, subtaskEntityArgs, subtaskAuditEntityArgs));
     }
 
     //  根据当前审核状态的ID查询审核意见

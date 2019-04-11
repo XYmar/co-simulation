@@ -45,6 +45,18 @@ public class ApplicationConfig {
     public static final String DEFAULT_MECHANICAL_SIMULATION_NAME = "mechanical_simulation";         //力学仿真
     public static final String DEFAULT_ASSEMBLY_SIMULATION_NAME = "assembly_simulation";             //结构建模
 
+    // 子任务状态
+    public static final int SUBTASK_NOT_START = 0;                     // 子任务未开始
+    public static final int SUBTASK_START = 1;                         // 子任务进行中
+    public static final int SUBTASK_TO_BE_AUDIT = 2;                   // 待审批
+    public static final int SUBTASK_PROOFREAD = 3;                     // 校对中
+    public static final int SUBTASK_AUDIT = 4;                         // 审核中
+    public static final int SUBTASK_COUNTERSIGN = 5;                   // 会签中
+    public static final int SUBTASK_APPROVE = 6;                       // 批准中
+    public static final int SUBTASK_AUDIT_OVER = 7;                    // 审批结束
+    public static final int SUBTASK_APPLY_FOR_MODIFY = 8;              // 申请二次修改中
+    public static final int SUBTASK_APPLY_FOR_MODIFY_APPROVE = 9;      // 二次修改中
+
     // 子库文件审核环节
     public static final int SUBLIBRARY_FILE_PROOFREAD = 1;             // 校对中
     public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
@@ -57,10 +69,15 @@ public class ApplicationConfig {
     public static final int SUBLIBRARY_FILE_IFAPPROVE = 1;                  // 审核通过
     public static final int SUBLIBRARY_FILE_IFREJECT = 2;               // 审核未通过
 
-    // 子库文件审核模式 1：无会签  2：一人会签  3：多人会签
+    // 子库文件 或子任务 审核模式 1：无会签  2：一人会签  3：多人会签
     public static final int SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN = 1;               // 无会签
     public static final int SUBLIBRARY_FILE_AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
     public static final int SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
+
+    // 子库文件 或子任务 审核模式 1：无会签  2：一人会签  3：多人会签
+    public static final int AUDIT_NO_COUNTERSIGN = 1;               // 无会签
+    public static final int AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
+    public static final int AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
 
     // 子库文件上传  0：第一次上传  1： 直接修改  2： 二次修改
     public static final int SUBLIBRARY_FILE_FIRST_UPLOAD = 0;               // 子库文件第一次上传
