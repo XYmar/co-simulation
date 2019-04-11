@@ -36,7 +36,7 @@ public class SublibraryFilesController {
     }
 
     // 根据Id导出子库文件
-    @GetMapping(value = "sublibraryFile/{sublibraryFileId}/user/{userId}/export")
+    @GetMapping(value = "/{sublibraryFileId}/user/{userId}/export")
     public void exportSublibraryFileById(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
         File exportFile = sublibraryFilesService.exportSublibraryFileById(sublibraryFileId, userId);
         String mimeType = URLConnection.guessContentTypeFromName(exportFile.getName()) == null ? "application/octet-stream" : URLConnection.guessContentTypeFromName(exportFile.getName());

@@ -6,7 +6,6 @@ import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
 import com.rengu.cosimulation.repository.SublibraryFilesHistoryRepository;
 import com.rengu.cosimulation.repository.SublibraryFilesRepository;
-import com.rengu.cosimulation.repository.SublibraryFilesTempRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -37,8 +35,6 @@ public class SublibraryFilesService {
     private final UserService userService;
     private final SublibraryFilesAuditRepository sublibraryFilesAuditRepository;
     private final SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository;
-    @Autowired
-    private SublibraryFilesTempRepository sublibraryFilesTempRepository;
 
     @Autowired
     public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository) {
@@ -224,21 +220,21 @@ public class SublibraryFilesService {
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
         if(StringUtils.isEmpty(String.valueOf(auditMode))){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_AUDITMODE_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.AUDITMODE_NOT_FOUND_ERROR);
         }
         if(ArrayUtils.isEmpty(proofreadUserIds)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_PROOFREADUSERS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.PROOFREADUSERS_NOT_FOUND_ERROR);
         }
         if(ArrayUtils.isEmpty(auditUserIds)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_AUDITUSERS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.AUDITUSERS_NOT_FOUND_ERROR);
         }
-        if(auditMode != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN){
+        if(auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN){
             if(ArrayUtils.isEmpty(countersignUserIds)){
-                throw new ResultException(ResultCode.SUBLIBRARY_FILE_COUNTERSIGNUSERS_NOT_FOUND_ERROR);
+                throw new ResultException(ResultCode.COUNTERSIGNUSERS_NOT_FOUND_ERROR);
             }
         }
         if(ArrayUtils.isEmpty(approveUserIds)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_APPROVEUSERS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.APPROVEUSERS_NOT_FOUND_ERROR);
         }
         List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
         for(String id : sublibraryFileId){
@@ -248,7 +244,7 @@ public class SublibraryFilesService {
             SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(id);
             sublibraryFilesEntity.setProofreadUserSet(idsToSet(proofreadUserIds));
             sublibraryFilesEntity.setAuditUserSet(idsToSet(auditUserIds));
-            if(auditMode != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN){
+            if(auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN){
                 sublibraryFilesEntity.setCountersignUserSet(idsToSet(countersignUserIds));
             }
             sublibraryFilesEntity.setApproveUserSet(idsToSet(approveUserIds));
@@ -271,10 +267,7 @@ public class SublibraryFilesService {
     }
 
     // 根据用户id查询待校对、待审核、待会签、待批准
-     public Map<String, List> findToBeAuditedFilesByUserId(String userId){
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
+    public Map<String, List> findToBeAuditedFilesByUserId(String userId){
         UserEntity userEntity = userService.getUserById(userId);
         Map<String, List> sublibraryFilesToBeAudited = new HashMap<>();
         sublibraryFilesToBeAudited.put("proofreadFiles", sublibraryFilesRepository.findByProofreadUserSetContaining(userEntity));
@@ -283,7 +276,7 @@ public class SublibraryFilesService {
         sublibraryFilesToBeAudited.put("approveFiles", sublibraryFilesRepository.findByApproveUserSet(userEntity));
         sublibraryFilesToBeAudited.put("alreadyAudit", sublibraryFilesAuditRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN));
         return sublibraryFilesToBeAudited;
-     }
+    }
 
     // 审核操作
     public SublibraryFilesEntity sublibraryFileAudit(String sublibraryFileId, String userId, SublibraryFilesEntity sublibraryFilesEntityArgs, SublibraryFilesAuditEntity sublibraryFilesAuditEntityArgs){
@@ -294,6 +287,12 @@ public class SublibraryFilesService {
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_STATE_NOT_FOUND_ERROR);
         }
 
+        if(sublibraryFilesEntityArgs.getState() == 1){        // 校对中设置状态为校对
+            sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD);
+        }
+        if(sublibraryFilesEntityArgs.getState() != sublibraryFilesEntity.getState()){
+            throw new ResultException(ResultCode.CURRENT_PROGRESS_NOT_ARRIVE_ERROR);
+        }
         SublibraryFilesAuditEntity sublibraryFilesAuditEntity = new SublibraryFilesAuditEntity();      // 审核详情
 
         /**
@@ -303,19 +302,20 @@ public class SublibraryFilesService {
          *                                                当前阶段为审核时-->  1)无会签：审核-->批准
          *                                                                     2)一人/多人会签：审核-->会签
          *                                                当前阶段为会签时-->  1)一人会签：会签-->批准（同上）
-         *          *                                      @todo               2)多人会签：多人审核通过审核-->批准
+         *          *                                                          2)多人会签：多人审核通过审核-->批准
          *                                                                                 若当前用户已会签过则报错，您已会签过
-         *                                                当前阶段为批准时-->  修改子文件的通过状态为true
-         *                 no   --> 停留当前模式   （--> 子库文件状态改为进行中）
+         *                                                当前阶段为批准时-->  修改子文件的通过状态为true； 设置子文件状态为审批结束
+         *                 no   --> 停留当前模式   --> 设置子文件状态为审批结束
+         *                                             记录当前驳回的阶段
          * */
         // 若当前用户已审批过过则报错，您已执行过审批操作
         if(sublibraryFilesAuditRepository.existsBySublibraryFilesEntityAndUserEntityAndStateAndIfOver(sublibraryFilesEntity,userEntity,sublibraryFilesEntityArgs.getState(), false)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_ALREADY_COUNTERSIGN_ERROR);
+            throw new ResultException(ResultCode.USER_ALREADY_COUNTERSIGN_ERROR);
         }
 
         if(sublibraryFilesAuditEntityArgs.isIfPass()){
             if(sublibraryFilesEntity.getUserEntity().getId().equals(userId)){    // 自己无权通过
-                throw new ResultException(ResultCode.SUBLIBRARY_FILE_USER_PASS_DENIED_ERROR);
+                throw new ResultException(ResultCode.USER_PASS_DENIED_ERROR);
             }
             if(sublibraryFilesEntityArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT){               // 当前为审核
                 if(sublibraryFilesEntityArgs.getAuditMode() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN){  // 无会签
@@ -437,6 +437,7 @@ public class SublibraryFilesService {
         }
 
         sublibraryFilesEntity.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
+        sublibraryFilesEntity.setCreateTime(new Date());
         sublibraryFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
         sublibraryFilesEntity.setType(fileMetaEntity.getType());
         sublibraryFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
@@ -462,7 +463,10 @@ public class SublibraryFilesService {
 
     // 从子库文件历史生成子库文件
     public void saveSublibraryFilesBySublibraryFile(SublibraryFilesEntity coverNode, SublibraryFilesHistoryEntity sourceNode) {
-        BeanUtils.copyProperties(sourceNode, coverNode, "create_time", "leastSublibraryFilesEntity", "ifDirectModify");
+        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSublibraryFilesEntity", "ifDirectModify", "approveUserSet");
+        Set<UserEntity> approveUserSet = sourceNode.getApproveUserSet();
+        coverNode.setApproveUserSet(new HashSet<>());
+        coverNode.setApproveUserSet(approveUserSet);
         sublibraryFilesRepository.save(coverNode);
     }
 
@@ -484,7 +488,7 @@ public class SublibraryFilesService {
         // 当前文件
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         // 需撤销至的文件
-        SublibraryFilesHistoryEntity sourceNode = new SublibraryFilesHistoryEntity();
+        SublibraryFilesHistoryEntity sourceNode;
         if(StringUtils.isEmpty(version)){         // 直接修改撤销，获取此目标文件的临时历史文件
             sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0);
         }else{    // 二次修改撤销，选择撤销到的版本
