@@ -222,7 +222,7 @@ public class SubtaskService {
         subtaskToBeAudited.put("auditSubtask", subtaskRepository.findByAuditUserSetContaining(userEntity));
         subtaskToBeAudited.put("countersignSubtask", subtaskRepository.findByCountersignUserSetContaining(userEntity));
         subtaskToBeAudited.put("approveSubtask", subtaskRepository.findByApproveUserSet(userEntity));
-        subtaskToBeAudited.put("alreadyAudit", subtaskAuditRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN));
+        subtaskToBeAudited.put("alreadyAudit", subtaskAuditRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBTASK_COUNTERSIGN));
         return subtaskToBeAudited;
     }
 
@@ -243,17 +243,18 @@ public class SubtaskService {
 
         SubtaskAuditEntity subtaskAuditEntity = new SubtaskAuditEntity();      // 审核详情
         /**
-         *  子库文件流程控制：
+         *  子任务流程控制：
          *  当前审核结果： pass --> 当前审核人：自己--> 报错，无通过权限
-         *                                      其他人--> 设置子库文件进入下一模式：
+         *                                      其他人--> 设置子任务进入下一模式：
          *                                                当前阶段为审核时-->  1)无会签：审核-->批准
          *                                                                     2)一人/多人会签：审核-->会签
          *                                                当前阶段为会签时-->  1)一人会签：会签-->批准（同上）
          *          *                                                          2)多人会签：多人审核通过审核-->批准
          *                                                                                 若当前用户已会签过则报错，您已会签过
-         *                                                当前阶段为批准时-->  (1)修改子任务的通过状态为true； 设置子文件状态为审批结束
+         *                                                当前阶段为批准时-->  (1)修改子任务的通过状态为true； 设置任务状态为审批结束
          *                                                                     (2)将此子任务的后续任务状态改为进行中
-         *                 no   --> 停留当前模式   --> 设置子文件状态为审批结束
+         *                                                    @TODO                 (3)将此子任务的所有文件分别入库
+         *                 no   --> 停留当前模式   --> 设置子任务状态为审批结束
          *                                             记录当前驳回的阶段
          * */
         // 若当前用户已审批过过则报错，您已执行过审批操作
@@ -488,5 +489,30 @@ public class SubtaskService {
             throw new ResultException(ResultCode.SUBTASK_ARGS_NOT_FOUND_ERROR);
         }
         return subtaskEntityOptional.get();
+    }
+
+    // 申请二次修改
+    public SubtaskEntity applyForModify(String subtaskId){
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        subtaskEntity.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+        return subtaskRepository.save(subtaskEntity);
+    }
+
+    // 项目负责人查询所有待审核的二次修改申请
+    public List<SubtaskEntity> findByState(String userId){
+        UserEntity userEntity = userService.getUserById(userId);
+        return subtaskRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+    }
+
+    // 项目负责人处理二次修改申请
+    public SubtaskEntity handleModifyApply(String subtaskId, boolean ifModifyApprove){
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        subtaskEntity.setIfModifyApprove(ifModifyApprove);
+        if(ifModifyApprove){
+            subtaskEntity.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE);
+        }else{
+            subtaskEntity.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);
+        }
+        return subtaskRepository.save(subtaskEntity);
     }
 }

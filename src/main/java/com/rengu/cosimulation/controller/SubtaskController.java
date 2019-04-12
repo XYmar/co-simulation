@@ -9,6 +9,7 @@ import com.rengu.cosimulation.service.SubtaskService;
 import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -97,5 +98,23 @@ public class SubtaskController {
     @GetMapping(value = "/{subtaskId}/Allillustration")
     public ResultEntity AllillustrationBySubtaskId(@PathVariable(value = "subtaskId") String subtaskId) {
         return ResultUtils.success(subtaskService.allIllustrationBysubtaskId(subtaskService.getSubtaskById(subtaskId)));
+    }
+
+    // 申请二次修改
+    @PostMapping(value = "/{subtaskId}/applyForModify")
+    public ResultEntity applyForModify(@PathVariable(value = "subtaskId") String subtaskId){
+        return ResultUtils.success(subtaskService.applyForModify(subtaskId));
+    }
+
+    // 项目负责人查询所有待审核的二次修改申请
+    @GetMapping(value = "/findModifyToBeAudit")
+    public ResultEntity findModifyToBeAudit(String userId) {
+        return ResultUtils.success(subtaskService.findByState(userId));
+    }
+
+    // 项目负责人处理二次修改申请
+    @PostMapping(value = "/{subtaskId}/handleModifyApply")
+    public ResultEntity handleModifyApply(@PathVariable(value = "subtaskId") String subtaskId, boolean ifModifyApprove){
+        return ResultUtils.success(subtaskService.handleModifyApply(subtaskId, ifModifyApprove));
     }
 }

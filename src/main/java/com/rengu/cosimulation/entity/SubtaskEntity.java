@@ -26,6 +26,7 @@ public class SubtaskEntity implements Serializable {
     private boolean ifApprove;                 // 审核是否通过
     private boolean ifReject;                  // 是否被驳回
     private int rejectState;                   // 记录被驳回的流程
+    private boolean ifModifyApprove;           // 二次修改申请是否通过
     private int manyCounterSignState;          // 多人会签时，文件状态(几人已会签过)
     private int auditMode;                     // 会签模式               0：未选择   1：无会签  2：一人会签 3：多人会签
     @ManyToOne
