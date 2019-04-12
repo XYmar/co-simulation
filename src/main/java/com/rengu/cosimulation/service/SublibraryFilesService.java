@@ -494,10 +494,10 @@ public class SublibraryFilesService {
 
     // 从子库文件历史生成子库文件
     public void saveSublibraryFilesBySublibraryFile(SublibraryFilesEntity coverNode, SublibraryFilesHistoryEntity sourceNode) {
-        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSublibraryFilesEntity", "ifDirectModify", "approveUserSet");
-        Set<UserEntity> approveUserSet = sourceNode.getApproveUserSet();
-        coverNode.setApproveUserSet(new HashSet<>());
-        coverNode.setApproveUserSet(approveUserSet);
+        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSublibraryFilesEntity", "ifDirectModify", "proofreadUserSet", "auditUserSet", "countersignUserSet", "approveUserSet");
+        /*Set<UserEntity> approveUserSet = sourceNode.getApproveUserSet();
+        coverNode.setApproveUserSet(null);
+        coverNode.setApproveUserSet(approveUserSet);*/
         sublibraryFilesRepository.save(coverNode);
     }
 
@@ -526,12 +526,12 @@ public class SublibraryFilesService {
             sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModifyAndVersion(sublibraryFilesEntity, false, version);
         }
 
-        // 当前文件存为历史
-        saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
         // 历史版本提为当前文件
         saveSublibraryFilesBySublibraryFile(sublibraryFilesEntity, sourceNode);
-
         sublibraryFilesHistoryRepository.delete(sourceNode);
+        // 当前文件存为历史
+        saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
+
         return getSublibraryFileById(sublibraryFileId);
     }
 }
