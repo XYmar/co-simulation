@@ -27,15 +27,17 @@ public class SubtaskService {
     private final UserService userService;
     private final ProcessNodeRepository processNodeRepository;
     private final SubtaskAuditRepository subtaskAuditRepository;
+    private final SublibraryFilesService sublibraryFilesService;
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository processNodeRepository, SubtaskAuditRepository subtaskAuditRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository processNodeRepository, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
         this.processNodeRepository = processNodeRepository;
         this.subtaskAuditRepository = subtaskAuditRepository;
+        this.sublibraryFilesService = sublibraryFilesService;
     }
 
     // 根据项目id查询所有子任务
@@ -96,15 +98,13 @@ public class SubtaskService {
         return subtaskEntity;
     }
 
-    // 根据子任务查询其后续任务
-    public List<SubtaskEntity> findNextSubtasksById(SubtaskEntity subtaskEntity){
-        // 根据子任务查找对应的节点(多个)
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
-        // 查找每个节点对应的子节点
-        List<ProcessNodeEntity> childProcessNodeEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            childProcessNodeEntityList.add(processNodeRepository.findByProjectEntityAndParentSign(subtaskEntity.getProjectEntity(), processNodeEntity.getSelfSign()));
-        }
+    // 根据子任务开启其后续任务
+    public void startNextSubtasksById(SubtaskEntity subtaskEntity){
+        // 根据子任务查找对应的节点(多个)  其实只有一个块
+        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity).get(0);
+        // 查找子节点
+        List<ProcessNodeEntity> childProcessNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(subtaskEntity.getProjectEntity(), processNodeEntity.getSelfSign());
+
         // 获取后续子任务
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
         if(childProcessNodeEntityList.size() > 0){
@@ -113,19 +113,21 @@ public class SubtaskService {
             }
         }
 
-        return subtaskEntityList;
+        if(subtaskEntityList.size() > 0){                     // 如果后续有子任务的话则开启子任务
+            for(SubtaskEntity subtaskEntity1 : subtaskEntityList){
+                subtaskEntity1.setState(ApplicationConfig.SUBTASK_START);
+            }
+            subtaskRepository.saveAll(subtaskEntityList);
+        }
     }
 
     // 根据子任务查询其父节点任务是否全部完成
     public boolean ifAllParentSubtasksOver(SubtaskEntity subtaskEntity){
         boolean ifOver = false;
-        // 根据子任务查找对应的节点(多个)
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
-        // 查找每个节点对应的父节点
-        List<ProcessNodeEntity> parentProcessNodeEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            parentProcessNodeEntityList.add(processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity.getParentSign()));
-        }
+        // 根据子任务查找对应的节点(多个)  其实只有一个块
+        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity).get(0);
+        // 查找该块对应的父节点
+        List<ProcessNodeEntity> parentProcessNodeEntityList = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity.getParentSign());
         if(parentProcessNodeEntityList.size() == 0){             // 无父节点时
             ifOver = true;
         }else{
@@ -285,15 +287,11 @@ public class SubtaskService {
                 subtaskEntity.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                              // 审批结束
                 subtaskAuditEntity.setState(subtaskEntityArgs.getState());
 
-                // 开启后续子任务
-                List<SubtaskEntity> subtaskEntityList = findNextSubtasksById(subtaskEntity);
-                if(subtaskEntityList.size() > 0){                     // 如果后续有子任务的话则开启子任务
-                    for(SubtaskEntity subtaskEntity1 : subtaskEntityList){
-                        subtaskEntity1.setState(ApplicationConfig.SUBTASK_START);
-                    }
-                    subtaskRepository.saveAll(subtaskEntityList);
-                }
+                // 子任务文件入库
+                sublibraryFilesService.stockIn(subtaskEntity);
 
+                // 开启后续子任务
+                startNextSubtasksById(subtaskEntity);
             }else{
                 subtaskEntity.setState(subtaskEntityArgs.getState() + 1);
                 subtaskAuditEntity.setState(subtaskEntityArgs.getState());                                 // 在哪步驳回

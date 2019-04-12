@@ -6,6 +6,7 @@ import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
 import com.rengu.cosimulation.repository.SublibraryFilesHistoryRepository;
 import com.rengu.cosimulation.repository.SublibraryFilesRepository;
+import com.rengu.cosimulation.repository.SubtaskFilesRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -35,15 +36,17 @@ public class SublibraryFilesService {
     private final UserService userService;
     private final SublibraryFilesAuditRepository sublibraryFilesAuditRepository;
     private final SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository;
+    private final SubtaskFilesRepository subtaskFilesRepository;
 
     @Autowired
-    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository) {
+    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository) {
         this.sublibraryFilesRepository = sublibraryFilesRepository;
         this.fileService = fileService;
         this.sublibraryService = sublibraryService;
         this.userService = userService;
         this.sublibraryFilesAuditRepository = sublibraryFilesAuditRepository;
         this.sublibraryFilesHistoryRepository = sublibraryFilesHistoryRepository;
+        this.subtaskFilesRepository = subtaskFilesRepository;
     }
 
     // 根据名称、后缀及子库检查文件是否存在
@@ -87,6 +90,34 @@ public class SublibraryFilesService {
         return sublibraryFilesEntityList;
     }
 
+    // 子任务入库
+    public void stockIn(SubtaskEntity subtaskEntity){
+        List<SubtaskFilesEntity> subtaskFilesEntityList = subtaskFilesRepository.findBySubTaskEntity(subtaskEntity);    // 子任务下的文件
+        List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
+        for(SubtaskFilesEntity subtaskFilesEntity : subtaskFilesEntityList){
+            // 子任务文件属于几个子库
+            Set<SublibraryEntity> sublibraryEntitySet = subtaskFilesEntity.getSublibraryEntitySet();
+            for(SublibraryEntity sublibraryEntity : sublibraryEntitySet){
+                SublibraryFilesEntity sublibraryFilesEntity = new SublibraryFilesEntity();
+                sublibraryFilesEntity.setName(subtaskFilesEntity.getName());
+                sublibraryFilesEntity.setPostfix(subtaskFilesEntity.getPostfix());
+                sublibraryFilesEntity.setType(subtaskFilesEntity.getType());
+                sublibraryFilesEntity.setSecretClass(subtaskFilesEntity.getSecretClass());
+                sublibraryFilesEntity.setProductNo(subtaskFilesEntity.getProductNo());
+                sublibraryFilesEntity.setFileNo(subtaskFilesEntity.getFileNo());
+                sublibraryFilesEntity.setVersion(subtaskFilesEntity.getVersion());
+                sublibraryFilesEntity.setIfApprove(true);
+                sublibraryFilesEntity.setIfReject(false);
+                sublibraryFilesEntity.setManyCounterSignState(0);
+                sublibraryFilesEntity.setUserEntity(subtaskEntity.getUserEntity());
+                sublibraryFilesEntity.setFileEntity(subtaskFilesEntity.getFileEntity());
+                sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
+                sublibraryFilesEntityList.add(sublibraryFilesEntity);
+            }
+        }
+        sublibraryFilesRepository.saveAll(sublibraryFilesEntityList);
+
+    }
     /*@CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
     public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, String userId, List<FileMetaEntity> fileMetaEntityList) {
         if(!sublibraryService.hasSublibraryById(sublibraryId)){

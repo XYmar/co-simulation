@@ -14,9 +14,9 @@ import java.util.List;
 @Repository
 public interface ProcessNodeRepository extends JpaRepository<ProcessNodeEntity, String> {
 
-    ProcessNodeEntity findByProjectEntityAndParentSign(ProjectEntity projectEntity, String parentSign);
+    List<ProcessNodeEntity> findByProjectEntityAndParentSign(ProjectEntity projectEntity, String parentSign);
 
-    ProcessNodeEntity findByProjectEntityAndSelfSign(ProjectEntity projectEntity, String selfSign);
+    List<ProcessNodeEntity> findByProjectEntityAndSelfSign(ProjectEntity projectEntity, String selfSign);
 
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
