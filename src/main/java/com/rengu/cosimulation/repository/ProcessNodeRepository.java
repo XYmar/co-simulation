@@ -16,7 +16,7 @@ public interface ProcessNodeRepository extends JpaRepository<ProcessNodeEntity, 
 
     List<ProcessNodeEntity> findByProjectEntityAndParentSign(ProjectEntity projectEntity, String parentSign);
 
-    List<ProcessNodeEntity> findByProjectEntityAndSelfSign(ProjectEntity projectEntity, String selfSign);
+    ProcessNodeEntity findByProjectEntityAndSelfSign(ProjectEntity projectEntity, String selfSign);
 
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 

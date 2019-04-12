@@ -124,10 +124,13 @@ public class SubtaskService {
     // 根据子任务查询其父节点任务是否全部完成
     public boolean ifAllParentSubtasksOver(SubtaskEntity subtaskEntity){
         boolean ifOver = false;
-        // 根据子任务查找对应的节点(多个)  其实只有一个块
-        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity).get(0);
-        // 查找该块对应的父节点
-        List<ProcessNodeEntity> parentProcessNodeEntityList = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity.getParentSign());
+        // 根据子任务查找对应的父节点(多个)
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
+        // 查找该块对应的各个父节点
+        List<ProcessNodeEntity> parentProcessNodeEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity1 : processNodeEntityList){
+            parentProcessNodeEntityList.add(processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign()));
+        }
         if(parentProcessNodeEntityList.size() == 0){             // 无父节点时
             ifOver = true;
         }else{
