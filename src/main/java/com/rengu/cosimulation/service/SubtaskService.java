@@ -176,7 +176,10 @@ public class SubtaskService {
     public SubtaskEntity arrangeAssessorsByIds(String subtaskId, String userId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
         UserEntity userEntity = userService.getUserById(userId);
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
-        if(!ifAllParentSubtasksOver(subtaskEntity)){
+        if(subtaskEntity.getState() == ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){             // 若是正在申请二次修改（未通过申请）
+            throw new ResultException(ResultCode.MODIFY_APPROVE_NOT_PASS_ERROR);
+        }
+        if(!ifAllParentSubtasksOver(subtaskEntity)){                            // 父节点未全部完成
             throw new ResultException(ResultCode.SUBTASK_PARENT_NOT_ALL_OVER);
         }
         if (!userEntity.getId().equals(subtaskEntity.getUserEntity().getId())) {           // 只有子任务负责人才可选择审核人
@@ -518,4 +521,5 @@ public class SubtaskService {
         }
         return subtaskRepository.save(subtaskEntity);
     }
+
 }

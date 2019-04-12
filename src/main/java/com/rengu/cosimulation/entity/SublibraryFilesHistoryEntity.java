@@ -43,7 +43,7 @@ public class SublibraryFilesHistoryEntity implements Serializable {
     @JoinColumn(name = "subibraryEntity_id")
     private SublibraryEntity sublibraryEntity;
     @ManyToOne
-    @JoinColumn(name = "subibraryFilesEntity_id")
+    @JoinColumn(name = "sublibraryFilesEntity_id")
     private SublibraryFilesEntity leastSublibraryFilesEntity;                 // 历史文件对应的子库文件
     @ManyToMany
     private Set<UserEntity> proofreadUserSet;  // 校对人

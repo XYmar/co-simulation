@@ -444,7 +444,7 @@ public class SublibraryFilesService {
         }else{                 // 二次修改
             // 判断文件是否通过二次修改申请
             if(!sublibraryFilesEntity.isIfModifyApprove()){
-                throw new ResultException(ResultCode.SUBLIBRARY_FILE_MODIFY_APPROVE_NOT_PASS_ERROR);
+                throw new ResultException(ResultCode.MODIFY_APPROVE_NOT_PASS_ERROR);
             }
             // 修改前保存此文件历史
             saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, false);
