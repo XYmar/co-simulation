@@ -69,7 +69,6 @@ public class SubtaskController {
         return ResultUtils.success(subtaskService.findToBeAuditedsSubtasksByUserId(userId));
     }
 
-
     // 根据子任务id为子任务添加审核员以及会签状态
     @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
     public ResultEntity arrangeAssessorsByIds(@PathVariable(value = "subtaskId") String subtaskId, String userId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
@@ -86,12 +85,6 @@ public class SubtaskController {
     @PatchMapping(value = "/{subtaskId}/subtaskAudit")
     public ResultEntity subtaskAudit(@PathVariable(value = "subtaskId") String subtaskId, String userId, SubtaskEntity subtaskEntityArgs, SubtaskAuditEntity subtaskAuditEntityArgs) {
         return ResultUtils.success(subtaskService.subtaskAudit(subtaskId, userId, subtaskEntityArgs, subtaskAuditEntityArgs));
-    }
-
-    //  根据当前审核状态的ID查询审核意见
-    @GetMapping(value = "/{assessStateId}/illustration")
-    public ResultEntity illustrationByAssessStateIds(@PathVariable(value = "assessStateId") String assessStateId) {
-        return ResultUtils.success(subtaskService.illustrationByAssessStateIds(assessStateId));
     }
 
     //  根据子任务Id查询审核所有的流程
