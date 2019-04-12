@@ -41,7 +41,7 @@ public class SubtaskController {
 
     // 根据id查询子任务
     @GetMapping(value = "/{subtaskId}")
-    public ResultEntity getSubtaskById(String subtaskId){
+    public ResultEntity getSubtaskById(@PathVariable(value = "subtaskId") String subtaskId){
         return ResultUtils.success(subtaskService.getSubtaskById(subtaskId));
     }
 
