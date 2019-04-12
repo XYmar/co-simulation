@@ -14,12 +14,12 @@ import java.util.List;
 @Repository
 public interface ProcessNodeRepository extends JpaRepository<ProcessNodeEntity, String> {
 
-    List<ProcessNodeEntity> findByProjectEntityAndParentSign(ProjectEntity projectEntity, String parentSign);
+    ProcessNodeEntity findByProjectEntityAndParentSign(ProjectEntity projectEntity, String parentSign);
 
-    List<ProcessNodeEntity> findByProjectEntityAndSelfSign(ProjectEntity projectEntity, String selfSign);
+    ProcessNodeEntity findByProjectEntityAndSelfSign(ProjectEntity projectEntity, String selfSign);
 
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
     List<ProcessNodeEntity> findByProjectEntity(ProjectEntity projectEntity);
-    ProcessNodeEntity findBySubtaskEntity(SubtaskEntity subtaskEntity);
+    List<ProcessNodeEntity> findBySubtaskEntity(SubtaskEntity subtaskEntity);
 }

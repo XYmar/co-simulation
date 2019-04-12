@@ -59,6 +59,7 @@ public enum ResultCode {
     SUBTASK_STATE_NOT_FOUND_ERROR(22009,"请传入审核结果"),
     SUBTASK_PARENT_NOT_ALL_OVER(22010,"请等待上一流程结束再提交"),
     SUBTASK_HAVE_NOT_START(22011,"此任务还未开始"),
+    SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE(22012,"无权指定子任务负责人"),
 
     // 子任务文件相关  2300
     SUBTASK_FILE_ID_NOT_FOUND_ERROR(23001,"未发现该子任务文件ID"),

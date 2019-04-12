@@ -47,8 +47,8 @@ public class SubtaskController {
 
     // 修改子任务(执行者，子任务，节点)
     @PatchMapping(value = "/{subtaskId}/byProject/{projectId}")
-    public ResultEntity updateSubtaskById(@PathVariable(value = "projectId") String projectId, @PathVariable(value = "subtaskId") String subtaskId, String userId, String finishTime){
-        return ResultUtils.success(subtaskService.updateSubtaskById(projectId, subtaskId, userId, finishTime));
+    public ResultEntity updateSubtaskById(@PathVariable(value = "projectId") String projectId, @PathVariable(value = "subtaskId") String subtaskId, String loginUserId, String userId, String finishTime){
+        return ResultUtils.success(subtaskService.updateSubtaskById(projectId, subtaskId, loginUserId, userId, finishTime));
     }
 
     // 删除子任务

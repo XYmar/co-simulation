@@ -68,22 +68,16 @@ public class SubtaskService {
     }
 
     // 根据id修改子任务-->子任务负责人密级大于等于项目密级
-    public SubtaskEntity updateSubtaskById(String projectId, String subtaskById, String userId, String finishTime) {
-        if (!projectService.hasProjectById(projectId)) {
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
+    public SubtaskEntity updateSubtaskById(String projectId, String subtaskById, String loginUserId, String userId, String finishTime) {
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        if (!userService.hasUserById(userId)) {
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
         UserEntity userEntity = userService.getUserById(userId);
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
+        if(!projectEntity.getPic().getId().equals(loginUserId)){
+            throw new ResultException(ResultCode.SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE);
+        }
         if (userEntity.getSecretClass() < projectEntity.getSecretClass()) {
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
         }
-        if (!hasSubtaskById(subtaskById)) {
-            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
-        }
-        SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
         subtaskEntity.setUserEntity(userEntity);
         if (!StringUtils.isEmpty(finishTime)) {
             subtaskEntity.setFinishTime(finishTime);
@@ -102,17 +96,19 @@ public class SubtaskService {
         return subtaskEntity;
     }
 
-
     // 根据子任务查询其后续任务
     public List<SubtaskEntity> findNextSubtasksById(SubtaskEntity subtaskEntity){
-        // 根据子任务查找对应的节点
-        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity);
-        // 查找该节点对应的子节点
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(subtaskEntity.getProjectEntity(), processNodeEntity.getSelfSign());
+        // 根据子任务查找对应的节点(多个)
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
+        // 查找每个节点对应的子节点
+        List<ProcessNodeEntity> childProcessNodeEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+            childProcessNodeEntityList.add(processNodeRepository.findByProjectEntityAndParentSign(subtaskEntity.getProjectEntity(), processNodeEntity.getSelfSign()));
+        }
         // 获取后续子任务
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        if(processNodeEntityList.size() > 0){
-            for(ProcessNodeEntity processNodeEntity1 : processNodeEntityList){
+        if(childProcessNodeEntityList.size() > 0){
+            for(ProcessNodeEntity processNodeEntity1 : childProcessNodeEntityList){
                 subtaskEntityList.add(processNodeEntity1.getSubtaskEntity());
             }
         }
@@ -123,14 +119,17 @@ public class SubtaskService {
     // 根据子任务查询其父节点任务是否全部完成
     public boolean ifAllParentSubtasksOver(SubtaskEntity subtaskEntity){
         boolean ifOver = false;
-        // 根据子任务查找对应的节点
-        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity);
-        // 查找该节点对应的父节点
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity.getParentSign());
-        if(processNodeEntityList.size() == 0){             // 无父节点时
+        // 根据子任务查找对应的节点(多个)
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
+        // 查找每个节点对应的父节点
+        List<ProcessNodeEntity> parentProcessNodeEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+            parentProcessNodeEntityList.add(processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity.getParentSign()));
+        }
+        if(parentProcessNodeEntityList.size() == 0){             // 无父节点时
             ifOver = true;
         }else{
-            for(ProcessNodeEntity processNodeEntity1 : processNodeEntityList){
+            for(ProcessNodeEntity processNodeEntity1 : parentProcessNodeEntityList){
                 ifOver = false;
                 if(processNodeEntity1.getSubtaskEntity().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
                     ifOver = true;
