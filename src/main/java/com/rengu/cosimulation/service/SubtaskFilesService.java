@@ -112,7 +112,7 @@ public class SubtaskFilesService {
     }
 
     // 根据子任务id查询子任务下的文件
-    public List<SubtaskFilesEntity> getSubtaskFilesByProDesignId(String subtaskId) {
+    public List<SubtaskFilesEntity> getSubtaskFilesBySubtaskId(String subtaskId) {
         if(!subtaskService.hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }

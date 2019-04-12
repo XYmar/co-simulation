@@ -77,8 +77,8 @@ public class SubtaskController {
 
     // 根据子任务id查询子任务下的文件
     @GetMapping(value = "/{subtaskId}/files")
-    public ResultEntity getSubtaskFilesByProDesignId(@PathVariable(value = "subtaskId") String subtaskId) {
-        return ResultUtils.success(subtaskFilesService.getSubtaskFilesByProDesignId(subtaskId));
+    public ResultEntity getSubtaskFilesBySubtaskId(@PathVariable(value = "subtaskId") String subtaskId) {
+        return ResultUtils.success(subtaskFilesService.getSubtaskFilesBySubtaskId(subtaskId));
     }
 
     // 根据子任务id审核子任务
