@@ -51,8 +51,8 @@ public class SubtaskFilesController {
 
     // 根据子任务文件id修改文件基本信息
     @PatchMapping(value = "/{subtaskFileId}")
-    public ResultEntity updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFilesEntity subtaskFilesEntity){
-        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFilesEntity));
+    public ResultEntity updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFilesEntity subtaskFilesEntity, String sublibraryId){
+        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFilesEntity, sublibraryId));
     }
 
     // 根据子任务文件id删除文件

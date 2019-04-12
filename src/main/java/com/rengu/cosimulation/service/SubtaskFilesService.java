@@ -157,8 +157,8 @@ public class SubtaskFilesService {
         return exportFile;
     }
 
-    // 根据子任务文件id修改文件基本信息(类型、密级、代号)
-    public SubtaskFilesEntity updateSubtaskFileId(String subtaskFileId, SubtaskFilesEntity subtaskFilesEntityArgs) {
+    // 根据子任务文件id修改文件基本信息(类型、密级、代号、所属库)
+    public SubtaskFilesEntity updateSubtaskFileId(String subtaskFileId, SubtaskFilesEntity subtaskFilesEntityArgs, String sublibraryId) {
         if(!hasSubtaskFileById(subtaskFileId)){
             throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
@@ -178,6 +178,14 @@ public class SubtaskFilesService {
         if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getFileNo())){
             subtaskFilesEntity.setFileNo(subtaskFilesEntityArgs.getFileNo());
         }
+        if(!StringUtils.isEmpty(sublibraryId)){
+            SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(sublibraryId);      // 子库
+
+            Set<SublibraryEntity> sublibraryEntities = new HashSet<>();         // 修改所属库为一个
+            sublibraryEntities.add(sublibraryEntity);
+            subtaskFilesEntity.setSublibraryEntitySet(sublibraryEntities);
+        }
+
         return subtaskFilesRepository.save(subtaskFilesEntity);
     }
 
