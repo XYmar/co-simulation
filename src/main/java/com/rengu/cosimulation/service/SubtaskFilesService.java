@@ -4,6 +4,7 @@ import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SubtaskFilesRepository;
+import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -58,14 +59,11 @@ public class SubtaskFilesService {
     // 根据子任务id创建文件
     @CacheEvict(value = "SubtaskFiles_Cache", allEntries = true)
     public List<SubtaskFilesEntity> saveSubtaskFilesByProDesignId(String subtaskId, String projectId, List<FileMetaEntity> fileMetaEntityList) {
-        if(!projectService.hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        if(!subtaskService.hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
-        }
         SubtaskEntity subTaskEntity = subtaskService.getSubtaskById(subtaskId);
+        if(subTaskEntity.getState() != ApplicationConfig.SUBTASK_START){                   // 上传文件前判断子任务是否已在进行中
+            throw new ResultException(ResultCode.SUBTASK_HAVE_NOT_START);
+        }
         List<SubtaskFilesEntity> subtaskFilesEntityList = new ArrayList<>();
         for (FileMetaEntity fileMetaEntity : fileMetaEntityList) {
             String path = fileMetaEntity.getRelativePath().split("/")[1];
@@ -114,7 +112,7 @@ public class SubtaskFilesService {
     }
 
     // 根据子任务id查询子任务下的文件
-    public List<SubtaskFilesEntity> getSubtaskFilesByProDesignId(String subtaskId) {
+    public List<SubtaskFilesEntity> getSubtaskFilesBySubtaskId(String subtaskId) {
         if(!subtaskService.hasSubtaskById(subtaskId)){
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
@@ -159,8 +157,8 @@ public class SubtaskFilesService {
         return exportFile;
     }
 
-    // 根据子任务文件id修改文件基本信息(类型、密级、代号)
-    public SubtaskFilesEntity updateSubtaskFileId(String subtaskFileId, SubtaskFilesEntity subtaskFilesEntityArgs) {
+    // 根据子任务文件id修改文件基本信息(类型、密级、代号、所属库)
+    public SubtaskFilesEntity updateSubtaskFileId(String subtaskFileId, SubtaskFilesEntity subtaskFilesEntityArgs, String sublibraryId) {
         if(!hasSubtaskFileById(subtaskFileId)){
             throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
@@ -180,6 +178,14 @@ public class SubtaskFilesService {
         if(!StringUtils.isEmpty(subtaskFilesEntityArgs.getFileNo())){
             subtaskFilesEntity.setFileNo(subtaskFilesEntityArgs.getFileNo());
         }
+        if(!StringUtils.isEmpty(sublibraryId)){
+            SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(sublibraryId);      // 子库
+
+            Set<SublibraryEntity> sublibraryEntities = new HashSet<>();         // 修改所属库为一个
+            sublibraryEntities.add(sublibraryEntity);
+            subtaskFilesEntity.setSublibraryEntitySet(sublibraryEntities);
+        }
+
         return subtaskFilesRepository.save(subtaskFilesEntity);
     }
 

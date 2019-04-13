@@ -23,4 +23,7 @@ public class FileMetaEntity implements Serializable {
     private String productNo;                // 产品型号
     private String fileNo;                   // 文件图号
     private String sublibraryId;             // 子库id
+    private String version;                  // 文件版本
+    boolean ifDirectModify;                  // 是否直接修改
+    boolean ifBackToStart;                   // 直接修改的话，是否回到第一个审批流程
 }

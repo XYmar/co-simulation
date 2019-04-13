@@ -1,12 +1,9 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.AllIllustrationEntity;
-import com.rengu.cosimulation.entity.ProjectEntity;
-import com.rengu.cosimulation.entity.SubtaskEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
-import com.rengu.cosimulation.repository.AllIllustrationRepository;
+import com.rengu.cosimulation.repository.SubtaskAuditRepository;
 import com.rengu.cosimulation.repository.ProcessNodeRepository;
 import com.rengu.cosimulation.repository.SubtaskRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
@@ -29,16 +26,18 @@ public class SubtaskService {
     private final ProjectService projectService;
     private final UserService userService;
     private final ProcessNodeRepository processNodeRepository;
-    private final AllIllustrationRepository allIllustrationRepository;
+    private final SubtaskAuditRepository subtaskAuditRepository;
+    private final SublibraryFilesService sublibraryFilesService;
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository processNodeRepository, AllIllustrationRepository allIllustrationRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository processNodeRepository, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
         this.processNodeRepository = processNodeRepository;
-        this.allIllustrationRepository = allIllustrationRepository;
+        this.subtaskAuditRepository = subtaskAuditRepository;
+        this.sublibraryFilesService = sublibraryFilesService;
     }
 
     // 根据项目id查询所有子任务
@@ -71,22 +70,16 @@ public class SubtaskService {
     }
 
     // 根据id修改子任务-->子任务负责人密级大于等于项目密级
-    public SubtaskEntity updateSubtaskById(String projectId, String subtaskById, String userId, String finishTime) {
-        if (!projectService.hasProjectById(projectId)) {
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
+    public SubtaskEntity updateSubtaskById(String projectId, String subtaskById, String loginUserId, String userId, String finishTime) {
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        if (!userService.hasUserById(userId)) {
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
         UserEntity userEntity = userService.getUserById(userId);
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
+        if(!projectEntity.getPic().getId().equals(loginUserId)){
+            throw new ResultException(ResultCode.SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE);
+        }
         if (userEntity.getSecretClass() < projectEntity.getSecretClass()) {
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
         }
-        if (!hasSubtaskById(subtaskById)) {
-            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
-        }
-        SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
         subtaskEntity.setUserEntity(userEntity);
         if (!StringUtils.isEmpty(finishTime)) {
             subtaskEntity.setFinishTime(finishTime);
@@ -105,55 +98,55 @@ public class SubtaskService {
         return subtaskEntity;
     }
 
-    // 根据子任务id为子任务添加审核员
-//    public SubtaskEntity arrangeAssessorsById(String subtaskId, String userId, String[] userIds) {
-//        if(!userService.hasUserById(userId)){
-//            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-//        }
-//        UserEntity userEntity = userService.getUserById(userId);
-//        if(!hasSubtaskById(subtaskId)){
-//            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
-//        }
-//        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
-//        if(!userEntity.getId().equals(subtaskEntity.getUserEntity().getId())){
-//            throw new ResultException(ResultCode.SUBTASK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
-//        }
-//        if(userIds.length == 0){
-//            throw new ResultException(ResultCode.SUBTASK_ASSESSORS_NOT_FOUND_ERROR);
-//        }
-//
-//        List<UserEntity> userEntityList = new ArrayList<>();
-//        for (String id : userIds) {
-//            userEntityList.add(userService.getUserById(id));
-//        }
-//        HashSet<UserEntity> userEntityHashSet = new HashSet<>(userEntityList);
-//
-//        subtaskEntity.setAssessorSet(userEntityHashSet);
-//        return subtaskRepository.save(subtaskEntity);
-//    }
+    // 根据子任务开启其后续任务
+    public void startNextSubtasksById(SubtaskEntity subtaskEntity){
+        // 根据子任务查找对应的节点(多个)  其实只有一个块
+        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity).get(0);
+        // 查找子节点
+        List<ProcessNodeEntity> childProcessNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(subtaskEntity.getProjectEntity(), processNodeEntity.getSelfSign());
 
-    // 根据审核人id查询待其审核的子任务
-//    public List<SubtaskEntity> findSubtasksByAssessor(UserEntity userEntity){
-//        return subtaskRepository.findByAssessorSetContaining(userEntity);
-//    }
-
-    // 根据子任务id查询其后续任务
-    /*public List<SubtaskEntity> findNextSubtasksById(String subtaskId){
-        if(!hasSubtaskById(subtaskId)){
-            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
-        }
-        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
-        // 查询以此节点为父节点的节点
-        String sign = subtaskEntity.getProcessNodeEntity().getSelfSign();
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByParentSign(sign);
-
+        // 获取后续子任务
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
+        if(childProcessNodeEntityList.size() > 0){
+            for(ProcessNodeEntity processNodeEntity1 : childProcessNodeEntityList){
+                subtaskEntityList.add(processNodeEntity1.getSubtaskEntity());
+            }
         }
 
-        return subtaskEntityList;
-    }*/
+        if(subtaskEntityList.size() > 0){                     // 如果后续有子任务的话则开启子任务
+            for(SubtaskEntity subtaskEntity1 : subtaskEntityList){
+                subtaskEntity1.setState(ApplicationConfig.SUBTASK_START);
+            }
+            subtaskRepository.saveAll(subtaskEntityList);
+        }
+    }
+
+    // 根据子任务查询其父节点任务是否全部完成
+    public boolean ifAllParentSubtasksOver(SubtaskEntity subtaskEntity){
+        boolean ifOver = false;
+        // 根据子任务查找对应的节点(多个)
+        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
+        // 查找该块对应的各个父节点
+        List<ProcessNodeEntity> parentProcessNodeEntityList = new ArrayList<>();
+        for(ProcessNodeEntity processNodeEntity1 : processNodeEntityList){
+            ProcessNodeEntity parentProcessNodeEntity = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign());
+            if(parentProcessNodeEntity != null){
+                parentProcessNodeEntityList.add(parentProcessNodeEntity);
+            }
+        }
+        if(parentProcessNodeEntityList.size() == 0){             // 无父节点时
+            ifOver = true;
+        }else{
+            for(ProcessNodeEntity processNodeEntity1 : parentProcessNodeEntityList){
+                ifOver = false;
+                if(processNodeEntity1.getSubtaskEntity().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
+                    ifOver = true;
+                }
+            }
+        }
+
+        return ifOver;
+    }
 
     // 根据子任务id审核子任务
     /*public SubtaskEntity assessSubtaskById(String subtaskById, SubtaskEntity subtaskEntityArgs){
@@ -178,104 +171,194 @@ public class SubtaskService {
         }
         return subtaskRepository.save(subtaskEntity);
     }*/
-    // 根据子任务id为子任务添加审核员
-    public SubtaskEntity arrangeAssessorsByIds(String subtaskId, String userId, int countersignState, String[] collatorIds, String[] auditIds, String[] countersignIds, String[] approverIds) {
-        if (!userService.hasUserById(userId)) {
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
+
+    // 根据子任务id为子任务选择审核模式及四类审核人
+    public SubtaskEntity arrangeAssessorsByIds(String subtaskId, String userId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
         UserEntity userEntity = userService.getUserById(userId);
-        if (!hasSubtaskById(subtaskId)) {
-            throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
-        }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
-        if (!userEntity.getId().equals(subtaskEntity.getUserEntity().getId())) {
+        if(subtaskEntity.getState() == ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){             // 若是正在申请二次修改（未通过申请）
+            throw new ResultException(ResultCode.MODIFY_APPROVE_NOT_PASS_ERROR);
+        }
+        if(!ifAllParentSubtasksOver(subtaskEntity)){                            // 父节点未全部完成
+            throw new ResultException(ResultCode.SUBTASK_PARENT_NOT_ALL_OVER);
+        }
+        if (!userEntity.getId().equals(subtaskEntity.getUserEntity().getId())) {           // 只有子任务负责人才可选择审核人
             throw new ResultException(ResultCode.SUBTASK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
         }
-        if (ArrayUtils.isEmpty(collatorIds)) {
-            throw new ResultException(ResultCode.PRODESIGN_LINK_CHECK_NOT_FOUND_ERROR);
+        if(StringUtils.isEmpty(String.valueOf(auditMode))){
+            throw new ResultException(ResultCode.AUDITMODE_NOT_FOUND_ERROR);
         }
-        if (ArrayUtils.isEmpty(auditIds)) {
-            throw new ResultException(ResultCode.SUBTASK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
+        if (ArrayUtils.isEmpty(proofreadUserIds)) {
+            throw new ResultException(ResultCode.PROOFREADUSERS_NOT_FOUND_ERROR);
         }
-        if (ArrayUtils.isEmpty(approverIds)) {
-            throw new ResultException(ResultCode.PRODESIGN_LINK_APPROVER_NOT_FOUND_ERROR);
+        if (ArrayUtils.isEmpty(auditUserIds)) {
+            throw new ResultException(ResultCode.AUDITUSERS_NOT_FOUND_ERROR);
         }
-        //  储存核对人信息
-        subtaskEntity.setCollatorSet(saveAssessInfo(collatorIds));
-        subtaskRepository.save(subtaskEntity);
-        //  储存审核人信息
-        subtaskEntity.setAuditorSet(saveAssessInfo(auditIds));
-        subtaskRepository.save(subtaskEntity);
-        //  储存会签人信息
-        subtaskEntity.setCountersignState(countersignState);
-        if (subtaskEntity.getCountersignState() == 3 || subtaskEntity.getCountersignState() == 2) {
-            if (subtaskEntity.getCountersignState() == 3) {
-                subtaskEntity.setManyCountersignState(1);
+        if(auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN){
+            if(ArrayUtils.isEmpty(countersignUserIds)){
+                throw new ResultException(ResultCode.COUNTERSIGNUSERS_NOT_FOUND_ERROR);
             }
-            subtaskEntity.setCountersignSet(saveAssessInfo(countersignIds));
-            subtaskRepository.save(subtaskEntity);
         }
-
-        //  储存批准人信息
-
-        subtaskEntity.setApporverSet(saveAssessInfo(approverIds));
+        if (ArrayUtils.isEmpty(approveUserIds)) {
+            throw new ResultException(ResultCode.APPROVEUSERS_NOT_FOUND_ERROR);
+        }
+        subtaskEntity.setProofreadUserSet(idsToSet(proofreadUserIds));
+        subtaskEntity.setAuditUserSet(idsToSet(auditUserIds));
+        if(auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN){
+            subtaskEntity.setCountersignUserSet(idsToSet(countersignUserIds));
+        }
+        subtaskEntity.setApproveUserSet(idsToSet(approveUserIds));
+        subtaskEntity.setAuditMode(auditMode);
+        subtaskEntity.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
         return subtaskRepository.save(subtaskEntity);
     }
 
-    private Set<UserEntity> saveAssessInfo(String[] assessIds) {
-        List<UserEntity> assessIdList = new ArrayList<>();
-        for (String countersignId : assessIds) {
-            assessIdList.add(userService.getUserById(countersignId));
+    // 根据用户id数组，将用户数组转为set集合
+    private Set<UserEntity> idsToSet(String[] ids){
+        Set<UserEntity> userEntities = new HashSet<>();
+        if(!ArrayUtils.isEmpty(ids)){
+            for(String id : ids){
+                userEntities.add(userService.getUserById(id));
+            }
         }
-        HashSet<UserEntity> assessIdSet = new HashSet<>(assessIdList);
-        return assessIdSet;
+        return userEntities;
     }
 
-    // 根据审核人id查询待其核对的子任务
-    public Map<String, Object> findSubtasksByAllAssessor(UserEntity userEntity) {
-        List<SubtaskEntity> collatorSubtaskEntityList = subtaskRepository.findByCollatorSetContaining(userEntity);
-        List<SubtaskEntity> auditorSubtaskEntityList = subtaskRepository.findByAuditorSetContaining(userEntity);
-        List<SubtaskEntity> countersignSubtaskEntityList = subtaskRepository.findByCountersignSetContaining(userEntity);
-        List<SubtaskEntity> apporverSubtaskEntityList = subtaskRepository.findByApporverSetContaining(userEntity);
-        List<AllIllustrationEntity> allIllustrationEntityList = allIllustrationRepository.findByUserEntity(userEntity);
-        Map<String, Object> map = new HashMap<>();
-        map.put("collatorList", collatorSubtaskEntityList);
-        map.put("auditorList", auditorSubtaskEntityList);
-        map.put("countersignList", countersignSubtaskEntityList);
-        map.put("apporverList", apporverSubtaskEntityList);
-        map.put("userEntityList", allIllustrationEntityList);
-        return map;
+    // 根据用户id查询待校对、待审核、待会签、待批准
+    public Map<String, List> findToBeAuditedsSubtasksByUserId(String userId) {
+        UserEntity userEntity = userService.getUserById(userId);
+        Map<String, List> subtaskToBeAudited = new HashMap<>();
+        subtaskToBeAudited.put("proofreadSubtask", subtaskRepository.findByProofreadUserSetContaining(userEntity));
+        subtaskToBeAudited.put("auditSubtask", subtaskRepository.findByAuditUserSetContaining(userEntity));
+        subtaskToBeAudited.put("countersignSubtask", subtaskRepository.findByCountersignUserSetContaining(userEntity));
+        subtaskToBeAudited.put("approveSubtask", subtaskRepository.findByApproveUserSet(userEntity));
+        subtaskToBeAudited.put("alreadyAudit", subtaskAuditRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBTASK_COUNTERSIGN));
+        return subtaskToBeAudited;
     }
 
-    //  根据子任务审核id审核任务
+    // 审核操作
+    public SubtaskEntity subtaskAudit(String subtaskId, String userId, SubtaskEntity subtaskEntityArgs, SubtaskAuditEntity subtaskAuditEntityArgs){
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        UserEntity userEntity = userService.getUserById(userId);             // 登录的用户
 
-    /**
-     * 子任务文件流程控制：
-     * 当前审核结果： pass --> 当前审核人：自己--> 报错，无通过权限
-     * 其他人--> 设置子任务文件进入下一模式：
-     * 当前阶段为审核时-->  1)无会签：审核-->批准
-     * 2)一人/多人会签：审核-->会签
-     * 当前阶段为会签时-->  1)一人会签：会签-->批准（同上）
-     * *                                                           2)多人会签：多人审核通过审核-->批准
-     * 若当前用户已会签过则报错，您已会签过
-     * 当前阶段为批准时-->  修改子文件的通过状态为true
-     * no   --> 停留当前模式   （--> 子库文件状态改为进行中）
-     */
-    public SubtaskEntity assessSubtaskByIds(String subtaskById, SubtaskEntity subtaskEntityArgs, UserEntity userEntity) {
+        if(StringUtils.isEmpty(String.valueOf(subtaskEntityArgs.getState()))){
+            throw new ResultException(ResultCode.STATE_NOT_FOUND_ERROR);
+        }
+        if(subtaskEntityArgs.getState() == 3){        // 校对中设置状态为校对
+            subtaskEntity.setState(ApplicationConfig.SUBTASK_PROOFREAD);
+        }
+        if(subtaskEntityArgs.getState() != subtaskEntity.getState()){
+            throw new ResultException(ResultCode.CURRENT_PROGRESS_NOT_ARRIVE_ERROR);
+        }
+
+        SubtaskAuditEntity subtaskAuditEntity = new SubtaskAuditEntity();      // 审核详情
+        /**
+         *  子任务流程控制：
+         *  当前审核结果： pass --> 当前审核人：自己--> 报错，无通过权限
+         *                                      其他人--> 设置子任务进入下一模式：
+         *                                                当前阶段为审核时-->  1)无会签：审核-->批准
+         *                                                                     2)一人/多人会签：审核-->会签
+         *                                                当前阶段为会签时-->  1)一人会签：会签-->批准（同上）
+         *          *                                                          2)多人会签：多人审核通过审核-->批准
+         *                                                                                 若当前用户已会签过则报错，您已会签过
+         *                                                当前阶段为批准时-->  (1)修改子任务的通过状态为true； 设置任务状态为审批结束
+         *                                                                     (2)将此子任务的后续任务状态改为进行中
+         *                                                    @TODO                 (3)将此子任务的所有文件分别入库
+         *                 no   --> 停留当前模式   --> 设置子任务状态为审批结束
+         *                                             记录当前驳回的阶段
+         * */
+        // 若当前用户已审批过过则报错，您已执行过审批操作
+        if(subtaskAuditRepository.existsBySubtaskEntityAndUserEntityAndStateAndIfOver(subtaskEntity,userEntity,subtaskEntityArgs.getState(), false)){
+            throw new ResultException(ResultCode.USER_ALREADY_COUNTERSIGN_ERROR);
+        }
+
+        if(subtaskAuditEntityArgs.isIfPass()){
+            if(subtaskEntity.getUserEntity().getId().equals(userId)){    // 自己无权通过
+                throw new ResultException(ResultCode.USER_PASS_DENIED_ERROR);
+            }
+            if(subtaskEntityArgs.getState() == ApplicationConfig.SUBTASK_AUDIT){               // 当前为审核
+                if(subtaskEntityArgs.getAuditMode() == ApplicationConfig.AUDIT_NO_COUNTERSIGN){  // 无会签
+                    subtaskEntity.setState(ApplicationConfig.SUBTASK_APPROVE);
+                }else{
+                    subtaskEntity.setState(ApplicationConfig.SUBTASK_COUNTERSIGN);
+                }
+                subtaskAuditEntity.setState(subtaskEntityArgs.getState());
+            }else if(subtaskEntityArgs.getState() == ApplicationConfig.SUBTASK_COUNTERSIGN && subtaskEntityArgs.getAuditMode() == ApplicationConfig.AUDIT_MANY_COUNTERSIGN){
+                // 当前为会签 且模式为多人会签
+                if((subtaskEntity.getManyCounterSignState() + 1) != subtaskEntity.getCountersignUserSet().size()){
+                    subtaskEntity.setManyCounterSignState(subtaskEntity.getManyCounterSignState() + 1);
+                }else{                          // 所有人都已会签过
+                    subtaskEntity.setState(subtaskEntityArgs.getState() + 1);
+                }
+                subtaskAuditEntity.setState(subtaskEntityArgs.getState());
+            }else if(subtaskEntityArgs.getState() == ApplicationConfig.SUBTASK_APPROVE){                   // 当前为批准，即批准通过后
+                subtaskEntity.setIfApprove(true);                                                          // 通过审核
+                subtaskEntity.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                              // 审批结束
+                subtaskAuditEntity.setState(subtaskEntityArgs.getState());
+
+                // 子任务文件入库
+                sublibraryFilesService.stockIn(subtaskEntity);
+
+                // 开启后续子任务
+                startNextSubtasksById(subtaskEntity);
+            }else{
+                subtaskEntity.setState(subtaskEntityArgs.getState() + 1);
+                subtaskAuditEntity.setState(subtaskEntityArgs.getState());                                 // 在哪步驳回
+            }
+        }else{                // 驳回
+            subtaskEntity.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                                  // 审批结束
+            subtaskAuditEntity.setState(subtaskEntityArgs.getState());
+            subtaskEntity.setRejectState(subtaskEntityArgs.getState());
+
+            subtaskEntity.setIfReject(true);           // 设置驳回状态为true
+        }
+        /**
+         * 审核模式、审核阶段、审核结果、审核人、审核意见、当前步骤结束
+         * */
+        subtaskAuditEntity.setIfPass(subtaskAuditEntityArgs.isIfPass());               // 审核结果
+        subtaskAuditEntity.setUserEntity(userEntity);                                          // 审核人
+        subtaskAuditEntity.setSubtaskEntity(subtaskEntity);                    // 审核详情所属子库文件
+        subtaskAuditEntity.setAuditDescription(subtaskAuditEntityArgs.getAuditDescription());   // 审核意见
+        subtaskAuditRepository.save(subtaskAuditEntity);
+
+        // 批准通过后 或 驳回后, 将详情改为已结束
+        if(!(subtaskAuditEntityArgs.isIfPass()) || subtaskEntityArgs.getState() == ApplicationConfig.SUBTASK_APPROVE){
+            List<SubtaskAuditEntity> subtaskAuditEntityList = subtaskAuditRepository.findBySubtaskEntity(subtaskEntity);
+            for(SubtaskAuditEntity subtaskAuditEntity1 : subtaskAuditEntityList){
+                subtaskAuditEntity1.setIfOver(true);
+            }
+            subtaskAuditRepository.saveAll(subtaskAuditEntityList);
+        }
+        return subtaskEntity;
+    }
+
+    /*public SubtaskEntity assessSubtaskByIds(String subtaskById, SubtaskEntity subtaskEntityArgs, UserEntity userEntity) {
+        *//**
+         *  当前审核结果： pass --> 当前审核人：自己--> 报错，无通过权限
+         *                                      其他人--> 设置子任务进入下一模式：
+         *                                                当前阶段为审核时-->  1)无会签：审核-->批准
+         *                                                                     2)一人/多人会签：审核-->会签
+         *                                                当前阶段为会签时-->  1)一人会签：会签-->批准（同上）
+         *          *                                                          2)多人会签：多人审核通过审核-->批准
+         *                                                                                 若当前用户已会签过则报错，您已会签过
+         *                                                当前阶段为批准时-->  修改子任务的通过状态为true； 设置子任务状态为审批结束
+         *                 no   --> 停留当前模式   --> 设置子任务状态为审批结束
+         *                                             记录当前驳回的阶段
+         * *//*
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (!hasSubtaskById(subtaskById)) {
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
-        List<AllIllustrationEntity> allIllustrationList = allIllustrationRepository.findBySubtaskEntity(getSubtaskById(subtaskById));
+        List<SubtaskAuditEntity> allIllustrationList = subtaskAuditRepository.findBySubtaskEntity(getSubtaskById(subtaskById));
         int maxState = 0;
         int a = 0;
-        for (AllIllustrationEntity allIllustrationEntitys : allIllustrationList) {
-            if (subtaskById.equals(allIllustrationEntitys.getSubtaskEntity().getId())) {
-                if (maxState < allIllustrationEntitys.getAssessState()) {
-                    maxState = allIllustrationEntitys.getAssessState();
+        for (SubtaskAuditEntity subtaskAuditEntitys : allIllustrationList) {
+            if (subtaskById.equals(subtaskAuditEntitys.getSubtaskEntity().getId())) {
+                if (maxState < subtaskAuditEntitys.getAssessState()) {
+                    maxState = subtaskAuditEntitys.getAssessState();
                 }
-                if (allIllustrationEntitys.getAssessState() == 2 && allIllustrationEntitys.isPass()) {
+                if (subtaskAuditEntitys.getAssessState() == 2 && subtaskAuditEntitys.isPass()) {
                     a++;
                 }
             }
@@ -291,11 +374,11 @@ public class SubtaskService {
                 throw new ResultException(ResultCode.THE_PROCESS_SUBTASK_HAS_BEEN_REVIEWED);
             }
         }
-        for (AllIllustrationEntity allIllustrationEntity : allIllustrationList) {
+        for (SubtaskAuditEntity subtaskAuditEntity : allIllustrationList) {
             if (!CollectionUtils.isEmpty(allIllustrationList)) {
                 //  判断是否重复评估
-                if (subtaskById.equals(allIllustrationEntity.getSubtaskEntity().getId())) {
-                    if (subtaskEntityArgs.getState() - allIllustrationEntity.getAssessState() == 2 && subtaskEntityArgs.getState() != 4) {
+                if (subtaskById.equals(subtaskAuditEntity.getSubtaskEntity().getId())) {
+                    if (subtaskEntityArgs.getState() - subtaskAuditEntity.getAssessState() == 2 && subtaskEntityArgs.getState() != 4) {
                         throw new ResultException(ResultCode.THE_PROCESS_SUBTASK_HAS_BEEN_REVIEWED);
                     }
                 }
@@ -310,10 +393,10 @@ public class SubtaskService {
             if (!subtaskEntityOptional.isPresent()) {
                 throw new ResultException(ResultCode.SUBTASK_ARGS_NOT_FOUND_ERROR);
             }
-            List<AllIllustrationEntity> allIllustrationLists = allIllustrationRepository.findByUserEntity(userEntity);
+            List<SubtaskAuditEntity> allIllustrationLists = subtaskAuditRepository.findByUserEntity(userEntity);
             if (!CollectionUtils.isEmpty(allIllustrationLists)) {
-                for (AllIllustrationEntity allIllustrationEntityS : allIllustrationLists) {
-                    if (allIllustrationEntityS.getAssessState() == 2 && subtaskEntityArgs.getState() == ApplicationConfig.COUNTERSIGN_ING && allIllustrationEntityS.getSubtaskEntity().getId() == subtaskById) {
+                for (SubtaskAuditEntity subtaskAuditEntityS : allIllustrationLists) {
+                    if (subtaskAuditEntityS.getAssessState() == 2 && subtaskEntityArgs.getState() == ApplicationConfig.COUNTERSIGN_ING && subtaskAuditEntityS.getSubtaskEntity().getId() == subtaskById) {
                         throw new ResultException(ResultCode.THE_CURRENT_COUNTERSIGNATURE_HAS_BEEN_COUNTERSIGNED);
                     }
                 }
@@ -333,7 +416,7 @@ public class SubtaskService {
                 return getSubtaskEntity(subtaskById, subtaskEntityArgs, userEntity, df, subtaskEntity);
             }
         }
-        AllIllustrationEntity allIllustrationEntity = new AllIllustrationEntity();
+        SubtaskAuditEntity subtaskAuditEntity = new SubtaskAuditEntity();
         //  如果当前状态是批准状态
         if ((subtaskEntityArgs.getState() == ApplicationConfig.APPROVER_ING && set.size() != a && subtaskEntity.getCountersignState() == ApplicationConfig.MANY_PEOPLE_COUNTERSIGNSTATE)) {
             throw new ResultException(ResultCode.THE_PREVIOUS_LAYER_HAS_NOT_BEEN_REVIEWED_OR_REJECTED);
@@ -369,40 +452,40 @@ public class SubtaskService {
             subtaskEntity.setState(1);
         }
         if (subtaskEntityArgs.getState() == ApplicationConfig.PROOFREAD_ING) {
-            allIllustrationEntity.setAssessState(0);
+            subtaskAuditEntity.setAssessState(0);
         } else if (subtaskEntityArgs.getState() == ApplicationConfig.AUDITOR_ING) {
-            allIllustrationEntity.setAssessState(1);
+            subtaskAuditEntity.setAssessState(1);
         } else if (subtaskEntityArgs.getState() == ApplicationConfig.COUNTERSIGN_ING) {
-            allIllustrationEntity.setAssessState(2);
+            subtaskAuditEntity.setAssessState(2);
         } else if (subtaskEntityArgs.getState() == ApplicationConfig.APPROVER_ING) {
-            allIllustrationEntity.setAssessState(3);
+            subtaskAuditEntity.setAssessState(3);
         }
-        saveIllustration(subtaskById, subtaskEntityArgs, userEntity, df, subtaskEntity, allIllustrationEntity);
+        saveIllustration(subtaskById, subtaskEntityArgs, userEntity, df, subtaskEntity, subtaskAuditEntity);
         subtaskEntity.setIllustration(subtaskEntityArgs.getIllustration());
-        allIllustrationRepository.save(allIllustrationEntity);
+        subtaskAuditRepository.save(subtaskAuditEntity);
         return subtaskRepository.save(subtaskEntity);
     }
 
     //  多人会签中保存当前会签信息
     private SubtaskEntity getSubtaskEntity(String subtaskById, SubtaskEntity subtaskEntityArgs, UserEntity userEntity, SimpleDateFormat df, SubtaskEntity subtaskEntity) {
-        AllIllustrationEntity allIllustrationEntity = new AllIllustrationEntity();
-        saveIllustration(subtaskById, subtaskEntityArgs, userEntity, df, subtaskEntity, allIllustrationEntity);
-        allIllustrationEntity.setAssessState(2);
-        allIllustrationRepository.save(allIllustrationEntity);
+        SubtaskAuditEntity subtaskAuditEntity = new SubtaskAuditEntity();
+        saveIllustration(subtaskById, subtaskEntityArgs, userEntity, df, subtaskEntity, subtaskAuditEntity);
+        subtaskAuditEntity.setAssessState(2);
+        subtaskAuditRepository.save(subtaskAuditEntity);
         return subtaskRepository.save(subtaskEntity);
     }
 
-    private void saveIllustration(String subtaskById, SubtaskEntity subtaskEntityArgs, UserEntity userEntity, SimpleDateFormat df, SubtaskEntity subtaskEntity, AllIllustrationEntity allIllustrationEntity) {
-        allIllustrationEntity.setUserEntity(userEntity);
-        allIllustrationEntity.setIllustration(subtaskEntityArgs.getIllustration());
-        allIllustrationEntity.setAuditTime(df.format(new Date()));
-        allIllustrationEntity.setPass(subtaskEntity.isPass());
-        allIllustrationEntity.setSubtaskEntity(getSubtaskById(subtaskById));
-    }
+    private void saveIllustration(String subtaskById, SubtaskEntity subtaskEntityArgs, UserEntity userEntity, SimpleDateFormat df, SubtaskEntity subtaskEntity, SubtaskAuditEntity subtaskAuditEntity) {
+        subtaskAuditEntity.setUserEntity(userEntity);
+        subtaskAuditEntity.setIllustration(subtaskEntityArgs.getIllustration());
+        subtaskAuditEntity.setAuditTime(df.format(new Date()));
+        subtaskAuditEntity.setPass(subtaskEntity.isPass());
+        subtaskAuditEntity.setSubtaskEntity(getSubtaskById(subtaskById));
+    }*/
 
     //  根据子任务Id查询所有审核信息
-    public List<AllIllustrationEntity> allIllustrationBysubtaskId(SubtaskEntity subtaskEntity) {
-        return allIllustrationRepository.findBySubtaskEntity(subtaskEntity);
+    public List<SubtaskAuditEntity> allIllustrationBysubtaskId(SubtaskEntity subtaskEntity) {
+        return subtaskAuditRepository.findBySubtaskEntity(subtaskEntity);
     }
 
     //  根据子任务ID查询单个审核信息
@@ -413,4 +496,30 @@ public class SubtaskService {
         }
         return subtaskEntityOptional.get();
     }
+
+    // 申请二次修改
+    public SubtaskEntity applyForModify(String subtaskId){
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        subtaskEntity.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+        return subtaskRepository.save(subtaskEntity);
+    }
+
+    // 项目负责人查询所有待审核的二次修改申请
+    public List<SubtaskEntity> findByState(String userId){
+        UserEntity userEntity = userService.getUserById(userId);
+        return subtaskRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+    }
+
+    // 项目负责人处理二次修改申请
+    public SubtaskEntity handleModifyApply(String subtaskId, boolean ifModifyApprove){
+        SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        subtaskEntity.setIfModifyApprove(ifModifyApprove);
+        if(ifModifyApprove){
+            subtaskEntity.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE);
+        }else{
+            subtaskEntity.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);
+        }
+        return subtaskRepository.save(subtaskEntity);
+    }
+
 }

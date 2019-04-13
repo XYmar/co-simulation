@@ -19,21 +19,16 @@ public interface SubtaskRepository extends JpaRepository<SubtaskEntity, String> 
 
     boolean existsByName(String name);
 
-    List<SubtaskEntity> findByCollatorSetContaining(UserEntity assessor);
-
-    List<SubtaskEntity> findByAuditorSetContaining(UserEntity assessor);
-
-    List<SubtaskEntity> findByCountersignSetContaining(UserEntity assessor);
-
-    List<SubtaskEntity> findByApporverSetContaining(UserEntity assessor);
+    List<SubtaskEntity> findByProofreadUserSetContaining(UserEntity userEntity);
+    List<SubtaskEntity> findByAuditUserSetContaining(UserEntity userEntity);
+    List<SubtaskEntity> findByCountersignUserSetContaining(UserEntity userEntity);
+    List<SubtaskEntity> findByApproveUserSet(UserEntity userEntity);
+    List<SubtaskEntity> findByUserEntityAndState(UserEntity userEntity, int state);
 
     List<SubtaskEntity> findById(UserEntity userEntity);
 
-    //    List<SubtaskEntity> findByUserEntity(Set countersignSet);
     Optional<SubtaskEntity> findById(String assessStateId);
 
-    //   List<SubtaskEntity> findByAssessorSetContaining(UserEntity assessor);
-//    SubtaskEntity findByProcessNodeEntity(ProcessNodeEntity processNodeEntity);
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
 

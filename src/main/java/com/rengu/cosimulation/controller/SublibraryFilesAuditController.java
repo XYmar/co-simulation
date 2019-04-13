@@ -6,6 +6,9 @@ import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.util.Date;
+
 /**
  * Author: XYmar
  * Date: 2019/4/4 15:36
@@ -21,7 +24,7 @@ public class SublibraryFilesAuditController {
     }
 
     @GetMapping(value = "/{sublibraryFileId}")
-    public ResultEntity getSublibraryFilesAuditId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
-        return ResultUtils.success(sublibraryFilesAuditService.getSublibraryFilesAudits(sublibraryFileId));
+    public ResultEntity getSublibraryFilesAuditId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId,  String sublibraryDate) throws ParseException {
+        return ResultUtils.success(sublibraryFilesAuditService.getSublibraryFilesAudits(sublibraryFileId, sublibraryDate));
     }
 }

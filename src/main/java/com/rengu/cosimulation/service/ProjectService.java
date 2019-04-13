@@ -7,6 +7,7 @@ import com.rengu.cosimulation.repository.DesignLinkRepository;
 import com.rengu.cosimulation.repository.ProcessNodeRepository;
 import com.rengu.cosimulation.repository.ProjectRepository;
 import com.rengu.cosimulation.repository.SubtaskRepository;
+import com.rengu.cosimulation.utils.ApplicationConfig;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -292,7 +293,7 @@ public class ProjectService {
             throw new ResultException(ResultCode.PROCESS_NODE_NOT_FOUND_ERROR);
         }
         for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            processNodeEntity.getSubtaskEntity().setState(1);
+            processNodeEntity.getSubtaskEntity().setState(ApplicationConfig.SUBTASK_START);
         }
         processNodeRepository.saveAll(processNodeEntityList);
         // 根据节点查询子任务信息

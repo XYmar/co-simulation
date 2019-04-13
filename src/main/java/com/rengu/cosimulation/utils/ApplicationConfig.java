@@ -9,6 +9,13 @@ import java.io.File;
  * Date: 2019/2/12 17:25
  */
 public class ApplicationConfig {
+    // 服务器连接地址、端口
+    public static final int TCP_RECEIVE_PORT = 6005;
+    public static final int UDP_RECEIVE_PORT = 6004;
+    public static final int UDP_SEND_PORT = 3087;
+    // 扫描超时时间
+    public static final long SCAN_TIME_OUT = 1000 * 5;
+
     // 默认角色
     public static final String DEFAULT_ADMIN_ROLE_NAME = "admin";                              //系统管理员
     public static final String DEFAULT_SECURITY_GUARD_ROLE_NAME = "security_guard";            //安全保密员
@@ -38,20 +45,42 @@ public class ApplicationConfig {
     public static final String DEFAULT_MECHANICAL_SIMULATION_NAME = "mechanical_simulation";         //力学仿真
     public static final String DEFAULT_ASSEMBLY_SIMULATION_NAME = "assembly_simulation";             //结构建模
 
+    // 子任务状态
+    public static final int SUBTASK_NOT_START = 0;                     // 子任务未开始
+    public static final int SUBTASK_START = 1;                         // 子任务进行中
+    public static final int SUBTASK_TO_BE_AUDIT = 2;                   // 待审批
+    public static final int SUBTASK_PROOFREAD = 3;                     // 校对中
+    public static final int SUBTASK_AUDIT = 4;                         // 审核中
+    public static final int SUBTASK_COUNTERSIGN = 5;                   // 会签中
+    public static final int SUBTASK_APPROVE = 6;                       // 批准中
+    public static final int SUBTASK_AUDIT_OVER = 7;                    // 审批结束
+    public static final int SUBTASK_APPLY_FOR_MODIFY = 8;              // 申请二次修改中
+    public static final int SUBTASK_APPLY_FOR_MODIFY_APPROVE = 9;      // 二次修改中
+
     // 子库文件审核环节
     public static final int SUBLIBRARY_FILE_PROOFREAD = 1;             // 校对中
     public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
     public static final int SUBLIBRARY_FILE_COUNTERSIGN = 3;           // 会签中
     public static final int SUBLIBRARY_FILE_APPROVE = 4;               // 批准中
-    public static final int SUBLIBRARY_FILE_PASS = 5;                  // 审核通过
-    public static final int SUBLIBRARY_FILE_NOTPASS = 6;               // 审核未通过
+    public static final int SUBLIBRARY_FILE_AUDIT_OVER = 5;                  // 审批结束
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY = 6;      // 申请二次修改中
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE = 7;      // 二次修改中
 
-    // 子库文件审核模式 1：无会签  2：一人会签  3：多人会签
+    public static final int SUBLIBRARY_FILE_IFAPPROVE = 1;                  // 审核通过
+    public static final int SUBLIBRARY_FILE_IFREJECT = 2;               // 审核未通过
+
+    // 子库文件 或子任务 审核模式 1：无会签  2：一人会签  3：多人会签
     public static final int SUBLIBRARY_FILE_AUDIT_NO_COUNTERSIGN = 1;               // 无会签
     public static final int SUBLIBRARY_FILE_AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
     public static final int SUBLIBRARY_FILE_AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
 
-    // 子库文件驳回后的修改方式  1： 直接修改  2： 二次修改
+    // 子库文件 或子任务 审核模式 1：无会签  2：一人会签  3：多人会签
+    public static final int AUDIT_NO_COUNTERSIGN = 1;               // 无会签
+    public static final int AUDIT_ONE_COUNTERSIGN = 2;               // 一人会签
+    public static final int AUDIT_MANY_COUNTERSIGN = 3;               // 多人会签
+
+    // 子库文件上传  0：第一次上传  1： 直接修改  2： 二次修改
+    public static final int SUBLIBRARY_FILE_FIRST_UPLOAD = 0;               // 子库文件第一次上传
     public static final int SUBLIBRARY_FILE_DIRECTOR_MODIFY = 1;               // 直接修改
     public static final int SUBLIBRARY_FILE_SECOND_MODIFY = 2;               // 二次修改
 
@@ -69,6 +98,7 @@ public class ApplicationConfig {
     public static final int MANY_PEOPLE_COUNTERSIGNSTATE = 3; //  多人会签
     public static final boolean ASSESS_STATE_NOT_PASS = false;  //  当前审核未通过
     public static final boolean ASSESS_STATE_PASS = true;  // 审核通过
+
 
     // 文件块保存路径
     public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");

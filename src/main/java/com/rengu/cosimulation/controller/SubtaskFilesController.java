@@ -31,7 +31,7 @@ public class SubtaskFilesController {
     }
 
     // 根据Id导出子任务文件
-    @GetMapping(value = "subtaskFile/{subtaskFileId}/user/{userId}/export")
+    @GetMapping(value = "/{subtaskFileId}/user/{userId}/export")
     public void exportSubtaskFileById(@PathVariable(value = "subtaskFileId") String subtaskFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
         File exportFile = subtaskFilesService.exportSubtaskFileById(subtaskFileId, userId);
         String mimeType = URLConnection.guessContentTypeFromName(exportFile.getName()) == null ? "application/octet-stream" : URLConnection.guessContentTypeFromName(exportFile.getName());
@@ -51,8 +51,8 @@ public class SubtaskFilesController {
 
     // 根据子任务文件id修改文件基本信息
     @PatchMapping(value = "/{subtaskFileId}")
-    public ResultEntity updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFilesEntity subtaskFilesEntity){
-        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFilesEntity));
+    public ResultEntity updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFilesEntity subtaskFilesEntity, String sublibraryId){
+        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFilesEntity, sublibraryId));
     }
 
     // 根据子任务文件id删除文件

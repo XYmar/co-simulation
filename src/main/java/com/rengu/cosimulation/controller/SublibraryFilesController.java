@@ -1,5 +1,6 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.entity.SublibraryFilesAuditEntity;
 import com.rengu.cosimulation.entity.SublibraryFilesEntity;
@@ -8,6 +9,7 @@ import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Author: XYmar
@@ -33,7 +36,7 @@ public class SublibraryFilesController {
     }
 
     // 根据Id导出子库文件
-    @GetMapping(value = "sublibraryFile/{sublibraryFileId}/user/{userId}/export")
+    @GetMapping(value = "/{sublibraryFileId}/user/{userId}/export")
     public void exportSublibraryFileById(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
         File exportFile = sublibraryFilesService.exportSublibraryFileById(sublibraryFileId, userId);
         String mimeType = URLConnection.guessContentTypeFromName(exportFile.getName()) == null ? "application/octet-stream" : URLConnection.guessContentTypeFromName(exportFile.getName());
@@ -85,5 +88,44 @@ public class SublibraryFilesController {
     @PatchMapping(value = "/{sublibraryFileId}/sublibraryFileAudit")
     public ResultEntity sublibraryFileAudit(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String userId, SublibraryFilesEntity sublibraryFilesEntityArgs, SublibraryFilesAuditEntity sublibraryFilesAuditEntityArgs){
         return ResultUtils.success(sublibraryFilesService.sublibraryFileAudit(sublibraryFileId, userId,sublibraryFilesEntityArgs, sublibraryFilesAuditEntityArgs));
+    }
+
+    // 申请二次修改
+    @PostMapping(value = "/{sublibraryFileId}/applyForModify")
+    public ResultEntity applyForModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
+        return ResultUtils.success(sublibraryFilesService.applyForModify(sublibraryFileId));
+    }
+
+    // 系统管理员查询所有待审核的二次修改申请
+    @GetMapping(value = "/findModifyToBeAudit")
+    @PreAuthorize(value = "hasRole('ADMIN')")
+    public ResultEntity findModifyToBeAudit() {
+        return ResultUtils.success(sublibraryFilesService.findByState());
+    }
+
+
+    // 系统管理员处理二次修改申请
+    @PostMapping(value = "/{sublibraryFileId}/handleModifyApply")
+    @PreAuthorize(value = "hasRole('ADMIN')")
+    public ResultEntity handleModifyApply(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, boolean ifModifyApprove){
+        return ResultUtils.success(sublibraryFilesService.handleModifyApply(sublibraryFileId, ifModifyApprove));
+    }
+
+    // 驳回后的提交
+    @PostMapping(value = "/{sublibraryFileId}/modifySublibraryFile")
+    public ResultEntity modifySublibraryFile(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, @RequestBody FileMetaEntity fileMetaEntity){
+        return ResultUtils.success(sublibraryFilesService.modifySublibraryFile(sublibraryFileId, fileMetaEntity));
+    }
+
+    // 根据子库文件id查找其历史版本文件
+    @GetMapping(value = "/{sublibraryFileId}/getSublibraryHistoriesFiles")
+    public ResultEntity getSublibraryHistoriesFiles(@PathVariable(value = "sublibraryFileId") String sublibraryFileId) {
+        return ResultUtils.success(sublibraryFilesService.getSublibraryHistoriesFiles(sublibraryFileId));
+    }
+
+    // 撤销修改
+    @PatchMapping(value = "/{sublibraryFileId}/revokeModify")
+    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String version){
+        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId, version));
     }
 }
