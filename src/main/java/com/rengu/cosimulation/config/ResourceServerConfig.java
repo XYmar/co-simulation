@@ -48,6 +48,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests().antMatchers("/COSIMULATION/**").permitAll();
         // 放行actuator接口
         http.authorizeRequests().antMatchers("/actuator/**").permitAll();
+        http.authorizeRequests().antMatchers("/preview/**").permitAll();
         http.authorizeRequests().anyRequest().authenticated();
     }
 }
