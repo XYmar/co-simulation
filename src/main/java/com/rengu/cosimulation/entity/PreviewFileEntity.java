@@ -5,7 +5,8 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Created by chicheng on 2017/12/27.
+ * @Author YJH
+ * @Date 2019/3/18 16:08
  */
 @Data
 public class PreviewFileEntity implements Serializable {

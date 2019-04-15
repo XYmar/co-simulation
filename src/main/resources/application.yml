@@ -3,8 +3,8 @@
 
 #操作先关文件存放的根目录,此目录在初始化时候 里面的内容会被删除
 tmp:
-  root: D:/tmp/conventer
-  rootTemp: D:/temp
+  root: C:/tmp/conventer
+  rootTemp: C:/temp
 soffice:
   #openoffice 安装位置
   home: C:/Program Files (x86)/OpenOffice 4

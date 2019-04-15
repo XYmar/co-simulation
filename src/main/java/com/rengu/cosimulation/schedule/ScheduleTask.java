@@ -40,7 +40,7 @@ public class ScheduleTask {
 
     /**
      * @param
-     * @Description: 每小时执行一次文件清理(清理临时存储文件)
+     * @Description: 每天凌晨一点 执行一次文件清理(清理临时存储文件)
      */
     @Scheduled(cron = "0 0 1 * * ?")
     public void removeFile() {

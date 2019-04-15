@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by chicheng on 2017/12/28.
+ * @Author YJH
+ * @Date 2019/3/18 15:08
  */
 @Component
 public class PreviewFileService {
