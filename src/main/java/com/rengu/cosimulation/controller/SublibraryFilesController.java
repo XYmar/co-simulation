@@ -125,7 +125,13 @@ public class SublibraryFilesController {
 
     // 撤销修改
     @PatchMapping(value = "/{sublibraryFileId}/revokeModify")
-    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String version){
-        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId, version));
+    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
+        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId));
+    }
+
+    // 更换版本
+    @PatchMapping(value = "/{sublibraryFileId}/versionReplace")
+    public ResultEntity versionReplace(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String version){
+        return ResultUtils.success(sublibraryFilesService.versionReplace(sublibraryFileId, version));
     }
 }

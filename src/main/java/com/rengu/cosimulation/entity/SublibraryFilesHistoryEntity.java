@@ -36,6 +36,8 @@ public class SublibraryFilesHistoryEntity implements Serializable {
     private int auditMode;                     // 模式： 1：无会签  2：一人会签  3：多人会签
     private boolean ifModifyApprove;       // 二次修改申请是否通过
     private boolean ifDirectModify;        // 是否为直接修改
+    boolean ifTemp;                          // 是否是临时文件
+    private int rejectState;               // 记录被驳回的流程
 
     @ManyToOne
     private FileEntity fileEntity;
