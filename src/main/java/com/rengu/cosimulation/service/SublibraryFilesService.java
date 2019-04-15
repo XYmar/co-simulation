@@ -65,16 +65,17 @@ public class SublibraryFilesService {
     // 根据子库id创建文件 （后台不判断节点是否存在）
     @CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
     public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, String userId, List<FileMetaEntity> fileMetaEntityList) {
-        if(!sublibraryService.hasSublibraryById(sublibraryId)){
-            throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
-        }
         SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(sublibraryId);
+        UserEntity userEntity = userService.getUserById(userId);
         List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
         for (FileMetaEntity fileMetaEntity : fileMetaEntityList) {
             SublibraryFilesEntity sublibraryFilesEntity = new SublibraryFilesEntity();
             sublibraryFilesEntity.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
             sublibraryFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
             sublibraryFilesEntity.setType(fileMetaEntity.getType());
+            if(fileMetaEntity.getSecretClass() > userEntity.getSecretClass()){
+                throw new ResultException(ResultCode.SUBLIBRARY_FILE_UPLOAD_DENIED);
+            }
             sublibraryFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
             sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
             sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
@@ -82,7 +83,7 @@ public class SublibraryFilesService {
             sublibraryFilesEntity.setIfApprove(false);
             sublibraryFilesEntity.setIfReject(false);
             sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
-            sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
+            sublibraryFilesEntity.setUserEntity(userEntity);
             sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
             sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
             sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
@@ -427,14 +428,25 @@ public class SublibraryFilesService {
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
 
         if(StringUtils.isEmpty(fileMetaEntity.isIfDirectModify())){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_MODIFYWAY_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.FILE_MODIFYWAY_NOT_FOUND_ERROR);
         }
+
+        // 修改前存储此文件的备份 若备份已存在删除上一备份  直接修改、二次修改都保留可以撤销的备份
+        if(sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfTemp(sublibraryFilesEntity, true)){
+            sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfTemp(sublibraryFilesEntity, true).get(0));
+        }
+        saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
+
+        if(fileMetaEntity.getSecretClass() > sublibraryFilesEntity.getUserEntity().getSecretClass()){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_UPLOAD_DENIED);
+        }
+
         if(fileMetaEntity.isIfDirectModify()){            // 直接修改
-            // 修改前存储此文件的备份 若备份已存在删除上一备份
+            /*// 修改前存储此文件的备份 若备份已存在删除上一备份
             if(sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true)){
                 sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0));
             }
-            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
+            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);*/
             if(fileMetaEntity.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
                 sublibraryFilesEntity.setState(0);
             }else{
@@ -451,16 +463,15 @@ public class SublibraryFilesService {
 
             // 二次修改
             if(StringUtils.isEmpty(fileMetaEntity.getVersion())){
-                throw new ResultException(ResultCode.SUBLIBRARY_FILE_VERSION_NOT_FOUND_ERROR);
+                throw new ResultException(ResultCode.FILE_VERSION_NOT_FOUND_ERROR);
             }
+            sublibraryFilesEntity.setVersion(fileMetaEntity.getVersion());
             sublibraryFilesEntity.setState(0);
             sublibraryFilesEntity.setAuditMode(0);
             sublibraryFilesEntity.setIfModifyApprove(false);
-            sublibraryFilesEntity.setIfApprove(false);
 
             // 四类审核人重置
             Set<UserEntity> userEntitySet = new HashSet<>();
-            sublibraryFilesEntity.setVersion(fileMetaEntity.getVersion());
             sublibraryFilesEntity.setProofreadUserSet(userEntitySet);
             sublibraryFilesEntity.setAuditUserSet(userEntitySet);
             sublibraryFilesEntity.setCountersignUserSet(userEntitySet);
@@ -480,57 +491,69 @@ public class SublibraryFilesService {
         sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
         sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
 
-        return sublibraryFilesEntity;
+        return sublibraryFilesRepository.save(sublibraryFilesEntity);
     }
 
     // 从子库文件生成子库文件历史
-    public void saveSublibraryFilesHistoryBySublibraryFile(SublibraryFilesEntity sourceNode, boolean ifDirectModify) {
+    public void saveSublibraryFilesHistoryBySublibraryFile(SublibraryFilesEntity sourceNode, boolean ifTemp) {
         SublibraryFilesHistoryEntity copyNode = new SublibraryFilesHistoryEntity();
         BeanUtils.copyProperties(sourceNode, copyNode, "id", "create_time", "leastSublibraryFilesEntity");
         copyNode.setLeastSublibraryFilesEntity(sourceNode);
-        copyNode.setIfDirectModify(ifDirectModify);
+        copyNode.setIfTemp(ifTemp);
         sublibraryFilesHistoryRepository.save(copyNode);
     }
 
     // 从子库文件历史生成子库文件
     public void saveSublibraryFilesBySublibraryFile(SublibraryFilesEntity coverNode, SublibraryFilesHistoryEntity sourceNode) {
-        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSublibraryFilesEntity", "ifDirectModify", "proofreadUserSet", "auditUserSet", "countersignUserSet", "approveUserSet");
+        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "state", "rejectState", "leastSublibraryFilesEntity", "ifDirectModify", "proofreadUserSet", "auditUserSet", "countersignUserSet", "approveUserSet");
         /*Set<UserEntity> approveUserSet = sourceNode.getApproveUserSet();
         coverNode.setApproveUserSet(null);
         coverNode.setApproveUserSet(approveUserSet);*/
+        coverNode.setState(sourceNode.getState());
+        coverNode.setRejectState(sourceNode.getRejectState());
         sublibraryFilesRepository.save(coverNode);
     }
 
-    // 根据子库文件id查询其临时文件是否存在
+    // 根据子库文件id查询是否有可撤销文件(临时文件)
     public boolean ifHasTemp(String sublibraryFileId){
-        return sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntity(getSublibraryFileById(sublibraryFileId));
+        return sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfTemp(getSublibraryFileById(sublibraryFileId), true);
     }
 
     // 根据子库文件id查找其历史版本文件
     public List<SublibraryFilesHistoryEntity> getSublibraryHistoriesFiles(String sublibraryFileId){
-        return sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(getSublibraryFileById(sublibraryFileId), false);
+        return sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfTemp(getSublibraryFileById(sublibraryFileId), false);
     }
 
-    // 撤销文件操作（直接修改）  更换版本（二次修改可恢复其中任意版本）   版本为空则为直接修改，否则为二次修改，切换到指定版本
-    public SublibraryFilesEntity revokeModify(String sublibraryFileId, String version){
+    // 撤销文件操作    只支持一次撤销操作，撤销回上一步  要再次撤销需再次修改
+    public SublibraryFilesEntity revokeModify(String sublibraryFileId){
         if(!ifHasTemp(sublibraryFileId)){       // 当前文件不存在可撤销的文件
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE);
         }
         // 当前文件
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
-        // 需撤销至的文件
-        SublibraryFilesHistoryEntity sourceNode;
-        if(StringUtils.isEmpty(version)){         // 直接修改撤销，获取此目标文件的临时历史文件
-            sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0);
-        }else{    // 二次修改撤销，选择撤销到的版本
-            sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModifyAndVersion(sublibraryFilesEntity, false, version);
-        }
+        // 需撤销至的文件(该文件的临时文件)
+        SublibraryFilesHistoryEntity sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfTemp(sublibraryFilesEntity, true).get(0);
 
         // 历史版本提为当前文件
         saveSublibraryFilesBySublibraryFile(sublibraryFilesEntity, sourceNode);
         sublibraryFilesHistoryRepository.delete(sourceNode);
         // 当前文件存为历史
-        saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
+        // saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
+
+        return getSublibraryFileById(sublibraryFileId);
+    }
+
+
+    // 更换版本（二次修改可恢复其中任意版本）   版本为空则为直接修改，否则为二次修改，切换到指定版本
+    public SublibraryFilesEntity versionReplace(String sublibraryFileId, String version){
+        // 当前文件
+        SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        // 需撤销至的文件
+        SublibraryFilesHistoryEntity sourceNode = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfTempAndVersion(sublibraryFilesEntity, false, version);
+
+        // 历史版本提为当前文件
+        saveSublibraryFilesBySublibraryFile(sublibraryFilesEntity, sourceNode);
+        sublibraryFilesHistoryRepository.delete(sourceNode);
 
         return getSublibraryFileById(sublibraryFileId);
     }
