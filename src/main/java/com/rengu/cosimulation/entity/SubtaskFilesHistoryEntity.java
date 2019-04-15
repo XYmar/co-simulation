@@ -27,6 +27,9 @@ public class SubtaskFilesHistoryEntity  implements Serializable {
     private String productNo;                // 产品型号
     private String fileNo;                   // 文件图号
     private String version;               // 版本（根据提交次数累加，只有修改才变更版本）
+    private boolean ifDirectModify;        // 是否为直接修改
+    boolean ifTemp;                          // 是否是临时文件
+
     @ManyToOne
     private FileEntity fileEntity;
     @ManyToOne

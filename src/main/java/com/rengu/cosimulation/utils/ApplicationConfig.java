@@ -57,6 +57,11 @@ public class ApplicationConfig {
     public static final int SUBTASK_APPLY_FOR_MODIFY = 8;              // 申请二次修改中
     public static final int SUBTASK_APPLY_FOR_MODIFY_APPROVE = 9;      // 二次修改中
 
+    // 子任务提交审核方式： 第一次提交  直接修改  二次修改
+    public static final int SUBTASK_FIRST_COMMIT = 0;                     // 第一次提交
+    public static final int SUBTASK_DIRECT_MODIFY = 1;                    // 直接修改
+    public static final int SUBTASK_SECOND_MODIFY = 2;                    // 二次修改
+
     // 子库文件审核环节
     public static final int SUBLIBRARY_FILE_PROOFREAD = 1;             // 校对中
     public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
@@ -83,22 +88,6 @@ public class ApplicationConfig {
     public static final int SUBLIBRARY_FILE_FIRST_UPLOAD = 0;               // 子库文件第一次上传
     public static final int SUBLIBRARY_FILE_DIRECTOR_MODIFY = 1;               // 直接修改
     public static final int SUBLIBRARY_FILE_SECOND_MODIFY = 2;               // 二次修改
-
-    // 子任务文件审核环节
-    public static final int PROOFREAD_ING = 2;  //  校对中
-    public static final int AUDITOR_ING = 3;   //  审核中
-    public static final int COUNTERSIGN_ING = 4; //  会签中
-    public static final int APPROVER_ING = 5;  //  批准中
-    public static final int ASSESS_FINISH = 6;  //  审核完成
-    public static final int ASSESSOR_NOT_PASS = 0;  //  未通过
-    public static final int ASSESSOR_PASS = 1;  // 已通过
-    public static final int TO_AUDIT = 2;         //  待审核
-    public static final int NOT_PEOPLE_COUNTERSIGNSTATE = 1;  //  无会签
-    public static final int ONE_PEOPLE_COUNTERSIGNSTATE = 2;  //  一人会签
-    public static final int MANY_PEOPLE_COUNTERSIGNSTATE = 3; //  多人会签
-    public static final boolean ASSESS_STATE_NOT_PASS = false;  //  当前审核未通过
-    public static final boolean ASSESS_STATE_PASS = true;  // 审核通过
-
 
     // 文件块保存路径
     public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");

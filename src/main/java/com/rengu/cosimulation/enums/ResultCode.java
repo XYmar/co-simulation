@@ -97,7 +97,7 @@ public enum ResultCode {
     FILE_MODIFYWAY_NOT_FOUND_ERROR(28001,"请传入修改方式"),
     FILE_VERSION_NOT_FOUND_ERROR(28002,"请选择文件更新的版本"),
     MODIFY_APPROVE_NOT_PASS_ERROR(28003,"您的二次修改申请还未通过，请耐心等待"),
-    SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE(28004,"当前文件无可撤销版本"),
+    FILE_HAS_NO_REVOKE_FILE(28004,"当前文件无可撤销版本"),
     SUBLIBRARY_FILE_VERSION_NOT_CHOOSE_ERROR(28005,"请选择恢复至哪个版本"),
 
     // 审核相关   2900x

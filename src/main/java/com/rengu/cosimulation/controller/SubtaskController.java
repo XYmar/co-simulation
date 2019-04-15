@@ -71,8 +71,8 @@ public class SubtaskController {
 
     // 根据子任务id为子任务添加审核员以及会签状态
     @PatchMapping(value = "/{subtaskId}/arrangeAssessors")
-    public ResultEntity arrangeAssessorsByIds(@PathVariable(value = "subtaskId") String subtaskId, String userId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
-        return ResultUtils.success(subtaskService.arrangeAssessorsByIds(subtaskId, userId, auditMode, proofreadUserIds, auditUserIds, countersignUserIds, approveUserIds));
+    public ResultEntity arrangeAssessorsByIds(@PathVariable(value = "subtaskId") String subtaskId, String userId, int commitMode, boolean ifBackToStart, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
+        return ResultUtils.success(subtaskService.arrangeAssessorsByIds(subtaskId, userId, commitMode, ifBackToStart, auditMode, proofreadUserIds, auditUserIds, countersignUserIds, approveUserIds));
     }
 
     // 根据子任务id查询子任务下的文件

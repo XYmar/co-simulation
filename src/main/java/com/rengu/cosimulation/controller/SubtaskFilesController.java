@@ -1,5 +1,6 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.SubtaskFilesEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.service.SubtaskFilesService;
@@ -61,5 +62,29 @@ public class SubtaskFilesController {
     //@PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
     public ResultEntity deleteSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
         return ResultUtils.success(subtaskFilesService.deleteSubtaskFileId(subtaskFileId));
+    }
+
+    // 驳回后修改子任务文件
+    @PostMapping(value = "/{subtaskFileId}/modifySubtaskFiles")
+    public ResultEntity modifySubtaskFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId, @RequestBody FileMetaEntity fileMetaEntity){
+        return ResultUtils.success(subtaskFilesService.modifySubtaskFiles(subtaskFileId, fileMetaEntity));
+    }
+
+    // 根据子任务文件id查找其历史版本文件
+    @GetMapping(value = "/{subtaskFileId}/getSublibraryHistoriesFiles")
+    public ResultEntity getSubtaskHistoriesFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId) {
+        return ResultUtils.success(subtaskFilesService.getSubtaskHistoriesFiles(subtaskFileId));
+    }
+
+    // 撤销修改
+    @PatchMapping(value = "/{subtaskFileId}/revokeModify")
+    public ResultEntity revokeModify(@PathVariable(value = "subtaskFileId") String subtaskFileId){
+        return ResultUtils.success(subtaskFilesService.revokeModify(subtaskFileId));
+    }
+
+    // 更换版本
+    @PatchMapping(value = "/{subtaskFileId}/versionReplace")
+    public ResultEntity versionReplace(@PathVariable(value = "subtaskFileId") String subtaskFileId, String version){
+        return ResultUtils.success(subtaskFilesService.versionReplace(subtaskFileId, version));
     }
 }

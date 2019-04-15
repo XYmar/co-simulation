@@ -431,22 +431,17 @@ public class SublibraryFilesService {
             throw new ResultException(ResultCode.FILE_MODIFYWAY_NOT_FOUND_ERROR);
         }
 
+        if(fileMetaEntity.getSecretClass() > sublibraryFilesEntity.getUserEntity().getSecretClass()){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_UPLOAD_DENIED);
+        }
+
         // 修改前存储此文件的备份 若备份已存在删除上一备份  直接修改、二次修改都保留可以撤销的备份
         if(sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfTemp(sublibraryFilesEntity, true)){
             sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfTemp(sublibraryFilesEntity, true).get(0));
         }
         saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
 
-        if(fileMetaEntity.getSecretClass() > sublibraryFilesEntity.getUserEntity().getSecretClass()){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_UPLOAD_DENIED);
-        }
-
         if(fileMetaEntity.isIfDirectModify()){            // 直接修改
-            /*// 修改前存储此文件的备份 若备份已存在删除上一备份
-            if(sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true)){
-                sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0));
-            }
-            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);*/
             if(fileMetaEntity.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
                 sublibraryFilesEntity.setState(0);
             }else{
@@ -458,13 +453,13 @@ public class SublibraryFilesService {
             if(!sublibraryFilesEntity.isIfModifyApprove()){
                 throw new ResultException(ResultCode.MODIFY_APPROVE_NOT_PASS_ERROR);
             }
-            // 修改前保存此文件历史
-            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, false);
-
             // 二次修改
             if(StringUtils.isEmpty(fileMetaEntity.getVersion())){
                 throw new ResultException(ResultCode.FILE_VERSION_NOT_FOUND_ERROR);
             }
+            // 修改前保存此文件历史
+            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, false);
+
             sublibraryFilesEntity.setVersion(fileMetaEntity.getVersion());
             sublibraryFilesEntity.setState(0);
             sublibraryFilesEntity.setAuditMode(0);
@@ -527,7 +522,7 @@ public class SublibraryFilesService {
     // 撤销文件操作    只支持一次撤销操作，撤销回上一步  要再次撤销需再次修改
     public SublibraryFilesEntity revokeModify(String sublibraryFileId){
         if(!ifHasTemp(sublibraryFileId)){       // 当前文件不存在可撤销的文件
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE);
+            throw new ResultException(ResultCode.FILE_HAS_NO_REVOKE_FILE);
         }
         // 当前文件
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
