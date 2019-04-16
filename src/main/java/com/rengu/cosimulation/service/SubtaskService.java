@@ -129,7 +129,8 @@ public class SubtaskService {
         // 查找该块对应的各个父节点
         List<ProcessNodeEntity> parentProcessNodeEntityList = new ArrayList<>();
         for(ProcessNodeEntity processNodeEntity1 : processNodeEntityList){
-            ProcessNodeEntity parentProcessNodeEntity = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign());
+            // todo 父节点获取是否正确
+            ProcessNodeEntity parentProcessNodeEntity = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign()).get(0);
             if(parentProcessNodeEntity != null){
                 parentProcessNodeEntityList.add(parentProcessNodeEntity);
             }
