@@ -50,8 +50,8 @@ public class ProjectController {
 
     // 根据用户id查询所有项目(负责人)
     @GetMapping(value = "/byUserId/{userId}")
-    public ResultEntity getProjectsByUserId(@PathVariable(value = "userId") String userId, boolean deleted){
-        return ResultUtils.success(projectService.getProjectsByUser(userService.getUserById(userId), deleted));
+    public ResultEntity getProjectsByUserId(@PathVariable(value = "userId") String userId){
+        return ResultUtils.success(projectService.getProjectsByUser(userService.getUserById(userId)));
     }
 
     // 根据用户密级查询所有项目（返回小于等于用户密级的项目）

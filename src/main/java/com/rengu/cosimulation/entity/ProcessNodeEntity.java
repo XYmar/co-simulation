@@ -40,6 +40,7 @@ public class ProcessNodeEntity implements Serializable {
     private String nodeSize;                           // 节点框的大小
 
    // private int state;                                 // 节点状态，与子任务同步       0：未进行   1：进行中   2：审核中   3：审核完成
+    private String subtaskId;                          // 对应子任务的id
     @ManyToOne
     private ProjectEntity projectEntity;               // 节点所属项目
 

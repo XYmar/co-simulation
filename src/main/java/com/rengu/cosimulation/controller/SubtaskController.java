@@ -110,4 +110,10 @@ public class SubtaskController {
     public ResultEntity handleModifyApply(@PathVariable(value = "subtaskId") String subtaskId, boolean ifModifyApprove){
         return ResultUtils.success(subtaskService.handleModifyApply(subtaskId, ifModifyApprove));
     }
+
+    // 根据用户查询所有项目
+    @GetMapping(value = "findProjectsByUserId/{userId}")
+    public ResultEntity findProjectsByUserId(@PathVariable(value = "userId") String userId){
+        return ResultUtils.success(subtaskService.findProjectsByUserId(userService.getUserById(userId)));
+    }
 }

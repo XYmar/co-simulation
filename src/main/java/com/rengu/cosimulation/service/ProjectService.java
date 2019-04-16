@@ -102,9 +102,9 @@ public class ProjectService {
         return userEntity.getSecretClass() >= projectEntity.getSecretClass();
     }
 
-    // 查询所有项目,根据用户Id(负责人)
-    public List<ProjectEntity> getProjectsByUser(UserEntity userEntity, boolean deleted) {
-        return projectRepository.findByPicAndDeleted(userEntity, deleted);
+    // 根据用户查询其所有未删除的项目： 项目管理员、项目负责人、子任务负责人
+    public List<ProjectEntity> getProjectsByUser(UserEntity userEntity) {
+        return projectRepository.findByPicOrCreatorAndDeleted(userEntity, userEntity, false);
     }
 
     // 根据用户密级查询项目（返回小于等于用户密级的项目）

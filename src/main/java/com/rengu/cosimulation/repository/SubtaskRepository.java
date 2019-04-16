@@ -31,5 +31,5 @@ public interface SubtaskRepository extends JpaRepository<SubtaskEntity, String> 
 
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
-
+    List<SubtaskEntity>  findByUserEntity(UserEntity userEntity);
 }

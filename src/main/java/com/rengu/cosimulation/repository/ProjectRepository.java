@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<ProjectEntity, String> {
 
-    List<ProjectEntity> findByPicAndDeleted(UserEntity userEntity, boolean deleted);
+    List<ProjectEntity> findByPicOrCreatorAndDeleted(UserEntity pic, UserEntity creator, boolean deleted);
 
     boolean existsByNameAndDeleted(String name, boolean deleted);
 

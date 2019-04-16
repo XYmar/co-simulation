@@ -20,6 +20,7 @@ public interface ProcessNodeRepository extends JpaRepository<ProcessNodeEntity, 
 
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
+    boolean existsByProjectEntity(ProjectEntity projectEntity);
     List<ProcessNodeEntity> findByProjectEntity(ProjectEntity projectEntity);
     List<ProcessNodeEntity> findBySubtaskEntity(SubtaskEntity subtaskEntity);
 }

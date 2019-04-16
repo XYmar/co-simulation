@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,11 +42,19 @@ public class ProcessNodeService {
     }
 
     // 根据项目id保存项目流程节点信息,并设置对应的子任务
+    /**
+     * 第一次保存： 直接保存
+     * 有子任务id的节点: 判断节点内容是否有变化，在节点信息中保留，其他节点删除；
+     *                    添加无子任务id的节点。
+     * */
     public List<ProcessNodeEntity> saveProcessNodes(String projectId, ProcessNodeEntity[] processNodeEntities) {
         if (!projectService.hasProjectById(projectId)) {
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
+        /*for(){
+
+        }*/
         // 根据项目删除子任务和流程节点信息
         if(processNodeRepository.findByProjectEntity(projectEntity).size() > 0){
             processNodeRepository.deleteAllByProjectEntity(projectEntity);
@@ -115,13 +124,17 @@ public class ProcessNodeService {
         return processNodeRepository.findAll();*/
     }
 
+    // 根据项目查询流程是否存在
+    public boolean hasProcessNodeByProject(String projectId){
+       if(StringUtils.isEmpty(projectId)){
+           throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
+       }
+       return processNodeRepository.existsByProjectEntity(projectService.getProjectById(projectId));
+    }
+
     // 根据项目返回流程节点信息
     public List<ProcessNodeEntity> getProcessNodesByProjectId(String projectId) {
-        if(!projectService.hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
-
         return processNodeRepository.findByProjectEntity(projectEntity);
     }
 }

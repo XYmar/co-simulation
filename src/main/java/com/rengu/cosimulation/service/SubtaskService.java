@@ -362,4 +362,22 @@ public class SubtaskService {
         return subtaskRepository.save(subtaskEntity);
     }
 
+    // 根据子任务负责人查询其所有项目(去重后)
+    public List<ProjectEntity> findProjectsByUserId(UserEntity userEntity){
+        // 根据子任务负责人查询其所有项目(去重后)
+        List<SubtaskEntity> subtaskEntities = subtaskRepository.findByUserEntity(userEntity);
+        Map<String, ProjectEntity> projectEntityMap = new HashMap<>();
+        for(SubtaskEntity subtaskEntity : subtaskEntities){
+            if(!projectEntityMap.containsKey(subtaskEntity.getProjectEntity().getId())){
+                projectEntityMap.put(subtaskEntity.getProjectEntity().getId(), subtaskEntity.getProjectEntity());
+            }
+        }
+        List<ProjectEntity> projectEntities1 = new ArrayList<>(projectEntityMap.values());
+        // 根据项目管理员/项目负责人查询所有未删除的项目
+        List<ProjectEntity> projectEntities2 = projectService.getProjectsByUser(userEntity);
+        projectEntities1.removeAll(projectEntities2);
+        projectEntities1.addAll(projectEntities2);
+        return projectEntities1;
+    }
+
 }
