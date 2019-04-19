@@ -24,11 +24,6 @@ public interface SubtaskRepository extends JpaRepository<SubtaskEntity, String> 
     List<SubtaskEntity> findByCountersignUserSetContaining(UserEntity userEntity);
     List<SubtaskEntity> findByApproveUserSet(UserEntity userEntity);
     List<SubtaskEntity> findByUserEntityAndState(UserEntity userEntity, int state);
-
-    List<SubtaskEntity> findById(UserEntity userEntity);
-
-    Optional<SubtaskEntity> findById(String assessStateId);
-
     void deleteAllByProjectEntity(ProjectEntity projectEntity);
 
     List<SubtaskEntity>  findByUserEntity(UserEntity userEntity);

@@ -3,10 +3,12 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
+import com.rengu.cosimulation.repository.LinkRepository;
 import com.rengu.cosimulation.repository.SubtaskAuditRepository;
-import com.rengu.cosimulation.repository.ProcessNodeRepository;
+import com.rengu.cosimulation.repository.ProcessNodeRepository1;
 import com.rengu.cosimulation.repository.SubtaskRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,24 +22,28 @@ import java.util.*;
  * Author: XYmar
  * Date: 2019/2/26 10:04
  */
+
+@Slf4j
 @Service
 public class SubtaskService {
     private final SubtaskRepository subtaskRepository;
     private final ProjectService projectService;
     private final UserService userService;
-    private final ProcessNodeRepository processNodeRepository;
+    private final ProcessNodeRepository1 processNodeRepository1;
     private final SubtaskAuditRepository subtaskAuditRepository;
     private final SublibraryFilesService sublibraryFilesService;
+    private final LinkRepository linkRepository;
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository processNodeRepository, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
-        this.processNodeRepository = processNodeRepository;
+        this.processNodeRepository1 = processNodeRepository1;
         this.subtaskAuditRepository = subtaskAuditRepository;
         this.sublibraryFilesService = sublibraryFilesService;
+        this.linkRepository = linkRepository;
     }
 
     // 根据项目id查询所有子任务
@@ -100,16 +106,22 @@ public class SubtaskService {
 
     // 根据子任务开启其后续任务
     public void startNextSubtasksById(SubtaskEntity subtaskEntity){
-        // 根据子任务查找对应的节点(多个)  其实只有一个块
-        ProcessNodeEntity processNodeEntity = processNodeRepository.findBySubtaskEntity(subtaskEntity).get(0);
-        // 查找子节点
-        List<ProcessNodeEntity> childProcessNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(subtaskEntity.getProjectEntity(), processNodeEntity.getSelfSign());
+        // 根据子任务查找对应的节点
+        ProcessNodeEntity1 processNodeEntity1 = processNodeRepository1.findBySubtaskEntity(subtaskEntity);
+        // 根据连接关系找到对应的子节点连接
+        List<LinkEntity> childLinkEntityList = linkRepository.findByParentId(processNodeEntity1.getId());
+
+        List<ProcessNodeEntity1> processNodeEntity1List = new ArrayList<>();
+        // 根据连接查找子节点
+        for(LinkEntity linkEntity : childLinkEntityList){
+            processNodeEntity1List.add(processNodeRepository1.findById(linkEntity.getSelfId()).get());
+        }
 
         // 获取后续子任务
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        if(childProcessNodeEntityList.size() > 0){
-            for(ProcessNodeEntity processNodeEntity1 : childProcessNodeEntityList){
-                subtaskEntityList.add(processNodeEntity1.getSubtaskEntity());
+        if(processNodeEntity1List.size() > 0){
+            for(ProcessNodeEntity1 processNodeEntity : processNodeEntity1List){
+                subtaskEntityList.add(processNodeEntity.getSubtaskEntity());
             }
         }
 
@@ -124,23 +136,31 @@ public class SubtaskService {
     // 根据子任务查询其父节点任务是否全部完成
     public boolean ifAllParentSubtasksOver(SubtaskEntity subtaskEntity){
         boolean ifOver = false;
-        // 根据子任务查找对应的节点(多个)
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findBySubtaskEntity(subtaskEntity);
-        // 查找该块对应的各个父节点
-        List<ProcessNodeEntity> parentProcessNodeEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity1 : processNodeEntityList){
-            // todo 父节点获取是否正确
-            ProcessNodeEntity parentProcessNodeEntity = processNodeRepository.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign()).get(0);
+        // 根据子任务查找对应的节点
+        ProcessNodeEntity1 processNodeEntity1 = processNodeRepository1.findBySubtaskEntity(subtaskEntity);
+        // 查找该块对应的各个父节点连接
+        List<LinkEntity> parentLinkEntityList = linkRepository.findBySelfId(processNodeEntity1.getId());
+        // 根据连接查找父节点
+        List<ProcessNodeEntity1> parentProcessNodeEntityList = new ArrayList<>();
+        for(LinkEntity linkEntity : parentLinkEntityList){
+            parentProcessNodeEntityList.add(processNodeRepository1.findById(linkEntity.getParentId()).get());
+        }
+        /*for(ProcessNodeEntity1 processNodeEntity : parentProcessNodeEntityList){
+            ProcessNodeEntity parentProcessNodeEntity = null;
+            if(processNodeRepository1.existsByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign())){
+                parentProcessNodeEntity = processNodeRepository1.findByProjectEntityAndSelfSign(subtaskEntity.getProjectEntity(), processNodeEntity1.getParentSign()).get(0);
+            }
+
             if(parentProcessNodeEntity != null){
                 parentProcessNodeEntityList.add(parentProcessNodeEntity);
             }
-        }
+        }*/
         if(parentProcessNodeEntityList.size() == 0){             // 无父节点时
             ifOver = true;
         }else{
-            for(ProcessNodeEntity processNodeEntity1 : parentProcessNodeEntityList){
+            for(ProcessNodeEntity1 processNodeEntity11 : parentProcessNodeEntityList){
                 ifOver = false;
-                if(processNodeEntity1.getSubtaskEntity().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
+                if(processNodeEntity11.getSubtaskEntity().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
                     ifOver = true;
                 }
             }

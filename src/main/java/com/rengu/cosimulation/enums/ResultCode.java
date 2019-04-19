@@ -75,8 +75,9 @@ public enum ResultCode {
     FILE_ID_NOT_FOUND_ERROR(30005,"未发现该文件Id"),
 
     // 流程节点相关   2400x
-    PROCESS_NODE_NOT_FOUND_ERROR(24001, "项目流程不存在"),
-    PROCESS_ARGS_NOT_FOUND_ERROR(24002, "流程节点参数不存在"),
+    PROCESS_NODE_ID_NOT_FOUND_ERROR(24001,"未发现该节点ID"),
+    PROCESS_NODE_NOT_FOUND_ERROR(24002, "项目流程不存在"),
+    PROCESS_ARGS_NOT_FOUND_ERROR(24003, "流程节点参数不存在"),
 
     // 库相关   2500x
     LIBRARY_ID_NOT_FOUND_ERROR(25001, "未发现该库id"),
