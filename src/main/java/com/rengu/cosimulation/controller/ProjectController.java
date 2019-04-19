@@ -3,8 +3,10 @@ package com.rengu.cosimulation.controller;
 import com.rengu.cosimulation.entity.DesignLinkEntity;
 import com.rengu.cosimulation.entity.ProjectEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.repository.ProjectRepository;
 import com.rengu.cosimulation.service.ProjectService;
 import com.rengu.cosimulation.service.UserService;
+import com.rengu.cosimulation.specification.Filter;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.jboss.logging.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import static com.rengu.cosimulation.specification.SpecificationBuilder.selectFrom;
 
 /**
  * Author: XYmar
@@ -22,11 +26,13 @@ import javax.validation.Valid;
 public class ProjectController {
     private final ProjectService projectService;
     private final UserService userService;
+    private final ProjectRepository projectRepository;
 
     @Autowired
-    public ProjectController(ProjectService projectService, UserService userService) {
+    public ProjectController(ProjectService projectService, UserService userService, ProjectRepository projectRepository) {
         this.projectService = projectService;
         this.userService = userService;
+        this.projectRepository = projectRepository;
     }
 
     // 新增项目（名称，负责人）
@@ -113,5 +119,11 @@ public class ProjectController {
     @GetMapping(value = "/{projectId}/getUsers")
     public ResultEntity getUsersByProjectId(@PathVariable(value = "projectId") String projectId){
         return ResultUtils.success(projectService.getUsersByProjectId(projectId));
+    }
+
+    // 项目关键字查询
+    @PostMapping("/multiInquire")
+    public ResultEntity filter(@RequestBody Filter filter){
+        return ResultUtils.success(selectFrom(projectRepository).where(filter).findAll());
     }
 }
