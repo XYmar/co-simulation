@@ -238,9 +238,6 @@ public class SublibraryFilesService {
 
     // 根据子库文件id删除文件
     public SublibraryFilesEntity deleteSublibraryFileId(String sublibraryFileId) {
-        if(!hasSublibraryFileById(sublibraryFileId)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
-        }
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         sublibraryFilesRepository.delete(sublibraryFilesEntity);
         return sublibraryFilesEntity;
