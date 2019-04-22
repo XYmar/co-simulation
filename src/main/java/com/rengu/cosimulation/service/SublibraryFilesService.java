@@ -3,15 +3,15 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
-import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
-import com.rengu.cosimulation.repository.SublibraryFilesHistoryRepository;
-import com.rengu.cosimulation.repository.SublibraryFilesRepository;
-import com.rengu.cosimulation.repository.SubtaskFilesRepository;
+import com.rengu.cosimulation.repository.*;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.logging.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -37,9 +38,10 @@ public class SublibraryFilesService {
     private final SublibraryFilesAuditRepository sublibraryFilesAuditRepository;
     private final SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository;
     private final SubtaskFilesRepository subtaskFilesRepository;
+    private final DownloadLogsRepository downloadLogsRepository;
 
     @Autowired
-    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository) {
+    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository, DownloadLogsRepository downloadLogsRepository) {
         this.sublibraryFilesRepository = sublibraryFilesRepository;
         this.fileService = fileService;
         this.sublibraryService = sublibraryService;
@@ -47,6 +49,7 @@ public class SublibraryFilesService {
         this.sublibraryFilesAuditRepository = sublibraryFilesAuditRepository;
         this.sublibraryFilesHistoryRepository = sublibraryFilesHistoryRepository;
         this.subtaskFilesRepository = subtaskFilesRepository;
+        this.downloadLogsRepository = downloadLogsRepository;
     }
 
     // 根据名称、后缀及子库检查文件是否存在
@@ -197,7 +200,8 @@ public class SublibraryFilesService {
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
-        int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
+        UserEntity userEntity = userService.getUserById(userId);
+        int userSecretClass = userEntity.getSecretClass();     //获取用户密级
         if(!hasSublibraryFileById(sublibraryFileId)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
@@ -209,6 +213,10 @@ public class SublibraryFilesService {
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + sublibraryFilesEntity.getName() + "." + sublibraryFilesEntity.getFileEntity().getPostfix());
         FileUtils.copyFile(new File(sublibraryFilesEntity.getFileEntity().getLocalPath()), exportFile);
+        DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setUserEntity(userEntity);
+        downloadLogsEntity.setFileEntity(sublibraryFilesEntity.getFileEntity());
+        downloadLogsRepository.save(downloadLogsEntity);
         return exportFile;
     }
 
@@ -241,7 +249,7 @@ public class SublibraryFilesService {
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         sublibraryFilesRepository.delete(sublibraryFilesEntity);
         return sublibraryFilesEntity;
-    }
+     }
 
     // 选择文件（一批文件）的审核模式及四类审核人
     public List<SublibraryFilesEntity> arrangeAudit(String[] sublibraryFileId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){

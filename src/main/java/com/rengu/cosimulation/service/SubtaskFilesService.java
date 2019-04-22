@@ -3,10 +3,12 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
+import com.rengu.cosimulation.repository.DownloadLogsRepository;
 import com.rengu.cosimulation.repository.SubtaskFilesHistoryRepository;
 import com.rengu.cosimulation.repository.SubtaskFilesRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.BeanUtils;
@@ -35,9 +37,10 @@ public class SubtaskFilesService {
     private final UserService userService;
     private final SublibraryService sublibraryService;
     private final SubtaskFilesHistoryRepository subtaskFilesHistoryRepository;
+    private final DownloadLogsRepository downloadLogsRepository;
 
     @Autowired
-    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService, SublibraryService sublibraryService, SubtaskFilesHistoryRepository subtaskFilesHistoryRepository) {
+    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService, SublibraryService sublibraryService, SubtaskFilesHistoryRepository subtaskFilesHistoryRepository, DownloadLogsRepository downloadLogsRepository) {
         this.fileService = fileService;
         this.subtaskFilesRepository = subtaskFilesRepository;
         this.subtaskService = subtaskService;
@@ -45,6 +48,7 @@ public class SubtaskFilesService {
         this.userService = userService;
         this.sublibraryService = sublibraryService;
         this.subtaskFilesHistoryRepository = subtaskFilesHistoryRepository;
+        this.downloadLogsRepository = downloadLogsRepository;
     }
 
     // 根据名称、后缀及子任务检查文件是否存在
@@ -207,7 +211,8 @@ public class SubtaskFilesService {
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
-        int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
+        UserEntity userEntity = userService.getUserById(userId);
+        int userSecretClass = userEntity.getSecretClass();     //获取用户密级
         if(!hasSubtaskFileById(subtaskFileId)){
             throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
@@ -220,6 +225,10 @@ public class SubtaskFilesService {
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + subtaskFilesEntity.getName() + "." + subtaskFilesEntity.getFileEntity().getPostfix());
         FileUtils.copyFile(new File(subtaskFilesEntity.getFileEntity().getLocalPath()), exportFile);
         log.info(userService.getUserById(userId).getUsername() + "于" + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()) + "下载了：" + subtaskFilesEntity.getName());
+        DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setUserEntity(userEntity);
+        downloadLogsEntity.setFileEntity(subtaskFilesEntity.getFileEntity());
+        downloadLogsRepository.save(downloadLogsEntity);
         return exportFile;
     }
 
