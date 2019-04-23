@@ -89,6 +89,25 @@ public class ApplicationConfig {
     public static final int SUBLIBRARY_FILE_DIRECTOR_MODIFY = 1;               // 直接修改
     public static final int SUBLIBRARY_FILE_SECOND_MODIFY = 2;               // 二次修改
 
+    // 通知消息
+    // 通知的基本操作
+    public static final int ARRANGE_NONE_OPERATE = -1;                     // 无操作
+    public static final int ARRANGE_ROLE_OPERATE = 0;                     // 赋予新角色
+    public static final int ARRANGE_PROJECTPIC_OPERATE = 1;               // 指定为项目负责人
+    public static final int ARRANGE_SUBTASKPIC_OPERATE =2;               // 指定为子任务负责人
+    public static final int ARRANGE_AUDIT_OPERATE = 3;                    // 指定为审核员
+    public static final int DELETE_OPERATE = 4;                           // 删除
+    public static final int RESTORE_OPERATE = 5;                          // 恢复
+    public static final int MODIFY_OPERATE = 6;                           // 修改
+
+    // 通知操作的主体
+    public static final int MAINBODY_NONE = -1;                           // 无操作主体
+    public static final int MAINBODY_USERENTITY = 0;                      // 用户
+    public static final int MAINBODY_PROJECTENTITY = 1;                   // 项目
+    public static final int MAINBODY_SUBTASKENTITY = 2;                   // 子任务
+    public static final int MAINBODY_SUBLIBRARY_FILE_ENTITY = 3;                // 子库文件
+
+
     // 文件块保存路径
     public static final String CHUNKS_SAVE_PATH = FormatUtils.formatPath(FileUtils.getTempDirectoryPath() + File.separator + "SIMULATION" + File.separator + "CHUNKS");
     // 文件保存路径

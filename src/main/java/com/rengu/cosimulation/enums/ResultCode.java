@@ -119,6 +119,9 @@ public enum ResultCode {
     SCAN_DISK_TIME_OUT(30003, "获取设备磁盘信息超时"),
     SCAN_PROCESS_TIME_OUT(30004, "获取设备进程信息超时"),
 
+    // 通知相关
+    MESSAGE_ID_NOT_FOUND_ERROR(10015,"未发现该消息ID"),
+
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),
     ARGS_NOT_FOUND_ERROR(40003, "未传递参数"),
