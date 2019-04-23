@@ -69,7 +69,7 @@ public class SubtaskFilesService {
     public List<SubtaskFilesEntity> saveSubtaskFilesByProDesignId(String subtaskId, String projectId, List<FileMetaEntity> fileMetaEntityList) {
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
         SubtaskEntity subTaskEntity = subtaskService.getSubtaskById(subtaskId);
-        if(subTaskEntity.getState() != ApplicationConfig.SUBTASK_START){                   // 上传文件前判断子任务是否已在进行中
+        if(subTaskEntity.getState() != ApplicationConfig.SUBTASK_START || subTaskEntity.getState() != ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE){                   // 上传文件前判断子任务是否已在进行中  或者二次修改中
             throw new ResultException(ResultCode.SUBTASK_HAVE_NOT_START);
         }
         List<SubtaskFilesEntity> subtaskFilesEntityList = new ArrayList<>();
@@ -123,7 +123,10 @@ public class SubtaskFilesService {
     @CacheEvict(value = "SubtaskFiles_Cache", allEntries = true)
     public SubtaskFilesEntity modifySubtaskFiles(String subtaskFileId, FileMetaEntity fileMetaEntity) {
         SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
-
+        SubtaskEntity subtaskEntity = subtaskFilesEntity.getSubTaskEntity();
+        if(subtaskEntity.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtaskEntity.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){              // 子任务审核中及审核后无权进行修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
         if(StringUtils.isEmpty(fileMetaEntity.isIfDirectModify())){
             throw new ResultException(ResultCode.FILE_MODIFYWAY_NOT_FOUND_ERROR);
         }

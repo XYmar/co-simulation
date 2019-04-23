@@ -80,6 +80,9 @@ public class SubtaskService {
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
         UserEntity userEntity = userService.getUserById(userId);
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskById);
+        if(subtaskEntity.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtaskEntity.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){              // 子任务审核中及审核后无权进行修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
         if(!projectEntity.getPic().getId().equals(loginUserId)){
             throw new ResultException(ResultCode.SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE);
         }
@@ -95,11 +98,16 @@ public class SubtaskService {
     }
 
     // 删除子任务
+    // todo 审核中后不能进行删除
+    // todo 子任务删除后节点是否需要删除
     public SubtaskEntity deleteSubtaskById(String subtaskId) {
         if (!hasSubtaskById(subtaskId)) {
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        if(subtaskEntity.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtaskEntity.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){                     // 子任务审核中及审核后无权进行删除
+            throw new ResultException(ResultCode.DELETE_DENIED_ERROR);
+        }
         subtaskRepository.delete(subtaskEntity);
         return subtaskEntity;
     }
@@ -178,6 +186,9 @@ public class SubtaskService {
     // 提交审核  根据子任务id为子任务选择审核模式及四类审核人  提交：第一次提交，直接修改，二次修改
     public SubtaskEntity arrangeAssessorsByIds(String subtaskId, String userId, int commitMode, boolean ifBackToStart, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        if(subtaskEntity.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtaskEntity.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){                     // 子任务审核中及审核后无权进行删除
+            throw new ResultException(ResultCode.ARRANGE_DENIED_ERROR);
+        }
         if(commitMode == ApplicationConfig.SUBTASK_DIRECT_MODIFY){    // 直接修改提交审核
             if(ifBackToStart){                // 驳回后的修改提交到第一个流程
                 subtaskEntity.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
@@ -361,6 +372,9 @@ public class SubtaskService {
     // 申请二次修改
     public SubtaskEntity applyForModify(String subtaskId){
         SubtaskEntity subtaskEntity = getSubtaskById(subtaskId);
+        if(subtaskEntity.getState() != ApplicationConfig.SUBTASK_AUDIT_OVER){
+            throw new ResultException(ResultCode.SECOND_MODIFY_DENIED_ERROR);
+        }
         subtaskEntity.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
         return subtaskRepository.save(subtaskEntity);
     }

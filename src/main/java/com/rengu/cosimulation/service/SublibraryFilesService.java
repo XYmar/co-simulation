@@ -122,54 +122,7 @@ public class SublibraryFilesService {
         sublibraryFilesRepository.saveAll(sublibraryFilesEntityList);
 
     }
-    /*@CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
-    public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, String userId, List<FileMetaEntity> fileMetaEntityList) {
-        if(!sublibraryService.hasSublibraryById(sublibraryId)){
-            throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
-        }
-        SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(sublibraryId);
-        List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
-        for (FileMetaEntity fileMetaEntity : fileMetaEntityList) {
-            String path = fileMetaEntity.getRelativePath().split("/")[1];
 
-            // 判断该节点是否存在
-            if (hasSublibraryFilesByNameAndExtensionAndSublibraryEntity(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), sublibraryEntity)) {
-                SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFilesByNameAndPostfixAndSublibraryEntity(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), sublibraryEntity);
-                sublibraryFilesEntity.setCreateTime(new Date());
-                sublibraryFilesEntity.setName(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setType(fileMetaEntity.getType());
-                sublibraryFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
-                sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
-                sublibraryFilesEntity.setVersion("M1");
-                sublibraryFilesEntity.setIfApprove(false);
-                sublibraryFilesEntity.setIfReject(false);
-                sublibraryFilesEntity.setManyCounterSignState(0);          // 多人会签模式，此时无人开始会签
-                sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
-                sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
-                sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
-            } else {
-                SublibraryFilesEntity sublibraryFilesEntity = new SublibraryFilesEntity();
-                sublibraryFilesEntity.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setType(fileMetaEntity.getType());
-                sublibraryFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
-                sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
-                sublibraryFilesEntity.setVersion("M1");
-                sublibraryFilesEntity.setIfApprove(false);
-                sublibraryFilesEntity.setIfReject(false);
-                sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
-                sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
-                sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
-                sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
-                sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
-            }
-        }
-        return sublibraryFilesEntityList;
-    }
-*/
     // 根据子库id查询子库下的文件
     public List<SublibraryFilesEntity> getSublibraryFilesBySublibraryAndIfApprove(String sublibraryId, boolean ifApprove) {
         if(!sublibraryService.hasSublibraryById(sublibraryId)){
@@ -247,6 +200,9 @@ public class SublibraryFilesService {
     // 根据子库文件id删除文件
     public SublibraryFilesEntity deleteSublibraryFileId(String sublibraryFileId) {
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        if(sublibraryFilesEntity.getState() >= ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD && sublibraryFilesEntity.getState() <= ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){                     // 审核中及审核后无权进行删除
+            throw new ResultException(ResultCode.DELETE_DENIED_ERROR);
+        }
         sublibraryFilesRepository.delete(sublibraryFilesEntity);
         return sublibraryFilesEntity;
      }
@@ -407,6 +363,9 @@ public class SublibraryFilesService {
     // 申请二次修改
     public SublibraryFilesEntity applyForModify(String sublibraryFileId){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        if(sublibraryFilesEntity.getState() != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){
+            throw new ResultException(ResultCode.SECOND_MODIFY_DENIED_ERROR);
+        }
         sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY);
         return sublibraryFilesRepository.save(sublibraryFilesEntity);
     }
@@ -431,6 +390,9 @@ public class SublibraryFilesService {
     // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
     public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, FileMetaEntity fileMetaEntity){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        if(sublibraryFilesEntity.getState() >= ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD && sublibraryFilesEntity.getState() <= ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){                     // 审核中及审核后无权进行修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
 
         if(StringUtils.isEmpty(fileMetaEntity.isIfDirectModify())){
             throw new ResultException(ResultCode.FILE_MODIFYWAY_NOT_FOUND_ERROR);
