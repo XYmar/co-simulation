@@ -142,7 +142,7 @@ public class MessageAop {
             // 子任务接口
             if (joinPoint.getTarget().getClass().equals(SubtaskController.class)) {
                 String type = result.getData().getClass().toString();
-                if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean")){
+                if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean") || type.equals("class java.util.HashMap")){
                     return;
                 }
                 SubtaskEntity subtaskEntity = (SubtaskEntity) result.getData();
@@ -188,7 +188,7 @@ public class MessageAop {
                         break;
                     }
                     case "subtaskAudit": {
-                        // mainOperator = subtaskEntity.getProjectEntity().getPic();                 // 操作人
+                        mainOperator = null;                 // 操作人
                         arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
                         messageOperate = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
                         mainBody = ApplicationConfig.MODIFY_OPERATE;
@@ -206,7 +206,7 @@ public class MessageAop {
             // 子库文件接口
             if (joinPoint.getTarget().getClass().equals(SublibraryFilesController.class)) {
                 String type = result.getData().getClass().toString();
-                if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean")){
+                if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean") || type.equals("class java.util.HashMap")){
                     return;
                 }
                 SublibraryFilesEntity sublibraryFilesEntity = (SublibraryFilesEntity) result.getData();
@@ -243,7 +243,8 @@ public class MessageAop {
                         description = "您的二次修改申请  " + (sublibraryFilesEntity.isIfModifyApprove() ? "已通过" : "未通过");
                         break;
                     }
-                    case "subtaskAudit": {
+                    case "sublibraryFileAudit": {
+                        mainOperator = null;                 // 操作人
                         arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
                         mainBody = ApplicationConfig.MODIFY_OPERATE;
                         messageOperate = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
