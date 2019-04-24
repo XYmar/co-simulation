@@ -16,11 +16,13 @@ public class WebSocketMessageConfig implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/deviceInfo", "/onlineDevice", "/deployProgress");
+        // config.enableSimpleBroker("/deviceInfo", "/onlineDevice", "/deployProgress");
+        config.enableSimpleBroker("/userInfo", "/personalInfo", "/audit");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/COSIMULATION").setAllowedOrigins("*").withSockJS();
     }
+
 }
