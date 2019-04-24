@@ -162,7 +162,7 @@ public class SubtaskFilesService {
         subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
         subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
         SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(fileMetaEntity.getSublibraryId());      // 所属子库
-        Set<SublibraryEntity> sublibraryEntities = subtaskFilesEntity.getSublibraryEntitySet() == null ? new HashSet<>() : subtaskFilesEntity.getSublibraryEntitySet();
+        Set<SublibraryEntity> sublibraryEntities = new HashSet<>();
         sublibraryEntities.add(sublibraryEntity);
         subtaskFilesEntity.setSublibraryEntitySet(sublibraryEntities);
 
