@@ -4,12 +4,15 @@ import com.rengu.cosimulation.entity.FileMetaEntity;
 import com.rengu.cosimulation.entity.ResultEntity;
 import com.rengu.cosimulation.entity.SublibraryFilesAuditEntity;
 import com.rengu.cosimulation.entity.SublibraryFilesEntity;
+import com.rengu.cosimulation.repository.SublibraryFilesRepository;
 import com.rengu.cosimulation.service.SublibraryFilesService;
+import com.rengu.cosimulation.specification.Filter;
 import com.rengu.cosimulation.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +23,8 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.rengu.cosimulation.specification.SpecificationBuilder.selectFrom;
+
 /**
  * Author: XYmar
  * Date: 2019/4/1 12:53
@@ -29,14 +34,16 @@ import java.util.List;
 @RequestMapping(value = "/sublibraryFiles")
 public class SublibraryFilesController {
     private final SublibraryFilesService sublibraryFilesService;
+    private final SublibraryFilesRepository sublibraryFilesRepository;
 
     @Autowired
-    public SublibraryFilesController(SublibraryFilesService sublibraryFilesService) {
+    public SublibraryFilesController(SublibraryFilesService sublibraryFilesService, SublibraryFilesRepository sublibraryFilesRepository) {
         this.sublibraryFilesService = sublibraryFilesService;
+        this.sublibraryFilesRepository = sublibraryFilesRepository;
     }
 
     // 根据Id导出子库文件
-    @GetMapping(value = "sublibraryFile/{sublibraryFileId}/user/{userId}/export")
+    @GetMapping(value = "/{sublibraryFileId}/user/{userId}/export")
     public void exportSublibraryFileById(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, @PathVariable(value = "userId") String userId, HttpServletResponse httpServletResponse) throws IOException {
         File exportFile = sublibraryFilesService.exportSublibraryFileById(sublibraryFileId, userId);
         String mimeType = URLConnection.guessContentTypeFromName(exportFile.getName()) == null ? "application/octet-stream" : URLConnection.guessContentTypeFromName(exportFile.getName());
@@ -62,7 +69,7 @@ public class SublibraryFilesController {
 
     // 根据子库文件id删除文件
     @DeleteMapping(value = "/{sublibraryFileId}")
-    public ResultEntity deleteSublibraryFileId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
+    public ResultEntity deleteSublibraryFileId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId) {
         return ResultUtils.success(sublibraryFilesService.deleteSublibraryFileId(sublibraryFileId));
     }
 
@@ -125,7 +132,19 @@ public class SublibraryFilesController {
 
     // 撤销修改
     @PatchMapping(value = "/{sublibraryFileId}/revokeModify")
-    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String version){
-        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId, version));
+    public ResultEntity revokeModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
+        return ResultUtils.success(sublibraryFilesService.revokeModify(sublibraryFileId));
+    }
+
+    // 更换版本
+    @PatchMapping(value = "/{sublibraryFileId}/versionReplace")
+    public ResultEntity versionReplace(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String version){
+        return ResultUtils.success(sublibraryFilesService.versionReplace(sublibraryFileId, version));
+    }
+
+    // 项目关键字查询
+    @PostMapping("/multiInquire")
+    public ResultEntity filter(@RequestBody Filter filter){
+        return ResultUtils.success(selectFrom(sublibraryFilesRepository).where(filter).findAll());
     }
 }

@@ -2,8 +2,6 @@ package com.rengu.cosimulation.service;
 
 import com.rengu.cosimulation.entity.SublibraryFilesAuditEntity;
 import com.rengu.cosimulation.entity.SublibraryFilesEntity;
-import com.rengu.cosimulation.entity.SubtaskFilesEntity;
-import com.rengu.cosimulation.entity.UserEntity;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
@@ -12,6 +10,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,12 +33,15 @@ public class SublibraryFilesAuditService {
     }
 
     // 根据用户id及子库文件id查询该文件审核详情(当前的)
-    public List<SublibraryFilesAuditEntity> getSublibraryFilesAudits(String sublibraryFileId){
+    public List<SublibraryFilesAuditEntity> getSublibraryFilesAudits(String sublibraryFileId, String sublibraryDate) throws ParseException {
         SublibraryFilesEntity sublibraryFilesEntity = sublibraryFilesService.getSublibraryFileById(sublibraryFileId);
-        return sublibraryFilesAuditRepository.findBySublibraryFilesEntityAndIfOver(sublibraryFilesEntity, false);
+        // return sublibraryFilesAuditRepository.findBySublibraryFilesEntityAndIfOver(sublibraryFilesEntity, false);
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = simpleDateFormat.parse(sublibraryDate);
+        return sublibraryFilesAuditRepository.findBySublibraryFilesEntityAndCreateTimeAfter(sublibraryFilesEntity, date);
     }
 
-    // 根据id查询子任务文件是否存在
+    // 根据详情id查询子库文件详情是否存在
     public boolean hasSublibraryFileById(String sublibraryFileAuditId) {
         if (StringUtils.isEmpty(sublibraryFileAuditId)) {
             return false;
@@ -46,7 +50,7 @@ public class SublibraryFilesAuditService {
     }
 
     // 根据id查询子任务文件
-    @Cacheable(value = "SublibraryFile_Cache", key = "#sublibraryFileAuditId")
+    @Cacheable(value = "SublibraryFilesAudit_Cache", key = "#sublibraryFileAuditId")
     public SublibraryFilesAuditEntity getSublibraryFilesAuditById(String sublibraryFileAuditId) {
         if (!hasSublibraryFileById(sublibraryFileAuditId)) {
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
