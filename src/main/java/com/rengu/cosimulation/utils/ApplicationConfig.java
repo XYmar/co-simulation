@@ -57,6 +57,11 @@ public class ApplicationConfig {
     public static final int SUBTASK_APPLY_FOR_MODIFY = 8;              // 申请二次修改中
     public static final int SUBTASK_APPLY_FOR_MODIFY_APPROVE = 9;      // 二次修改中
 
+    // 子任务提交审核方式： 第一次提交  直接修改  二次修改
+    public static final int SUBTASK_FIRST_COMMIT = 0;                     // 第一次提交
+    public static final int SUBTASK_DIRECT_MODIFY = 1;                    // 直接修改
+    public static final int SUBTASK_SECOND_MODIFY = 2;                    // 二次修改
+
     // 子库文件审核环节
     public static final int SUBLIBRARY_FILE_PROOFREAD = 1;             // 校对中
     public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
@@ -84,20 +89,23 @@ public class ApplicationConfig {
     public static final int SUBLIBRARY_FILE_DIRECTOR_MODIFY = 1;               // 直接修改
     public static final int SUBLIBRARY_FILE_SECOND_MODIFY = 2;               // 二次修改
 
-    // 子任务文件审核环节
-    public static final int PROOFREAD_ING = 2;  //  校对中
-    public static final int AUDITOR_ING = 3;   //  审核中
-    public static final int COUNTERSIGN_ING = 4; //  会签中
-    public static final int APPROVER_ING = 5;  //  批准中
-    public static final int ASSESS_FINISH = 6;  //  审核完成
-    public static final int ASSESSOR_NOT_PASS = 0;  //  未通过
-    public static final int ASSESSOR_PASS = 1;  // 已通过
-    public static final int TO_AUDIT = 2;         //  待审核
-    public static final int NOT_PEOPLE_COUNTERSIGNSTATE = 1;  //  无会签
-    public static final int ONE_PEOPLE_COUNTERSIGNSTATE = 2;  //  一人会签
-    public static final int MANY_PEOPLE_COUNTERSIGNSTATE = 3; //  多人会签
-    public static final boolean ASSESS_STATE_NOT_PASS = false;  //  当前审核未通过
-    public static final boolean ASSESS_STATE_PASS = true;  // 审核通过
+    // 通知消息
+    // 通知的基本操作
+    public static final int ARRANGE_NONE_OPERATE = 0;                     // 无操作
+    public static final int ARRANGE_ROLE_OPERATE = 1;                     // 赋予新角色
+    public static final int ARRANGE_PROJECTPIC_OPERATE = 2;               // 指定为项目负责人
+    public static final int ARRANGE_SUBTASKPIC_OPERATE =3;               // 指定为子任务负责人
+    public static final int ARRANGE_AUDIT_OPERATE = 4;                    // 指定为审核员
+    public static final int DELETE_OPERATE = 5;                           // 删除
+    public static final int RESTORE_OPERATE = 6;                          // 恢复
+    public static final int MODIFY_OPERATE = 7;                           // 修改
+
+    // 通知操作的主体
+    public static final int MAINBODY_NONE = 0;                           // 无操作主体
+    public static final int MAINBODY_USERENTITY = 1;                      // 用户
+    public static final int MAINBODY_PROJECTENTITY = 2;                   // 项目
+    public static final int MAINBODY_SUBTASKENTITY = 3;                   // 子任务
+    public static final int MAINBODY_SUBLIBRARY_FILE_ENTITY = 4;                // 子库文件
 
 
     // 文件块保存路径

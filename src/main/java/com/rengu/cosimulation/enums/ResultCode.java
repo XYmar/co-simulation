@@ -58,8 +58,9 @@ public enum ResultCode {
     SUBTASK_USER_ARRANGE_AUTHORITY_DENIED_ERROR(22008,"无权指定审核人"),
     SUBTASK_STATE_NOT_FOUND_ERROR(22009,"请传入审核结果"),
     SUBTASK_PARENT_NOT_ALL_OVER(22010,"请等待上一流程结束再提交"),
-    SUBTASK_HAVE_NOT_START(22011,"此任务还未开始"),
+    SUBTASK_HAVE_NOT_START(22011,"此任务当前阶段无法执行上传操作"),
     SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE(22012,"无权指定子任务负责人"),
+
 
     // 子任务文件相关  2300
     SUBTASK_FILE_ID_NOT_FOUND_ERROR(23001,"未发现该子任务文件ID"),
@@ -75,8 +76,9 @@ public enum ResultCode {
     FILE_ID_NOT_FOUND_ERROR(30005,"未发现该文件Id"),
 
     // 流程节点相关   2400x
-    PROCESS_NODE_NOT_FOUND_ERROR(24001, "项目流程不存在"),
-    PROCESS_ARGS_NOT_FOUND_ERROR(24002, "流程节点参数不存在"),
+    PROCESS_NODE_ID_NOT_FOUND_ERROR(24001,"未发现该节点ID"),
+    PROCESS_NODE_NOT_FOUND_ERROR(24002, "项目流程不存在"),
+    PROCESS_ARGS_NOT_FOUND_ERROR(24003, "流程节点参数不存在"),
 
     // 库相关   2500x
     LIBRARY_ID_NOT_FOUND_ERROR(25001, "未发现该库id"),
@@ -97,7 +99,7 @@ public enum ResultCode {
     FILE_MODIFYWAY_NOT_FOUND_ERROR(28001,"请传入修改方式"),
     FILE_VERSION_NOT_FOUND_ERROR(28002,"请选择文件更新的版本"),
     MODIFY_APPROVE_NOT_PASS_ERROR(28003,"您的二次修改申请还未通过，请耐心等待"),
-    SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE(28004,"当前文件无可撤销版本"),
+    FILE_HAS_NO_REVOKE_FILE(28004,"当前文件无可撤销版本"),
     SUBLIBRARY_FILE_VERSION_NOT_CHOOSE_ERROR(28005,"请选择恢复至哪个版本"),
 
     // 审核相关   2900x
@@ -112,11 +114,20 @@ public enum ResultCode {
     USER_ALREADY_COUNTERSIGN_ERROR(29009,"该文件您已处理过"),
     CURRENT_PROGRESS_NOT_ARRIVE_ERROR(29010,"还未进行到当前流程"),
 
-    // 设备相关3000x
-    DEVICE_ID_NOT_FOUND(30001, "未找到该设备"),
-    DEVICE_IS_OFFLINE(30002, "该设备已离线"),
-    SCAN_DISK_TIME_OUT(30003, "获取设备磁盘信息超时"),
-    SCAN_PROCESS_TIME_OUT(30004, "获取设备进程信息超时"),
+    // 修改删除权限控制 3000x
+    DELETE_DENIED_ERROR(30013,"当前阶段无法进行删除操作"),
+    MODIFY_DENIED_ERROR(30014,"当前阶段无法进行修改操作"),
+    SECOND_MODIFY_DENIED_ERROR(30015,"请等待任务审核结束再提交二次修改申请"),
+    ARRANGE_DENIED_ERROR(30016,"请等待任务审核结束再提交二次修改申请"),
+
+    // 设备相关3100x
+    DEVICE_ID_NOT_FOUND(31001, "未找到该设备"),
+    DEVICE_IS_OFFLINE(31002, "该设备已离线"),
+    SCAN_DISK_TIME_OUT(31003, "获取设备磁盘信息超时"),
+    SCAN_PROCESS_TIME_OUT(31004, "获取设备进程信息超时"),
+
+    // 通知相关   5000x
+    MESSAGE_ID_NOT_FOUND_ERROR(50015,"未发现该消息ID"),
 
     PARAMETER_ERROR(40001, "参数错误"),
     ACCESS_DENIED_ERROR(40002, "参数错误"),

@@ -3,15 +3,15 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
-import com.rengu.cosimulation.repository.SublibraryFilesAuditRepository;
-import com.rengu.cosimulation.repository.SublibraryFilesHistoryRepository;
-import com.rengu.cosimulation.repository.SublibraryFilesRepository;
-import com.rengu.cosimulation.repository.SubtaskFilesRepository;
+import com.rengu.cosimulation.repository.*;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.logging.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -37,9 +38,10 @@ public class SublibraryFilesService {
     private final SublibraryFilesAuditRepository sublibraryFilesAuditRepository;
     private final SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository;
     private final SubtaskFilesRepository subtaskFilesRepository;
+    private final DownloadLogsRepository downloadLogsRepository;
 
     @Autowired
-    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository) {
+    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository, DownloadLogsRepository downloadLogsRepository) {
         this.sublibraryFilesRepository = sublibraryFilesRepository;
         this.fileService = fileService;
         this.sublibraryService = sublibraryService;
@@ -47,6 +49,7 @@ public class SublibraryFilesService {
         this.sublibraryFilesAuditRepository = sublibraryFilesAuditRepository;
         this.sublibraryFilesHistoryRepository = sublibraryFilesHistoryRepository;
         this.subtaskFilesRepository = subtaskFilesRepository;
+        this.downloadLogsRepository = downloadLogsRepository;
     }
 
     // 根据名称、后缀及子库检查文件是否存在
@@ -119,54 +122,7 @@ public class SublibraryFilesService {
         sublibraryFilesRepository.saveAll(sublibraryFilesEntityList);
 
     }
-    /*@CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
-    public List<SublibraryFilesEntity> saveSublibraryFilesBySublibraryId(String sublibraryId, String userId, List<FileMetaEntity> fileMetaEntityList) {
-        if(!sublibraryService.hasSublibraryById(sublibraryId)){
-            throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
-        }
-        SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(sublibraryId);
-        List<SublibraryFilesEntity> sublibraryFilesEntityList = new ArrayList<>();
-        for (FileMetaEntity fileMetaEntity : fileMetaEntityList) {
-            String path = fileMetaEntity.getRelativePath().split("/")[1];
 
-            // 判断该节点是否存在
-            if (hasSublibraryFilesByNameAndExtensionAndSublibraryEntity(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), sublibraryEntity)) {
-                SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFilesByNameAndPostfixAndSublibraryEntity(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), sublibraryEntity);
-                sublibraryFilesEntity.setCreateTime(new Date());
-                sublibraryFilesEntity.setName(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setType(fileMetaEntity.getType());
-                sublibraryFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
-                sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
-                sublibraryFilesEntity.setVersion("M1");
-                sublibraryFilesEntity.setIfApprove(false);
-                sublibraryFilesEntity.setIfReject(false);
-                sublibraryFilesEntity.setManyCounterSignState(0);          // 多人会签模式，此时无人开始会签
-                sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
-                sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
-                sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
-            } else {
-                SublibraryFilesEntity sublibraryFilesEntity = new SublibraryFilesEntity();
-                sublibraryFilesEntity.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMetaEntity.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setPostfix(FilenameUtils.getExtension(fileMetaEntity.getRelativePath()));
-                sublibraryFilesEntity.setType(fileMetaEntity.getType());
-                sublibraryFilesEntity.setSecretClass(fileMetaEntity.getSecretClass());
-                sublibraryFilesEntity.setProductNo(fileMetaEntity.getProductNo());
-                sublibraryFilesEntity.setFileNo(fileMetaEntity.getFileNo());
-                sublibraryFilesEntity.setVersion("M1");
-                sublibraryFilesEntity.setIfApprove(false);
-                sublibraryFilesEntity.setIfReject(false);
-                sublibraryFilesEntity.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
-                sublibraryFilesEntity.setUserEntity(userService.getUserById(userId));
-                sublibraryFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
-                sublibraryFilesEntity.setSublibraryEntity(sublibraryEntity);
-                sublibraryFilesEntityList.add(sublibraryFilesRepository.save(sublibraryFilesEntity));
-            }
-        }
-        return sublibraryFilesEntityList;
-    }
-*/
     // 根据子库id查询子库下的文件
     public List<SublibraryFilesEntity> getSublibraryFilesBySublibraryAndIfApprove(String sublibraryId, boolean ifApprove) {
         if(!sublibraryService.hasSublibraryById(sublibraryId)){
@@ -197,7 +153,8 @@ public class SublibraryFilesService {
         if(!userService.hasUserById(userId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
-        int userSecretClass = userService.getUserById(userId).getSecretClass();     //获取用户密级
+        UserEntity userEntity = userService.getUserById(userId);
+        int userSecretClass = userEntity.getSecretClass();     //获取用户密级
         if(!hasSublibraryFileById(sublibraryFileId)){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
         }
@@ -209,6 +166,10 @@ public class SublibraryFilesService {
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + sublibraryFilesEntity.getName() + "." + sublibraryFilesEntity.getFileEntity().getPostfix());
         FileUtils.copyFile(new File(sublibraryFilesEntity.getFileEntity().getLocalPath()), exportFile);
+        DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setUserEntity(userEntity);
+        downloadLogsEntity.setFileEntity(sublibraryFilesEntity.getFileEntity());
+        downloadLogsRepository.save(downloadLogsEntity);
         return exportFile;
     }
 
@@ -238,13 +199,13 @@ public class SublibraryFilesService {
 
     // 根据子库文件id删除文件
     public SublibraryFilesEntity deleteSublibraryFileId(String sublibraryFileId) {
-        if(!hasSublibraryFileById(sublibraryFileId)){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_ID_NOT_FOUND_ERROR);
-        }
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        if(sublibraryFilesEntity.getState() >= ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD && sublibraryFilesEntity.getState() <= ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){                     // 审核中及审核后无权进行删除
+            throw new ResultException(ResultCode.DELETE_DENIED_ERROR);
+        }
         sublibraryFilesRepository.delete(sublibraryFilesEntity);
         return sublibraryFilesEntity;
-    }
+     }
 
     // 选择文件（一批文件）的审核模式及四类审核人
     public List<SublibraryFilesEntity> arrangeAudit(String[] sublibraryFileId, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds){
@@ -402,6 +363,9 @@ public class SublibraryFilesService {
     // 申请二次修改
     public SublibraryFilesEntity applyForModify(String sublibraryFileId){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        if(sublibraryFilesEntity.getState() != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){
+            throw new ResultException(ResultCode.SECOND_MODIFY_DENIED_ERROR);
+        }
         sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY);
         return sublibraryFilesRepository.save(sublibraryFilesEntity);
     }
@@ -426,9 +390,16 @@ public class SublibraryFilesService {
     // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
     public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, FileMetaEntity fileMetaEntity){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
+        if(sublibraryFilesEntity.getState() >= ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD && sublibraryFilesEntity.getState() <= ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){                     // 审核中及审核后无权进行修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
 
         if(StringUtils.isEmpty(fileMetaEntity.isIfDirectModify())){
             throw new ResultException(ResultCode.FILE_MODIFYWAY_NOT_FOUND_ERROR);
+        }
+
+        if(fileMetaEntity.getSecretClass() > sublibraryFilesEntity.getUserEntity().getSecretClass()){
+            throw new ResultException(ResultCode.SUBLIBRARY_FILE_UPLOAD_DENIED);
         }
 
         // 修改前存储此文件的备份 若备份已存在删除上一备份  直接修改、二次修改都保留可以撤销的备份
@@ -437,16 +408,7 @@ public class SublibraryFilesService {
         }
         saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);
 
-        if(fileMetaEntity.getSecretClass() > sublibraryFilesEntity.getUserEntity().getSecretClass()){
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_UPLOAD_DENIED);
-        }
-
         if(fileMetaEntity.isIfDirectModify()){            // 直接修改
-            /*// 修改前存储此文件的备份 若备份已存在删除上一备份
-            if(sublibraryFilesHistoryRepository.existsByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true)){
-                sublibraryFilesHistoryRepository.delete(sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntityAndIfDirectModify(sublibraryFilesEntity, true).get(0));
-            }
-            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, true);*/
             if(fileMetaEntity.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
                 sublibraryFilesEntity.setState(0);
             }else{
@@ -458,13 +420,13 @@ public class SublibraryFilesService {
             if(!sublibraryFilesEntity.isIfModifyApprove()){
                 throw new ResultException(ResultCode.MODIFY_APPROVE_NOT_PASS_ERROR);
             }
-            // 修改前保存此文件历史
-            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, false);
-
             // 二次修改
             if(StringUtils.isEmpty(fileMetaEntity.getVersion())){
                 throw new ResultException(ResultCode.FILE_VERSION_NOT_FOUND_ERROR);
             }
+            // 修改前保存此文件历史
+            saveSublibraryFilesHistoryBySublibraryFile(sublibraryFilesEntity, false);
+
             sublibraryFilesEntity.setVersion(fileMetaEntity.getVersion());
             sublibraryFilesEntity.setState(0);
             sublibraryFilesEntity.setAuditMode(0);
@@ -527,7 +489,7 @@ public class SublibraryFilesService {
     // 撤销文件操作    只支持一次撤销操作，撤销回上一步  要再次撤销需再次修改
     public SublibraryFilesEntity revokeModify(String sublibraryFileId){
         if(!ifHasTemp(sublibraryFileId)){       // 当前文件不存在可撤销的文件
-            throw new ResultException(ResultCode.SUBLIBRARY_FILE_HAS_NO_REVOKE_FILE);
+            throw new ResultException(ResultCode.FILE_HAS_NO_REVOKE_FILE);
         }
         // 当前文件
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);

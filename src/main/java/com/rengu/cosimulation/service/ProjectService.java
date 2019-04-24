@@ -3,10 +3,7 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
-import com.rengu.cosimulation.repository.DesignLinkRepository;
-import com.rengu.cosimulation.repository.ProcessNodeRepository;
-import com.rengu.cosimulation.repository.ProjectRepository;
-import com.rengu.cosimulation.repository.SubtaskRepository;
+import com.rengu.cosimulation.repository.*;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +24,13 @@ import java.util.*;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserService userService;
-    private final DesignLinkService designLinkService;
-    private final DesignLinkRepository designLinkRepository;
-    private final SubtaskRepository subtaskRepository;
-    private final ProcessNodeRepository processNodeRepository;
+    private final ProcessNodeRepository1 processNodeRepository1;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, UserService userService, DesignLinkService designLinkService, DesignLinkRepository designLinkRepository, SubtaskRepository subtaskRepository, ProcessNodeRepository processNodeRepository) {
+    public ProjectService(ProjectRepository projectRepository, UserService userService, ProcessNodeRepository1 processNodeRepository1) {
         this.projectRepository = projectRepository;
         this.userService = userService;
-        this.designLinkService = designLinkService;
-        this.designLinkRepository = designLinkRepository;
-        this.subtaskRepository = subtaskRepository;
-        this.processNodeRepository = processNodeRepository;
+        this.processNodeRepository1 = processNodeRepository1;
     }
 
     // 新建项目(创建者、名称、负责人)  项目负责人密级限制
@@ -91,20 +82,14 @@ public class ProjectService {
 
     // 根据密级控制查看项目详情
     public boolean getProjectDetails(String projectId, String userId){
-        if(!hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
         ProjectEntity projectEntity = getProjectById(projectId);
         UserEntity userEntity = userService.getUserById(userId);
         return userEntity.getSecretClass() >= projectEntity.getSecretClass();
     }
 
-    // 查询所有项目,根据用户Id(负责人)
-    public List<ProjectEntity> getProjectsByUser(UserEntity userEntity, boolean deleted) {
-        return projectRepository.findByPicAndDeleted(userEntity, deleted);
+    // 根据用户查询其所有未删除的项目： 项目管理员、项目负责人、子任务负责人
+    public List<ProjectEntity> getProjectsByUser(UserEntity userEntity) {
+        return projectRepository.findByPicOrCreatorAndDeleted(userEntity, userEntity, false);
     }
 
     // 根据用户密级查询项目（返回小于等于用户密级的项目）
@@ -288,25 +273,15 @@ public class ProjectService {
 
         // 第一个开始的一系列子任务的状态改为进行中
         // 查看流程图上无父节点的节点
-        List<ProcessNodeEntity> processNodeEntityList = processNodeRepository.findByProjectEntityAndParentSign(projectEntity, "NULL");
+        List<ProcessNodeEntity1> processNodeEntityList = processNodeRepository1.findByProjectEntityAndLinkEntityList(projectEntity, null);
         if(processNodeEntityList.size() == 0){
             throw new ResultException(ResultCode.PROCESS_NODE_NOT_FOUND_ERROR);
         }
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
+        // 开启子任务
+        for(ProcessNodeEntity1 processNodeEntity : processNodeEntityList){
             processNodeEntity.getSubtaskEntity().setState(ApplicationConfig.SUBTASK_START);
         }
-        processNodeRepository.saveAll(processNodeEntityList);
-        // 根据节点查询子任务信息
-        /*List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
-        for(ProcessNodeEntity processNodeEntity : processNodeEntityList){
-            subtaskEntityList.add(subtaskRepository.findByProcessNodeEntity(processNodeEntity));
-        }
-        //List<SubtaskEntity> subtaskEntityList = processNodeService.findFirstSubtasks(projectEntity);
-        for(SubtaskEntity subtaskEntity : subtaskEntityList){
-            subtaskEntity.setState(1);
-        }
-
-        subtaskRepository.saveAll(subtaskEntityList);*/
+        processNodeRepository1.saveAll(processNodeEntityList);
         return projectRepository.save(projectEntity);
     }
 

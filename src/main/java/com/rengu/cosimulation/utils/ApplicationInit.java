@@ -113,7 +113,7 @@ public class ApplicationInit  implements ApplicationRunner {
             userService.saveUser(userEntity, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
         }
 
-        // 初始化设计环节
+        /*// 初始化设计环节
         // 创建设计环节数组
         DesignLinkEntity[] designLinkEntities = new DesignLinkEntity[7];
 
@@ -150,7 +150,7 @@ public class ApplicationInit  implements ApplicationRunner {
             if (!designLinkService.hasDesignLinkByName(designLinkEntitie.getName())) {
                 designLinkService.saveDesignLink(designLinkEntitie);
             }
-        }
+        }*/
 
     }
 
