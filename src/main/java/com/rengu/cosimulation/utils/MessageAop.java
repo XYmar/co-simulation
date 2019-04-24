@@ -151,12 +151,12 @@ public class MessageAop {
                         mainOperator = subtaskEntity.getProjectEntity().getPic();                 // 操作人
                         arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
                         messageOperate = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
-                        mainBody = ApplicationConfig.ARRANGE_PROJECTPIC_OPERATE;
+                        mainBody = ApplicationConfig.ARRANGE_SUBTASKPIC_OPERATE;
                         description = mainOperator.getUsername() + "将您指定为子任务  " + subtaskEntity.getName() + "  的负责人";
                         break;
                     }
                     case "arrangeAssessorsByIds": {
-                        mainBody = ApplicationConfig.MODIFY_OPERATE;
+                        mainBody = ApplicationConfig.ARRANGE_AUDIT_OPERATE;
                         mainOperator = subtaskEntity.getUserEntity();
                         Set<UserEntity> proofreadUserSet = subtaskEntity.getProofreadUserSet();
                         Set<UserEntity> auditUserSet = subtaskEntity.getAuditUserSet();
@@ -212,7 +212,7 @@ public class MessageAop {
                 SublibraryFilesEntity sublibraryFilesEntity = (SublibraryFilesEntity) result.getData();
                 switch (joinPoint.getSignature().getName()) {
                     case "arrangeAudit": {
-                        mainBody = ApplicationConfig.MODIFY_OPERATE;
+                        mainBody = ApplicationConfig.ARRANGE_AUDIT_OPERATE;
                         Set<UserEntity> subLibraryProofreadUserSet = sublibraryFilesEntity.getProofreadUserSet();
                         Set<UserEntity> auditUserSet = sublibraryFilesEntity.getAuditUserSet();
                         Set<UserEntity> countersignUserSet = sublibraryFilesEntity.getCountersignUserSet();
@@ -267,8 +267,9 @@ public class MessageAop {
                 messageEntity.setMainBody(mainBody);
                 messageService.saveMessage(messageEntity);
             }
-            List<MessageEntity> messageEntityList = messageService.getMessagesByUser(userService.getUserByUsername(username).getId());
-            simpMessagingTemplate.convertAndSend("/personalInfo/" + username, ResultUtils.success(messageEntityList));
+            // List<MessageEntity> messageEntityList = messageService.getMessagesByUser(userService.getUserByUsername(username).getId());
+            Long count = messageRepository.countByArrangedPersonAndIfRead(userService.getUserByUsername(username), false);
+            simpMessagingTemplate.convertAndSend("/personalInfo/" + username, ResultUtils.success(count));
         }
     }
 
