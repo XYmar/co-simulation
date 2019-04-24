@@ -82,12 +82,6 @@ public class ProjectService {
 
     // 根据密级控制查看项目详情
     public boolean getProjectDetails(String projectId, String userId){
-        if(!hasProjectById(projectId)){
-            throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
-        }
-        if(!userService.hasUserById(userId)){
-            throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
-        }
         ProjectEntity projectEntity = getProjectById(projectId);
         UserEntity userEntity = userService.getUserById(userId);
         return userEntity.getSecretClass() >= projectEntity.getSecretClass();
