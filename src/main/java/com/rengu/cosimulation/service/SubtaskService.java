@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -414,6 +412,19 @@ public class SubtaskService {
         projectEntities1.removeAll(projectEntities2);
         projectEntities1.addAll(projectEntities2);
         return projectEntities1;
+    }
+
+    // 返回整个系统的所有项目及以下子任务的树结构
+    public List<Map<String, Object>> getProjectTrees(int secretClass){
+        List<Map<String, Object>> list = new ArrayList<>();
+        List<ProjectEntity> projectEntityList = projectService.getProjectsBySecretClass(secretClass, false);
+        for(ProjectEntity projectEntity : projectEntityList){
+            Map<String, Object> map = new HashMap<>();
+            map.put("project", projectEntity);
+            map.put("subtask", findByProjectId(projectEntity.getId()));
+            list.add(map);
+        }
+        return list;
     }
 
 }
