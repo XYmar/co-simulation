@@ -59,7 +59,6 @@ public class MessageAop {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         if (httpServletRequest.getUserPrincipal() != null) {
-            String username = httpServletRequest.getUserPrincipal().getName();
             UserEntity mainOperator = new UserEntity();
             UserEntity arrangedPerson = new UserEntity();
             int messageOperate = ApplicationConfig.ARRANGE_NONE_OPERATE;
@@ -103,7 +102,7 @@ public class MessageAop {
                     case "saveProject": {
                         messageOperate = ApplicationConfig.ARRANGE_PROJECTPIC_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = mainOperator.getUsername() + "创建了" + projectEntity.getName() + "， 并指定您为项目负责人";
+                        description = mainOperator.getUsername() + "创建了项目" + projectEntity.getName() + "， 并指定您为项目负责人";
                         break;
                     }
                     case "arrangeProject": {
@@ -115,19 +114,19 @@ public class MessageAop {
                     case "deleteProjectById": {
                         messageOperate = ApplicationConfig.DELETE_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = projectEntity.getName() + " 已移入回收站";
+                        description = "项目" + projectEntity.getName() + " 已移入回收站";
                         break;
                     }
                     case "restoreProjectById": {
                         messageOperate = ApplicationConfig.RESTORE_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = projectEntity.getName() + " 已恢复";
+                        description = "项目" +  projectEntity.getName() + " 已恢复";
                         break;
                     }
                     case "startProject": {
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = projectEntity.getName() + "已启动";
+                        description = "项目" +  projectEntity.getName() + "已启动";
                         break;
                     }
                     case "updateProjectPic": {             // 修改项目负责人
@@ -174,7 +173,7 @@ public class MessageAop {
                             messageEntity.setArrangedPerson(userEntity);
                             messageEntity.setMessageOperate(messageOperate);
                             messageEntity.setMainBody(mainBody);
-                            messageEntity.setDescription(subtaskEntity.getUserEntity().getUsername() + "指定您为 " + subtaskEntity.getProjectEntity().getName() + "的审核人员");
+                            messageEntity.setDescription(subtaskEntity.getUserEntity().getUsername() + "指定您为子任务 " + subtaskEntity.getProjectEntity().getName() + "的审核人员");
                             messageEntityList.add(messageEntity);
                         }
                         messageRepository.saveAll(messageEntityList);
@@ -189,14 +188,18 @@ public class MessageAop {
                         break;
                     }
                     case "subtaskAudit": {
-                        mainOperator = null;                 // 操作人
-                        arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
-                        mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
-                        messageOperate = ApplicationConfig.MODIFY_OPERATE;
                         if(subtaskEntity.isIfApprove()){
+                            mainOperator = null;                 // 操作人
+                            arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
+                            mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
+                            messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             description = "您的在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已审核通过，相关文件已入库";
                         }
                         if(subtaskEntity.isIfReject()){
+                            mainOperator = null;                 // 操作人
+                            arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
+                            mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
+                            messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             description = "您的在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已被驳回";
                         }
                         break;
@@ -246,14 +249,18 @@ public class MessageAop {
                         break;
                     }
                     case "sublibraryFileAudit": {
-                        mainOperator = null;                 // 操作人
-                        arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
-                        messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                         if(sublibraryFilesEntity.isIfApprove()){
+                            mainOperator = null;                 // 操作人
+                            arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
+                            messageOperate = ApplicationConfig.MODIFY_OPERATE;
+                            mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                             description = "您上传的文件  " + sublibraryFilesEntity.getName() + "已审核通过，相关文件已入库";
                         }
                         if(sublibraryFilesEntity.isIfReject()){
+                            mainOperator = null;                 // 操作人
+                            arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
+                            messageOperate = ApplicationConfig.MODIFY_OPERATE;
+                            mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                             description = "您上传的文件  " + sublibraryFilesEntity.getName() + "已被驳回";
                         }
                         break;
