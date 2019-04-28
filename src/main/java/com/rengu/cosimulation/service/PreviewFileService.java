@@ -67,12 +67,12 @@ public class PreviewFileService {
             }else if(this.compressType.contains(subfix.toLowerCase())) {
                 this.compressedFileConventer.conventer(previewFileEntity);
             }else if(this.officeType.contains(subfix.toLowerCase())) {
-                if("xlsx".equals(subfix.toLowerCase()) || "xls".equals(subfix.toLowerCase())
+             /*   if("xlsx".equals(subfix.toLowerCase()) || "xls".equals(subfix.toLowerCase())
                         || "pptx".equals(subfix.toLowerCase()) || "ppt".equals(subfix.toLowerCase())) {
                     this.officeFileConventer.conventerToHtml(previewFileEntity);
-                }else {
+                }else {*/
                     this.officeFileConventer.conventerToPdf(previewFileEntity);
-                }
+//                }
             }
         }catch (Exception e) {
             e.printStackTrace();
