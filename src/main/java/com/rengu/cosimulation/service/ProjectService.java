@@ -282,6 +282,9 @@ public class ProjectService {
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
         ProjectEntity projectEntity = getProjectById(projectId);
+        if(projectEntity.getState() != ApplicationConfig.PROJECT_NOT_START){
+           throw new ResultException(ResultCode.PROJECT_ALREADY_START_ERROR);
+        }
         if(StringUtils.isEmpty(projectEntity.getOrderNum())){
             throw new ResultException(ResultCode.PROJECT_ORDER_NUM_NOT_FOUND_ERROR);
         }

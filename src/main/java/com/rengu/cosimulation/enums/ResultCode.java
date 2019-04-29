@@ -39,6 +39,7 @@ public enum ResultCode {
     PROJECT_ORDER_NUM_NOT_FOUND_ERROR(20008,"未发现该项目令号"),
     PROJECT_FINISH_TIME_NOT_FOUND_ERROR(20009,"未发现该项目节点"),
     PROJECT_SECRETCLASS_NOT_FOUND_ERROR(20010,"请指定项目密级"),
+    PROJECT_ALREADY_START_ERROR(20011,"项目已启动，请勿重复操作"),
 
     // 设计环节相关    2100x
     DESIGN_LINK_ARGS_NOT_FOUND_ERROR(21001, "未发现设计环节参数"),
