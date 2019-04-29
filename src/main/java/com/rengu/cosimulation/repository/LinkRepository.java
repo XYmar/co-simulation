@@ -13,4 +13,5 @@ public interface LinkRepository extends JpaRepository<LinkEntity, String> {
     List<LinkEntity> deleteAllByProjectEntity(ProjectEntity projectEntity);
     boolean existsByProjectEntity(ProjectEntity projectEntity);
     List<LinkEntity> findByParentId(String parentId);         // 查找以此节点为父节点的所有子节点
+    boolean existsByProjectEntityAndParentId(ProjectEntity projectEntity, String parentId);
 }

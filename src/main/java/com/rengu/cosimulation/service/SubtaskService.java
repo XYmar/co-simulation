@@ -3,10 +3,7 @@ package com.rengu.cosimulation.service;
 import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
-import com.rengu.cosimulation.repository.LinkRepository;
-import com.rengu.cosimulation.repository.SubtaskAuditRepository;
-import com.rengu.cosimulation.repository.ProcessNodeRepository1;
-import com.rengu.cosimulation.repository.SubtaskRepository;
+import com.rengu.cosimulation.repository.*;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
@@ -25,6 +22,7 @@ import java.util.*;
 @Service
 public class SubtaskService {
     private final SubtaskRepository subtaskRepository;
+    private final ProjectRepository projectRepository;
     private final ProjectService projectService;
     private final UserService userService;
     private final ProcessNodeRepository1 processNodeRepository1;
@@ -34,7 +32,7 @@ public class SubtaskService {
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
@@ -42,6 +40,7 @@ public class SubtaskService {
         this.subtaskAuditRepository = subtaskAuditRepository;
         this.sublibraryFilesService = sublibraryFilesService;
         this.linkRepository = linkRepository;
+        this.projectRepository = projectRepository;
     }
 
     // 根据项目id查询所有子任务
@@ -96,8 +95,6 @@ public class SubtaskService {
     }
 
     // 删除子任务
-    // todo 审核中后不能进行删除
-    // todo 子任务删除后节点是否需要删除
     public SubtaskEntity deleteSubtaskById(String subtaskId) {
         if (!hasSubtaskById(subtaskId)) {
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
@@ -108,6 +105,25 @@ public class SubtaskService {
         }
         subtaskRepository.delete(subtaskEntity);
         return subtaskEntity;
+    }
+
+    // 判断项目的所有子任务是否已全部完成，完成后将项目状态设置为完成
+    public void setProjectComplete(ProjectEntity projectEntity){
+        List<ProcessNodeEntity1> processNodeEntity1List = processNodeRepository1.findByProjectEntity(projectEntity);
+
+        // 查找最后的节点  即查找无已此节点为父节点的link，然后找到对应的节点,查看他们的状态
+        boolean ifAllComplete = true;
+        for(ProcessNodeEntity1 processNodeEntity1 : processNodeEntity1List){
+            if(!linkRepository.existsByProjectEntityAndParentId(projectEntity, processNodeEntity1.getId())){
+                if(!(processNodeEntity1.getSubtaskEntity().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER)){
+                    ifAllComplete = false;
+                }
+            }
+        }
+        if(ifAllComplete){
+            projectEntity.setState(ApplicationConfig.PROJECT_OVER);
+        }
+        projectRepository.save(projectEntity);
     }
 
     // 根据子任务开启其后续任务
@@ -123,7 +139,7 @@ public class SubtaskService {
             processNodeEntity1List.add(processNodeRepository1.findById(linkEntity.getSelfId()).get());
         }
 
-        // 获取后续子任务
+        // 获取后续子任务   如果没有后续子任务了则
         List<SubtaskEntity> subtaskEntityList = new ArrayList<>();
         if(processNodeEntity1List.size() > 0){
             for(ProcessNodeEntity1 processNodeEntity : processNodeEntity1List){
@@ -284,8 +300,9 @@ public class SubtaskService {
          *          *                                                          2)多人会签：多人审核通过审核-->批准
          *                                                                                 若当前用户已会签过则报错，您已会签过
          *                                                当前阶段为批准时-->  (1)修改子任务的通过状态为true； 设置任务状态为审批结束
-         *                                                                     (2)将此子任务的后续任务状态改为进行中
-         *                                                    @TODO                 (3)将此子任务的所有文件分别入库
+         *                                                                     (2)将此子任务的后续任务状态改为进行中，即开启后续子任务
+         *                                                                     (3)将此子任务的所有文件分别入库
+         *                                                                     (4)若所有子任务都已完成，则将项目状态设为完成
          *                 no   --> 停留当前模式   --> 设置子任务状态为审批结束
          *                                             记录当前驳回的阶段
          * */
@@ -323,6 +340,9 @@ public class SubtaskService {
 
                 // 开启后续子任务
                 startNextSubtasksById(subtaskEntity);
+
+                // 子任务全部完成后项目完成
+                setProjectComplete(subtaskEntity.getProjectEntity());
             }else{
                 subtaskEntity.setState(subtaskEntityArgs.getState() + 1);
                 subtaskAuditEntity.setState(subtaskEntityArgs.getState());                                 // 在哪步驳回

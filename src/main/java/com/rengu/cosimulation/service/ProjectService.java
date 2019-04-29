@@ -80,11 +80,27 @@ public class ProjectService {
         return projectRepository.findByDeleted(deleted);
     }
 
-    // 根据密级控制查看项目详情
+    // 根据密级控制查看项目详情  同时判断项目是否超时
     public boolean getProjectDetails(String projectId, String userId){
         ProjectEntity projectEntity = getProjectById(projectId);
         UserEntity userEntity = userService.getUserById(userId);
+        if(ifOverTime(projectEntity.getFinishTime())){
+            projectEntity.setState(ApplicationConfig.PROJECT_OVER_TIME);
+        }
+        projectRepository.save(projectEntity);
+
         return userEntity.getSecretClass() >= projectEntity.getSecretClass();
+    }
+
+    public boolean ifOverTime(String projectTimestamp) {
+        long timeStamp = System.currentTimeMillis();
+        long projectStamp = Long.parseLong(projectTimestamp);
+
+        boolean ifOver = false;
+        if(projectStamp < timeStamp){
+            ifOver = true;
+        }
+        return ifOver;
     }
 
     // 根据用户查询其所有未删除的项目： 项目管理员、项目负责人、子任务负责人
@@ -191,6 +207,9 @@ public class ProjectService {
         }
         projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
         projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
+        if(!ifOverTime(projectEntityArgs.getFinishTime())){
+            projectEntity.setState(ApplicationConfig.PROJECT_START);
+        }
         return projectRepository.save(projectEntity);
     }
 
@@ -269,7 +288,7 @@ public class ProjectService {
         if(StringUtils.isEmpty(projectEntity.getFinishTime())){
             throw new ResultException(ResultCode.PROJECT_FINISH_TIME_NOT_FOUND_ERROR);
         }
-        projectEntity.setState(1);
+        projectEntity.setState(ApplicationConfig.PROJECT_START);
 
         // 第一个开始的一系列子任务的状态改为进行中
         // 查看流程图上无父节点的节点

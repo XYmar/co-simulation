@@ -94,7 +94,7 @@ public class ProjectController {
     @PatchMapping(value = "/{projectId}/secretClass")
     @PreAuthorize(value = "hasAnyRole('SECURITY_GUARD','PROJECT_MANAGER')")
     public ResultEntity updateSecretClassById(@PathVariable(value = "projectId") String projectId, int secretClass){
-        return ResultUtils.success(userService.updateSecretClassById(projectId, secretClass));
+        return ResultUtils.success(projectService.updateSecretClassById(projectId, secretClass));
     }
 
     // 根据id修改项目

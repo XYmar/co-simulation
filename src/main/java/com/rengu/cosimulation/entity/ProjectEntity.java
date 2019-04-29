@@ -7,7 +7,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.Set;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -19,6 +19,8 @@ import java.util.UUID;
 public class ProjectEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime = new Date();
     @NotBlank(message = ApplicationMessage.PROJECT_NAME_NOT_FOUND)
     private String name;
     private String orderNum;      // 令号
