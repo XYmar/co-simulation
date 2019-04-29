@@ -208,7 +208,7 @@ public class ProjectService {
         projectEntity.setOrderNum(projectEntityArgs.getOrderNum());
         projectEntity.setFinishTime(projectEntityArgs.getFinishTime());
         if(!ifOverTime(projectEntityArgs.getFinishTime())){
-            projectEntity.setState(ApplicationConfig.PROJECT_START);
+            projectEntity.setState(ApplicationConfig.PROJECT_NOT_START);
         }
         return projectRepository.save(projectEntity);
     }

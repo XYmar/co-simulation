@@ -110,6 +110,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setVersion(subtaskFilesEntity.getVersion());
                 sublibraryFilesEntity.setIfApprove(true);
                 sublibraryFilesEntity.setIfReject(false);
+                sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);
                 sublibraryFilesEntity.setManyCounterSignState(0);
                 sublibraryFilesEntity.setUserEntity(subtaskEntity.getUserEntity());
                 sublibraryFilesEntity.setFileEntity(subtaskFilesEntity.getFileEntity());
@@ -377,6 +378,7 @@ public class SublibraryFilesService {
     public SublibraryFilesEntity handleModifyApply(String sublibraryFileId, boolean ifModifyApprove){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         sublibraryFilesEntity.setIfModifyApprove(ifModifyApprove);
+        sublibraryFilesEntity.setIfApprove(false);
         if(ifModifyApprove){
             sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE);
         }else{
@@ -537,5 +539,11 @@ public class SublibraryFilesService {
             list.add(map);
         }
         return list;
+    }
+
+    // 根据用户查询自己未通过的子库文件
+    public List<SublibraryFilesEntity> getFailedFilesByUser(String userId){
+        UserEntity userEntity = userService.getUserById(userId);
+        return sublibraryFilesRepository.findByUserEntityAndIfApprove(userEntity, false);
     }
 }

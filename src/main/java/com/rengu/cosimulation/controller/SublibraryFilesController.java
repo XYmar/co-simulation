@@ -153,4 +153,10 @@ public class SublibraryFilesController {
     public ResultEntity getLibraryTrees(){
         return ResultUtils.success(sublibraryFilesService.getLibraryTrees());
     }
+
+    // 根据用户查询自己未通过的子库文件
+    @GetMapping(value = "/getFailedFiles")
+    public ResultEntity getFailedFilesByUser(@RequestHeader(value = "userId") String userId){
+        return ResultUtils.success(sublibraryFilesService.getFailedFilesByUser(userId));
+    }
 }
