@@ -59,8 +59,8 @@ public class MessageAop {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         if (httpServletRequest.getUserPrincipal() != null) {
-            UserEntity mainOperator = new UserEntity();
-            UserEntity arrangedPerson = new UserEntity();
+            UserEntity mainOperator = null;
+            UserEntity arrangedPerson = null;
             int messageOperate = ApplicationConfig.ARRANGE_NONE_OPERATE;
             int mainBody = ApplicationConfig.MAINBODY_NONE;
             String description = "";
@@ -193,14 +193,14 @@ public class MessageAop {
                             arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
                             mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                            description = "您的在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已审核通过，相关文件已入库";
+                            description = "您在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已审核通过，相关文件已入库";
                         }
                         if(subtaskEntity.isIfReject()){
                             mainOperator = null;                 // 操作人
                             arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
                             mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                            description = "您的在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已被驳回";
+                            description = "您在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已被驳回";
                         }
                         break;
                     }
