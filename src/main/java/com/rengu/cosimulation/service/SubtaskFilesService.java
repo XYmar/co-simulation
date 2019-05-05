@@ -180,7 +180,7 @@ public class SubtaskFilesService {
 
     // 从子库文件历史生成子库文件
     public void saveSubtaskFilesBySubtaskFile(SubtaskFilesEntity coverNode, SubtaskFilesHistoryEntity sourceNode) {
-        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSubtaskFilesEntity", "ifDirectModify");
+        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSubtaskFilesEntity", "ifDirectModify", "sublibraryEntitySet");
         subtaskFilesRepository.save(coverNode);
     }
 
