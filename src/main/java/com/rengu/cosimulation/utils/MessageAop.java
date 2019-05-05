@@ -23,7 +23,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -108,7 +110,9 @@ public class MessageAop {
                     case "arrangeProject": {
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = projectEntity.getName() + " 项目令号更新为：" + projectEntity.getOrderNum() + "，项目节点更新为：" + projectEntity.getFinishTime();
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String finishTime = sdf.format(new Date(Long.valueOf(projectEntity.getFinishTime())));
+                        description = projectEntity.getName() + " 项目令号更新为：" + projectEntity.getOrderNum() + "，项目节点更新为：" + finishTime;
                         break;
                     }
                     case "deleteProjectById": {
