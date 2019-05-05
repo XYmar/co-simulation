@@ -229,6 +229,7 @@ public class SubtaskFilesService {
         FileUtils.copyFile(new File(subtaskFilesEntity.getFileEntity().getLocalPath()), exportFile);
         log.info(userService.getUserById(userId).getUsername() + "于" + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()) + "下载了：" + subtaskFilesEntity.getName());
         DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setFileName(subtaskFilesEntity.getName());
         downloadLogsEntity.setUserEntity(userEntity);
         downloadLogsEntity.setFileEntity(subtaskFilesEntity.getFileEntity());
         downloadLogsRepository.save(downloadLogsEntity);

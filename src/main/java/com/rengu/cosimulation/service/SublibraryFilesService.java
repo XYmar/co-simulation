@@ -166,6 +166,7 @@ public class SublibraryFilesService {
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + sublibraryFilesEntity.getName() + "." + sublibraryFilesEntity.getFileEntity().getPostfix());
         FileUtils.copyFile(new File(sublibraryFilesEntity.getFileEntity().getLocalPath()), exportFile);
         DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setFileName(sublibraryFilesEntity.getName());
         downloadLogsEntity.setUserEntity(userEntity);
         downloadLogsEntity.setFileEntity(sublibraryFilesEntity.getFileEntity());
         downloadLogsRepository.save(downloadLogsEntity);
