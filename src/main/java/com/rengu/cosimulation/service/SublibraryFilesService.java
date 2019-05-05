@@ -9,9 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.logging.log4j.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -39,9 +35,10 @@ public class SublibraryFilesService {
     private final SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository;
     private final SubtaskFilesRepository subtaskFilesRepository;
     private final DownloadLogsRepository downloadLogsRepository;
+    private final LibraryService libraryService;
 
     @Autowired
-    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository, DownloadLogsRepository downloadLogsRepository) {
+    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository, DownloadLogsRepository downloadLogsRepository, LibraryService libraryService) {
         this.sublibraryFilesRepository = sublibraryFilesRepository;
         this.fileService = fileService;
         this.sublibraryService = sublibraryService;
@@ -50,6 +47,7 @@ public class SublibraryFilesService {
         this.sublibraryFilesHistoryRepository = sublibraryFilesHistoryRepository;
         this.subtaskFilesRepository = subtaskFilesRepository;
         this.downloadLogsRepository = downloadLogsRepository;
+        this.libraryService = libraryService;
     }
 
     // 根据名称、后缀及子库检查文件是否存在
@@ -112,6 +110,7 @@ public class SublibraryFilesService {
                 sublibraryFilesEntity.setVersion(subtaskFilesEntity.getVersion());
                 sublibraryFilesEntity.setIfApprove(true);
                 sublibraryFilesEntity.setIfReject(false);
+                sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);
                 sublibraryFilesEntity.setManyCounterSignState(0);
                 sublibraryFilesEntity.setUserEntity(subtaskEntity.getUserEntity());
                 sublibraryFilesEntity.setFileEntity(subtaskFilesEntity.getFileEntity());
@@ -167,6 +166,7 @@ public class SublibraryFilesService {
         File exportFile = new File(FileUtils.getTempDirectoryPath() + File.separator + sublibraryFilesEntity.getName() + "." + sublibraryFilesEntity.getFileEntity().getPostfix());
         FileUtils.copyFile(new File(sublibraryFilesEntity.getFileEntity().getLocalPath()), exportFile);
         DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setFileName(sublibraryFilesEntity.getName());
         downloadLogsEntity.setUserEntity(userEntity);
         downloadLogsEntity.setFileEntity(sublibraryFilesEntity.getFileEntity());
         downloadLogsRepository.save(downloadLogsEntity);
@@ -379,6 +379,7 @@ public class SublibraryFilesService {
     public SublibraryFilesEntity handleModifyApply(String sublibraryFileId, boolean ifModifyApprove){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
         sublibraryFilesEntity.setIfModifyApprove(ifModifyApprove);
+        sublibraryFilesEntity.setIfApprove(false);
         if(ifModifyApprove){
             sublibraryFilesEntity.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE);
         }else{
@@ -518,5 +519,32 @@ public class SublibraryFilesService {
         sublibraryFilesHistoryRepository.delete(sourceNode);
 
         return getSublibraryFileById(sublibraryFileId);
+    }
+
+    // 返回整个系统的所有库及其下子库及子库下的文件
+    public List<Map<String, Object>> getLibraryTrees(){
+        List<Map<String, Object>> list = new ArrayList<>();
+        List<LibraryEntity> libraryEntityList = libraryService.getAll();
+        for(LibraryEntity libraryEntity : libraryEntityList){
+            List<Map<String, Object>> sublibraryList = new ArrayList<Map<String, Object>>();
+            List<SublibraryEntity> sublibraryEntityList = sublibraryService.getSublibrariesByLibraryId(libraryEntity.getId());
+            for(SublibraryEntity sublibraryEntity : sublibraryEntityList){
+                Map<String, Object> map = new HashMap<>();
+                map.put("sublibraryLibrary", sublibraryEntity);
+                map.put("sublibraryLibraryFiles", getSublibraryFilesBySublibraryAndIfApprove(sublibraryEntity.getId(), true));
+                sublibraryList.add(map);
+            }
+            Map<String, Object> map = new HashMap<>();
+            map.put("library", libraryEntity);
+            map.put("sublibraryLibraries", sublibraryList);
+            list.add(map);
+        }
+        return list;
+    }
+
+    // 根据用户查询自己未通过的子库文件
+    public List<SublibraryFilesEntity> getFailedFilesByUser(String userId){
+        UserEntity userEntity = userService.getUserById(userId);
+        return sublibraryFilesRepository.findByUserEntityAndIfApprove(userEntity, false);
     }
 }

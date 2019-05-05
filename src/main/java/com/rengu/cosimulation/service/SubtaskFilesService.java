@@ -69,7 +69,7 @@ public class SubtaskFilesService {
     public List<SubtaskFilesEntity> saveSubtaskFilesByProDesignId(String subtaskId, String projectId, List<FileMetaEntity> fileMetaEntityList) {
         ProjectEntity projectEntity = projectService.getProjectById(projectId);
         SubtaskEntity subTaskEntity = subtaskService.getSubtaskById(subtaskId);
-        if(subTaskEntity.getState() != ApplicationConfig.SUBTASK_START || subTaskEntity.isIfModifyApprove()){                   // 上传文件前判断子任务是否已在进行中  或者二次修改申请被同意
+        if(subTaskEntity.getState() != ApplicationConfig.SUBTASK_START && !subTaskEntity.isIfModifyApprove()){                   // 上传文件前判断子任务是否已在进行中  或者二次修改申请被同意
             throw new ResultException(ResultCode.SUBTASK_HAVE_NOT_START);
         }
         List<SubtaskFilesEntity> subtaskFilesEntityList = new ArrayList<>();
@@ -162,7 +162,7 @@ public class SubtaskFilesService {
         subtaskFilesEntity.setFileNo(fileMetaEntity.getFileNo());
         subtaskFilesEntity.setFileEntity(fileService.getFileById(fileMetaEntity.getFileId()));
         SublibraryEntity sublibraryEntity = sublibraryService.getSublibraryById(fileMetaEntity.getSublibraryId());      // 所属子库
-        Set<SublibraryEntity> sublibraryEntities = subtaskFilesEntity.getSublibraryEntitySet() == null ? new HashSet<>() : subtaskFilesEntity.getSublibraryEntitySet();
+        Set<SublibraryEntity> sublibraryEntities = new HashSet<>();
         sublibraryEntities.add(sublibraryEntity);
         subtaskFilesEntity.setSublibraryEntitySet(sublibraryEntities);
 
@@ -180,7 +180,7 @@ public class SubtaskFilesService {
 
     // 从子库文件历史生成子库文件
     public void saveSubtaskFilesBySubtaskFile(SubtaskFilesEntity coverNode, SubtaskFilesHistoryEntity sourceNode) {
-        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSubtaskFilesEntity", "ifDirectModify");
+        BeanUtils.copyProperties(sourceNode, coverNode, "id", "create_time", "leastSubtaskFilesEntity", "ifDirectModify", "sublibraryEntitySet");
         subtaskFilesRepository.save(coverNode);
     }
 
@@ -229,6 +229,7 @@ public class SubtaskFilesService {
         FileUtils.copyFile(new File(subtaskFilesEntity.getFileEntity().getLocalPath()), exportFile);
         log.info(userService.getUserById(userId).getUsername() + "于" + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()) + "下载了：" + subtaskFilesEntity.getName());
         DownloadLogsEntity downloadLogsEntity = new DownloadLogsEntity();
+        downloadLogsEntity.setFileName(subtaskFilesEntity.getName());
         downloadLogsEntity.setUserEntity(userEntity);
         downloadLogsEntity.setFileEntity(subtaskFilesEntity.getFileEntity());
         downloadLogsRepository.save(downloadLogsEntity);

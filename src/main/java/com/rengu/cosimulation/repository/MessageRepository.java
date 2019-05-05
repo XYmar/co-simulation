@@ -15,4 +15,5 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<MessageEntity, String> {
     List<MessageEntity> findByArrangedPerson(UserEntity arrangedPerson);
     List<MessageEntity> findByArrangedPersonAndIfRead(UserEntity userEntity, boolean ifRead);
+    Long countByArrangedPersonAndIfRead(UserEntity userEntity, boolean ifRead);
 }

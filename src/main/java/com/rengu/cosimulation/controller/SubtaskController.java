@@ -112,8 +112,14 @@ public class SubtaskController {
     }
 
     // 根据用户查询所有项目
-    @GetMapping(value = "findProjectsByUserId/{userId}")
+    @GetMapping(value = "/findProjectsByUserId/{userId}")
     public ResultEntity findProjectsByUserId(@PathVariable(value = "userId") String userId){
         return ResultUtils.success(subtaskService.findProjectsByUserId(userService.getUserById(userId)));
+    }
+
+    // 返回整个系统的所有项目及以下子任务的树结构
+    @GetMapping(value = "/getProjectTrees")
+    public ResultEntity getProjectTrees(@RequestHeader(value = "userSecretClass") int userSecretClass){
+        return ResultUtils.success(subtaskService.getProjectTrees(userSecretClass));
     }
 }

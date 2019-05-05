@@ -147,4 +147,16 @@ public class SublibraryFilesController {
     public ResultEntity filter(@RequestBody Filter filter){
         return ResultUtils.success(selectFrom(sublibraryFilesRepository).where(filter).findAll());
     }
+
+    // 返回整个系统的所有库及其下子库及子库下的文件
+    @GetMapping(value = "/getLibraryTrees")
+    public ResultEntity getLibraryTrees(){
+        return ResultUtils.success(sublibraryFilesService.getLibraryTrees());
+    }
+
+    // 根据用户查询自己未通过的子库文件
+    @GetMapping(value = "/getFailedFiles")
+    public ResultEntity getFailedFilesByUser(@RequestHeader(value = "userId") String userId){
+        return ResultUtils.success(sublibraryFilesService.getFailedFilesByUser(userId));
+    }
 }

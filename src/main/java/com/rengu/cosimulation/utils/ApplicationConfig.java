@@ -45,6 +45,12 @@ public class ApplicationConfig {
     public static final String DEFAULT_MECHANICAL_SIMULATION_NAME = "mechanical_simulation";         //力学仿真
     public static final String DEFAULT_ASSEMBLY_SIMULATION_NAME = "assembly_simulation";             //结构建模
 
+    // 项目状态：0:未进行  1:进行中  2:已完成  3:超时
+    public static final int PROJECT_NOT_START = 0;                     // 项目未开始
+    public static final int PROJECT_START = 1;                         // 项目进行中
+    public static final int PROJECT_OVER = 2;                          // 项目已完成
+    public static final int PROJECT_OVER_TIME = 3;                     // 项目超时
+
     // 子任务状态
     public static final int SUBTASK_NOT_START = 0;                     // 子任务未开始
     public static final int SUBTASK_START = 1;                         // 子任务进行中

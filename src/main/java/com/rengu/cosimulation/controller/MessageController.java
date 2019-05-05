@@ -1,9 +1,12 @@
 package com.rengu.cosimulation.controller;
 
 import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.repository.MessageRepository;
 import com.rengu.cosimulation.service.MessageService;
+import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -49,5 +52,4 @@ public class MessageController {
     public ResultEntity findByIfRead(String userId, boolean ifRead){
         return ResultUtils.success(messageService.findByIfRead(userId, ifRead));
     }
-
 }
