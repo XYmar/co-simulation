@@ -79,7 +79,11 @@ public class MessageAop {
                     case "distributeUserById": {
                         messageOperate = ApplicationConfig.ARRANGE_ROLE_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_USERENTITY;                        // 对用户的操作
-                        description = "系统管理员已将您的角色更新为：" + userEntity.getRoleEntities().toString();
+                        StringBuilder rolename= new StringBuilder();
+                        for(RoleEntity roleEntity : userEntity.getRoleEntities()){
+                            rolename.append(roleEntity.getDescription()).append(" ");
+                        }
+                        description = "系统管理员已将您的角色更新为：" + rolename;
                         break;
                     }
                     case "updateSecretClassById": {
