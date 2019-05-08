@@ -391,7 +391,11 @@ public class SublibraryFilesService {
     // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
     public SublibraryFilesEntity modifySublibraryFile(String sublibraryFileId, FileMetaEntity fileMetaEntity){
         SublibraryFilesEntity sublibraryFilesEntity = getSublibraryFileById(sublibraryFileId);
-        if(sublibraryFilesEntity.getState() >= ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD && sublibraryFilesEntity.getState() <= ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){                     // 审核中及审核后无权进行修改
+
+        if(fileMetaEntity.isIfDirectModify() && !(sublibraryFilesEntity.getState() == ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER && sublibraryFilesEntity.isIfReject())){              // 只有审核结束并且被驳回才能直接修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
+        if(!fileMetaEntity.isIfDirectModify() && (sublibraryFilesEntity.getState() != ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE)){              // 只有通过二次修改申请才能进行二次修改
             throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
         }
 

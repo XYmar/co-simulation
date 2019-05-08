@@ -124,12 +124,16 @@ public class SubtaskFilesService {
     public SubtaskFilesEntity modifySubtaskFiles(String subtaskFileId, FileMetaEntity fileMetaEntity) {
         SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
         SubtaskEntity subtaskEntity = subtaskFilesEntity.getSubTaskEntity();
-        if(subtaskEntity.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtaskEntity.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){              // 子任务审核中及审核后无权进行修改
-            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
-        }
         if(StringUtils.isEmpty(fileMetaEntity.isIfDirectModify())){
             throw new ResultException(ResultCode.FILE_MODIFYWAY_NOT_FOUND_ERROR);
         }
+        if(fileMetaEntity.isIfDirectModify() && !(subtaskEntity.getState() == ApplicationConfig.SUBTASK_AUDIT_OVER && subtaskEntity.isIfReject())){              // 只有子任务审核结束并且被驳回才能直接修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
+        if(!fileMetaEntity.isIfDirectModify() && (subtaskEntity.getState() != ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE)){              // 只有通过二次修改申请才能进行二次修改
+            throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
+        }
+
         if(fileMetaEntity.getSecretClass() > subtaskFilesEntity.getSubTaskEntity().getProjectEntity().getSecretClass()){  //文件密级只能低于等于该项目密级
             throw new ResultException(ResultCode.SUBTASK_FILE_SECRETCLASS_NOT_SUPPORT_ERROR);
         }
