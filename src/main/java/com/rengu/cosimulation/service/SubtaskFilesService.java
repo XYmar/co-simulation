@@ -4,6 +4,7 @@ import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.DownloadLogsRepository;
+import com.rengu.cosimulation.repository.SublibraryFilesHistoryRepository;
 import com.rengu.cosimulation.repository.SubtaskFilesHistoryRepository;
 import com.rengu.cosimulation.repository.SubtaskFilesRepository;
 import com.rengu.cosimulation.utils.ApplicationConfig;
@@ -38,9 +39,10 @@ public class SubtaskFilesService {
     private final SublibraryService sublibraryService;
     private final SubtaskFilesHistoryRepository subtaskFilesHistoryRepository;
     private final DownloadLogsRepository downloadLogsRepository;
+    private final SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository;
 
     @Autowired
-    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService, SublibraryService sublibraryService, SubtaskFilesHistoryRepository subtaskFilesHistoryRepository, DownloadLogsRepository downloadLogsRepository) {
+    public SubtaskFilesService(FileService fileService, SubtaskFilesRepository subtaskFilesRepository, SubtaskService subtaskService, ProjectService projectService, UserService userService, SublibraryService sublibraryService, SubtaskFilesHistoryRepository subtaskFilesHistoryRepository, DownloadLogsRepository downloadLogsRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository) {
         this.fileService = fileService;
         this.subtaskFilesRepository = subtaskFilesRepository;
         this.subtaskService = subtaskService;
@@ -49,6 +51,7 @@ public class SubtaskFilesService {
         this.sublibraryService = sublibraryService;
         this.subtaskFilesHistoryRepository = subtaskFilesHistoryRepository;
         this.downloadLogsRepository = downloadLogsRepository;
+        this.sublibraryFilesHistoryRepository = sublibraryFilesHistoryRepository;
     }
 
     // 根据名称、后缀及子任务检查文件是否存在
@@ -278,6 +281,8 @@ public class SubtaskFilesService {
             throw new ResultException(ResultCode.SUBTASK_FILE_ID_NOT_FOUND_ERROR);
         }
         SubtaskFilesEntity subtaskFilesEntity = getSubtaskFileById(subtaskFileId);
+        List<SubtaskFilesHistoryEntity> sublibraryFilesHistoryEntityList = subtaskFilesHistoryRepository.findByLeastSubtaskFilesEntity(subtaskFilesEntity);
+        subtaskFilesHistoryRepository.deleteInBatch(sublibraryFilesHistoryEntityList);
         subtaskFilesRepository.delete(subtaskFilesEntity);
         return subtaskFilesEntity;
     }

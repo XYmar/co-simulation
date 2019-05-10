@@ -11,7 +11,7 @@ import java.util.List;
 public interface SubtaskFilesHistoryRepository extends JpaRepository<SubtaskFilesHistoryEntity, String> {
     boolean existsByLeastSubtaskFilesEntityAndIfDirectModify(SubtaskFilesEntity subtaskFilesEntity, boolean ifDirectModify);
     boolean existsByLeastSubtaskFilesEntity(SubtaskFilesEntity subtaskFilesEntity);
-    List<SubtaskFilesHistoryEntity> findByLeastSubtaskFilesEntityAndIfDirectModify(SubtaskFilesEntity subtaskFilesEntity, boolean ifDirectModify);
+    List<SubtaskFilesHistoryEntity> findByLeastSubtaskFilesEntity(SubtaskFilesEntity subtaskFilesEntity);
     SubtaskFilesHistoryEntity findByLeastSubtaskFilesEntityAndIfDirectModifyAndVersion(SubtaskFilesEntity subtaskFilesEntity, boolean ifDirectModify, String version);
     boolean existsByLeastSubtaskFilesEntityAndIfTemp(SubtaskFilesEntity subtaskFilesEntity, boolean ifTemp);
     List<SubtaskFilesHistoryEntity> findByLeastSubtaskFilesEntityAndIfTemp(SubtaskFilesEntity subtaskFilesEntity, boolean ifTemp);

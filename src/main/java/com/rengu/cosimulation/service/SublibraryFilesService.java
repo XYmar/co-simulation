@@ -203,6 +203,10 @@ public class SublibraryFilesService {
         if(sublibraryFilesEntity.getState() >= ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD && sublibraryFilesEntity.getState() <= ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){                     // 审核中及审核后无权进行删除
             throw new ResultException(ResultCode.DELETE_DENIED_ERROR);
         }
+        List<SublibraryFilesAuditEntity> sublibraryFilesAuditEntityList = sublibraryFilesAuditRepository.findBySublibraryFilesEntity(sublibraryFilesEntity);
+        sublibraryFilesAuditRepository.deleteInBatch(sublibraryFilesAuditEntityList);
+        List<SublibraryFilesHistoryEntity> sublibraryFilesHistoryEntityList = sublibraryFilesHistoryRepository.findByLeastSublibraryFilesEntity(sublibraryFilesEntity);
+        sublibraryFilesHistoryRepository.deleteInBatch(sublibraryFilesHistoryEntityList);
         sublibraryFilesRepository.delete(sublibraryFilesEntity);
         return sublibraryFilesEntity;
      }

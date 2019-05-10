@@ -108,7 +108,7 @@ public class ApplicationInit  implements ApplicationRunner {
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME)) {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME);
-            userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
+            userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_PASSWORD);
             userEntity.setSecretClass(3);
             userService.saveUser(userEntity, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
         }
