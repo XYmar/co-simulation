@@ -440,6 +440,7 @@ public class SublibraryFilesService {
             sublibraryFilesEntity.setState(0);
             sublibraryFilesEntity.setAuditMode(0);
             sublibraryFilesEntity.setIfModifyApprove(false);
+            sublibraryFilesEntity.setIfApprove(false);
 
             // 四类审核人重置
             Set<UserEntity> userEntitySet = new HashSet<>();

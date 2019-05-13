@@ -246,6 +246,7 @@ public class SubtaskService {
             subtaskEntity.setAuditMode(auditMode);
             subtaskEntity.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
             subtaskEntity.setIfReject(false);
+            subtaskEntity.setIfApprove(false);
         }
 
         return subtaskRepository.save(subtaskEntity);
