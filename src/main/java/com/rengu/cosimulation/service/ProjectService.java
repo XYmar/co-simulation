@@ -129,8 +129,7 @@ public class ProjectService {
     }
 
     // 根据项目id查询项目
-    @Cacheable(value = "Project_Cache", key = "#projectId")
-    public ProjectEntity getProjectById(String projectId) {
+    public ProjectEntity getProjectById(String projectId) { 
         if(!hasProjectById(projectId)){
             throw new ResultException(ResultCode.PROJECT_ID_NOT_FOUND_ERROR);
         }
