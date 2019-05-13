@@ -21,4 +21,6 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, String>,
     boolean existsByNameAndDeleted(String name, boolean deleted);
 
     List<ProjectEntity> findByDeleted(boolean deleted);
+
+    List<ProjectEntity> findByPic(UserEntity pic);
 }

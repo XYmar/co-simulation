@@ -400,8 +400,14 @@ public class SubtaskService {
 
     // 项目负责人查询所有待审核的二次修改申请
     public List<SubtaskEntity> findByState(String userId){
-        UserEntity userEntity = userService.getUserById(userId);
-        return subtaskRepository.findByUserEntityAndState(userEntity, ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+        List<ProjectEntity> projectEntityList = projectRepository.findByPic(userService.getUserById(userId));
+        List<SubtaskEntity> allSubtaskEntityList = new ArrayList<>();
+        for(ProjectEntity projectEntity : projectEntityList){
+            List<SubtaskEntity> subtaskEntityList = subtaskRepository.findByProjectEntityAndState(projectEntity, ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+            allSubtaskEntityList.addAll(subtaskEntityList);
+        }
+        // UserEntity userEntity = userService.getUserById(userId);
+        return allSubtaskEntityList;
     }
 
     // 项目负责人处理二次修改申请
