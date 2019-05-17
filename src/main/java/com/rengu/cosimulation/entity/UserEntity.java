@@ -34,6 +34,8 @@ public class UserEntity implements UserDetails, Serializable {
     private boolean enabled = true;                 // 是否可用：可用  禁用
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<RoleEntity> roleEntities;
+    @ManyToOne
+    private DepartmentEntity departmentEntity;               // 所属部门
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -18,7 +18,7 @@ public enum ResultCode {
 
     // 用户相关    1001x
     USER_ARGS_NOT_FOUND_ERROR(10011, "未发现用户参数"),
-    USER_USERNAME_ARGS_NOT_FOUND_ERROR(10012, "用户名称参数不存在或不合法"),
+    USER_DEPARTMENT_ARGS_NOT_FOUND_ERROR(10012, "请选择部门"),
     USER_USERNAME_NOT_FOUND_ERROR(10013, "未发现该用户名称"),
     USER_PASSWORD_ARGS_NOT_FOUND_ERROR(10014, "用户密码参数不存在或不合法"),
     USER_ID_NOT_FOUND_ERROR(10015,"未发现该用户ID"),
@@ -27,6 +27,11 @@ public enum ResultCode {
     USER_SECRETCLASS_NOT_FOUND_ERROR(10018,"请指定用户密级"),
     USER_ROLE_NOT_FOUND_ERROR(10019,"请指定用户角色"),
     USER_SECRETCLASS_NOT_SUPPORT_ERROR(10020,"用户权限不够，请重新指定"),
+
+    // 部门相关    1003x
+    DEPARTMENT_ID_NOT_FOUND_ERROR(10030,"未发现该部门ID"),
+    DEPARTMENT_NAME_NOT_FOUND_ERROR(10031, "未发现该部门名称"),
+    DEPARTMENT_NAME_EXISTED_ERROR(10032,"该部门名称已存在"),
 
     // 项目相关    2000x
     PROJECT_ARGS_NOT_FOUND_ERROR(20001, "未发现项目参数"),

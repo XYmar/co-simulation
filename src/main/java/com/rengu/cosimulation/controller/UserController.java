@@ -31,8 +31,8 @@ public class UserController {
     // 新增用户（只有系统管理员可执行此操作）
     @PostMapping
     @PreAuthorize(value = "hasRole('ADMIN')")
-    public ResultEntity saveUser(UserEntity userEntity, @RequestHeader(name = "roleName") String roleName){
-        return ResultUtils.success(userService.saveUser(userEntity, roleName));
+    public ResultEntity saveUser(UserEntity userEntity, String departmentName, @RequestHeader(name = "roleName") String roleName){
+        return ResultUtils.success(userService.saveUser(departmentName, userEntity, roleName));
     }
 
     // 查询所有用户
@@ -63,6 +63,12 @@ public class UserController {
     @PatchMapping(value = "/{userId}/password")
     public ResultEntity updatePasswordById(@PathVariable(value = "userId") String userId, String password){
         return ResultUtils.success(userService.updatePasswordById(userId, password));
+    }
+
+    // 根据ID修改用所属部门
+    @PatchMapping(value = "/{userId}/department")
+    public ResultEntity updateDepartmentById(@PathVariable(value = "userId") String userId, String departmentId){
+        return ResultUtils.success(userService.updateDepartmentById(userId, departmentId));
     }
 
     // 安全保密员根据用户id修改用户密级

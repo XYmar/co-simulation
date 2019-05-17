@@ -26,6 +26,10 @@ public class ApplicationConfig {
     public static final String DEFAULT_FILE_AUDITOR__ROLE_NAME = "file_auditor";               //仿真技术文件审核员
     public static final String DEFAULT_NORMAL_DESIGNER_ROLE_NAME = "normal_designer";          //一般仿真设计员
 
+    // 信息化部
+    public static final String INFORMATION_MINISTRY = "信息化部";
+    public static final String INFORMATION_MINISTRY_DESCRIPTION = "信息化部";
+
     // 默认的系统管理员
     public static final String DEFAULT_ADMIN_USERNAME = "admin";
     public static final String DEFAULT_ADMIN_PASSWORD = "admin";
