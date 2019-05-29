@@ -39,7 +39,7 @@ public class DepartmentService {
             throw new ResultException(ResultCode.DEPARTMENT_ID_NOT_FOUND_ERROR);
         }
         DepartmentEntity departmentEntity = getDepartmentById(id);
-        if(!StringUtils.isEmpty(departmentEntityArgs.getName())){
+        if(!StringUtils.isEmpty(departmentEntityArgs.getName()) && !departmentEntity.getName().equals(departmentEntityArgs.getName())){
             if(hasDepartmentByName(departmentEntityArgs.getName())){
                 throw new ResultException(ResultCode.DEPARTMENT_NAME_EXISTED_ERROR);
             }

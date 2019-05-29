@@ -51,9 +51,9 @@ public class UserService implements UserDetailsService {
         if (hasUserByUsername(userEntity.getUsername())) {
             throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
         }
-        if(StringUtils.isEmpty(userEntity.getPassword())){
+        /*if(StringUtils.isEmpty(userEntity.getPassword())){
             throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
-        }
+        }*/
         if(StringUtils.isEmpty(String.valueOf(userEntity.getSecretClass()))){
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_FOUND_ERROR);
         }
