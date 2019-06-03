@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class DesignLinkEntity implements Serializable {
+public class DesignLink implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @NotBlank(message = ApplicationMessage.DESIGN_LINK_NAME_NOT_FOUND)

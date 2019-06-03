@@ -19,7 +19,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class LinkEntity implements Serializable {
+public class Link implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -33,5 +33,5 @@ public class LinkEntity implements Serializable {
     @NotNull (message = "节点到达方向不能为空")
     private String toPort;                             // 节点从哪个方向连接到本身
     @ManyToOne
-    private ProjectEntity projectEntity;               // 节点所属项目
+    private Project project;               // 节点所属项目
 }

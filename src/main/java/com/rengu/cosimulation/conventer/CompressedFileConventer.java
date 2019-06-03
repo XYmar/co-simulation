@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.conventer;
 
 
-import com.rengu.cosimulation.entity.PreviewFileEntity;
+import com.rengu.cosimulation.entity.PreviewFile;
 import com.rengu.cosimulation.utils.FileUtil;
 import com.rengu.cosimulation.utils.ZipUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,17 +19,17 @@ public class CompressedFileConventer {
     @Value("${tmp.root}")
     private String root;
 
-    public void conventer(PreviewFileEntity previewFileEntity) {
+    public void conventer(PreviewFile previewFile) {
 
         // 创建hash目录
-        String hashDirPath = root + File.separator + previewFileEntity.getFileId();
+        String hashDirPath = root + File.separator + previewFile.getFileId();
         File hashDir = FileUtil.createDir(hashDirPath);
         if (hashDir.exists() && hashDir.isDirectory()) {
             // 复制源文件到hash目录
-            String filePath = previewFileEntity.getFilePath();
+            String filePath = previewFile.getFilePath();
             FileUtil.copyFile(filePath, hashDirPath);
             // 计算文件大小
-            previewFileEntity.setFileSize(FileUtil.getFileSize(filePath));
+            previewFile.setFileSize(FileUtil.getFileSize(filePath));
             // 创建resource目录，存放源文件
             String resourceDirPath = hashDirPath + File.separator + "resource";
             File resourceDir = FileUtil.createDir(resourceDirPath);
@@ -43,15 +43,15 @@ public class CompressedFileConventer {
                 }catch (Exception e) {
                     e.printStackTrace();
                 }
-                previewFileEntity.setFileTree(fileTree);
-                int splitIndex = previewFileEntity.getFilePath().lastIndexOf(".");
-                String filename= FileUtil.getFileName(previewFileEntity.getFilePath().substring(0,splitIndex));
-                previewFileEntity.setConventedFileName(filename);
+                previewFile.setFileTree(fileTree);
+                int splitIndex = previewFile.getFilePath().lastIndexOf(".");
+                String filename= FileUtil.getFileName(previewFile.getFilePath().substring(0,splitIndex));
+                previewFile.setConventedFileName(filename);
             }
             // 创建meta文件，存放文件基本信息
             String metaPath = hashDirPath + File.separator + "meta";
             File metaFile = FileUtil.createFile(metaPath);
-            FileUtil.writeContent(metaFile, previewFileEntity, "GBK");
+            FileUtil.writeContent(metaFile, previewFile, "GBK");
         }
 
     }

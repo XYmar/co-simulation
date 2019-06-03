@@ -7,13 +7,10 @@ import com.rengu.cosimulation.repository.DeviceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.xml.transform.Result;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 @Transactional
 public class DeviceService {
-    public static final Map<String, HeartbeatEntity> ONLINE_HOST_ADRESS = new ConcurrentHashMap<>();
+    public static final Map<String, Heartbeat> ONLINE_HOST_ADRESS = new ConcurrentHashMap<>();
 
     private final DeviceRepository deviceRepository;
     private final OrderService orderService;
@@ -53,7 +50,7 @@ public class DeviceService {
 
     // 根据Id查询设备
     @Cacheable(value = "Device_Cache", key = "#deviceId")
-    public DeviceEntity getDeviceById(String deviceId) {
+    public Device getDeviceById(String deviceId) {
         if (!hasDeviceById(deviceId)) {
             throw new ResultException(ResultCode.DEVICE_ID_NOT_FOUND);
         }
@@ -61,27 +58,27 @@ public class DeviceService {
     }
 
     // 查询所有设备
-    public List<DeviceEntity> getDevices() {
+    public List<Device> getDevices() {
         return deviceRepository.findAll();
     }
 
     // 根据id扫描设备磁盘信息
-    public List<ProcessScanResultEntity> getProcessById(String deviceId) throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        DeviceEntity deviceEntity = getDeviceById(deviceId);
-        OrderEntity orderEntity = new OrderEntity();
-        orderEntity.setTag(OrderService.PROCESS_SCAN_TAG);
-        orderEntity.setTargetDevice(deviceEntity);
-        orderService.sendProcessScanOrderByUDP(orderEntity);
-        return scanHandlerService.processScanHandler(orderEntity).get(10, TimeUnit.SECONDS);
+    public List<ProcessScan> getProcessById(String deviceId) throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        Device device = getDeviceById(deviceId);
+        Order order = new Order();
+        order.setTag(OrderService.PROCESS_SCAN_TAG);
+        order.setTargetDevice(device);
+        orderService.sendProcessScanOrderByUDP(order);
+        return scanHandlerService.processScanHandler(order).get(10, TimeUnit.SECONDS);
     }
 
     // 根据id扫描设备磁盘信息
-    public List<DiskScanResultEntity> getDisksById(String deviceId) throws InterruptedException, ExecutionException, TimeoutException, IOException {
-        DeviceEntity deviceEntity = getDeviceById(deviceId);
-        OrderEntity orderEntity = new OrderEntity();
-        orderEntity.setTag(OrderService.DISK_SCAN_TAG);
-        orderEntity.setTargetDevice(deviceEntity);
-        orderService.sendDiskScanOrderByUDP(orderEntity);
-        return scanHandlerService.diskScanHandler(orderEntity).get(10, TimeUnit.SECONDS);
+    public List<DiskScan> getDisksById(String deviceId) throws InterruptedException, ExecutionException, TimeoutException, IOException {
+        Device device = getDeviceById(deviceId);
+        Order order = new Order();
+        order.setTag(OrderService.DISK_SCAN_TAG);
+        order.setTargetDevice(device);
+        orderService.sendDiskScanOrderByUDP(order);
+        return scanHandlerService.diskScanHandler(order).get(10, TimeUnit.SECONDS);
     }
 }

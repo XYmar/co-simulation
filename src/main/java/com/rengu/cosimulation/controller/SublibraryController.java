@@ -1,8 +1,8 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.FileMetaEntity;
-import com.rengu.cosimulation.entity.ResultEntity;
-import com.rengu.cosimulation.entity.SublibraryEntity;
+import com.rengu.cosimulation.entity.FileMeta;
+import com.rengu.cosimulation.entity.Result;
+import com.rengu.cosimulation.entity.SubDepot;
 import com.rengu.cosimulation.service.SublibraryFilesService;
 import com.rengu.cosimulation.service.SublibraryService;
 import com.rengu.cosimulation.utils.ResultUtils;
@@ -31,31 +31,31 @@ public class SublibraryController {
 
     // 根据库id保存子库
     @PostMapping
-    public ResultEntity saveSublibrary(SublibraryEntity sublibraryEntity, String libraryId){
-        return ResultUtils.success(subLibraryService.saveSublibrary(sublibraryEntity,libraryId));
+    public Result saveSublibrary(SubDepot subDepot, String libraryId){
+        return ResultUtils.success(subLibraryService.saveSublibrary(subDepot,libraryId));
     }
 
     // 根据id修改子库
     @PatchMapping(value = "/{sublibraryId}")
-    public ResultEntity updateSublibraryById(@PathVariable(value = "sublibraryId") String sublibraryId, SublibraryEntity sublibraryEntityArgs){
-        return ResultUtils.success(subLibraryService.updateSublibraryById(sublibraryId, sublibraryEntityArgs));
+    public Result updateSublibraryById(@PathVariable(value = "sublibraryId") String sublibraryId, SubDepot subDepotArgs){
+        return ResultUtils.success(subLibraryService.updateSublibraryById(sublibraryId, subDepotArgs));
     }
 
     // 根据id删除子库
     @DeleteMapping(value = "/{sublibraryId}")
-    public ResultEntity deleteSublibraryById(@PathVariable(value = "sublibraryId") String sublibraryId){
+    public Result deleteSublibraryById(@PathVariable(value = "sublibraryId") String sublibraryId){
         return ResultUtils.success(subLibraryService.deleteSublibraryById(sublibraryId));
     }
 
     // 根据库id查询其所有子库
     @GetMapping(value = "/byLibraryId/{libraryId}")
-    public ResultEntity getSublibrariesByLibraryId(@PathVariable(value = "libraryId") String libraryId){
+    public Result getSublibrariesByLibraryId(@PathVariable(value = "libraryId") String libraryId){
         return ResultUtils.success(subLibraryService.getSublibrariesByLibraryId(libraryId));
     }
 
     // 根据子库id创建文件
     @PostMapping(value = "/{sublibraryId}/uploadfiles/byUser/{userId}")
-    public ResultEntity saveSublibraryFilesBySublibraryId(@PathVariable(value = "sublibraryId") String sublibraryId, @PathVariable(value = "userId") String userId,  @RequestBody List<FileMetaEntity> fileMetaEntityList){
-        return ResultUtils.success(sublibraryFilesService.saveSublibraryFilesBySublibraryId(sublibraryId, userId, fileMetaEntityList));
+    public Result saveSublibraryFilesBySublibraryId(@PathVariable(value = "sublibraryId") String sublibraryId, @PathVariable(value = "userId") String userId, @RequestBody List<FileMeta> fileMetaList){
+        return ResultUtils.success(sublibraryFilesService.saveSublibraryFilesBySublibraryId(sublibraryId, userId, fileMetaList));
     }
 }

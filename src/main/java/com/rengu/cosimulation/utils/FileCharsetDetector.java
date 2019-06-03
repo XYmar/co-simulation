@@ -12,7 +12,7 @@ import java.io.*;
 public class FileCharsetDetector {
 
     /**
-     * 传入一个文件(File)对象，检查文件编码
+     * 传入一个文件(Files)对象，检查文件编码
      *
      * @param file
      *            File对象实例

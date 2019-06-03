@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.conventer;
 
-import com.rengu.cosimulation.entity.PreviewFileEntity;
+import com.rengu.cosimulation.entity.PreviewFile;
 import com.rengu.cosimulation.utils.FileCharsetDetector;
 import com.rengu.cosimulation.utils.FileUtil;
 import org.mozilla.intl.chardet.nsPSMDetector;
@@ -28,25 +28,25 @@ public class TextFileConventer {
     /**
      * txt文件转换后更改文件编码格式为utf-8
      *
-     * @param previewFileEntity
+     * @param previewFile
      */
-    public void conventer(PreviewFileEntity previewFileEntity) {
+    public void conventer(PreviewFile previewFile) {
         // 创建hash目录
-        String hashDirPath = root + File.separator + previewFileEntity.getFileId();
+        String hashDirPath = root + File.separator + previewFile.getFileId();
         File hashDir = FileUtil.createDir(hashDirPath);
         if (hashDir.exists() && hashDir.isDirectory()) {
             // 复制源文件到hash目录
-            String filePath = previewFileEntity.getFilePath();
+            String filePath = previewFile.getFilePath();
             FileUtil.copyFile(filePath, hashDirPath);
             // 计算文件大小
-            previewFileEntity.setFileSize(FileUtil.getFileSize(filePath));
+            previewFile.setFileSize(FileUtil.getFileSize(filePath));
             // 创建resource目录，存放源文件
             String resourceDirPath = hashDirPath + File.separator + "resource";
             File resourceDir = FileUtil.createDir(resourceDirPath);
             if (resourceDir.exists() && resourceDir.isDirectory()) {
                 // 纯文本,涉及到文件编码问题
                 try {
-                    File original = new File(previewFileEntity.getFilePath());
+                    File original = new File(previewFile.getFilePath());
                     FileCharsetDetector.Observer oCharset = FileCharsetDetector.guessFileEncoding(
                             original, nsPSMDetector.CHINESE);
                     String charset = null;
@@ -57,34 +57,34 @@ public class TextFileConventer {
                             && !oCharset.isFound()) {
                         // 猜测到编码
                         logger.error("Doc2PdfServiceImpl@convert error:"
-                                + previewFileEntity.getFilePath()
+                                + previewFile.getFilePath()
                                 + ",use the guess charset:"
                                 + oCharset.getEncoding());
                         charset = oCharset.getEncoding();
                     } else {
                         // 未找到编码,大部分情况 文档都是来自同一个window系统,使用GBK
                         logger.error("Doc2PdfServiceImpl@convert error:"
-                                + previewFileEntity.getFilePath()
+                                + previewFile.getFilePath()
                                 + ",can't find the charset.use :GBK");
                         charset = "GBK";
                     }
 
                     // 再进纯文本一律先转化为UTF-8的txt文件行转码
                     String outFile = resourceDirPath + File.separator
-                            + FileUtil.getFileName(previewFileEntity.getFilePath())
+                            + FileUtil.getFileName(previewFile.getFilePath())
                             + "-utf8.txt";
                     // 将文本文件复制到resource目录
                     FileUtil.copyFile(filePath, charset, outFile, "GBK");
                     String filename = FileUtil.getFileName(filePath);
-                    previewFileEntity.setConventedFileName(filename + "-utf8.txt");
-                    previewFileEntity.setOriginalMIMEType("text/plain");
+                    previewFile.setConventedFileName(filename + "-utf8.txt");
+                    previewFile.setOriginalMIMEType("text/plain");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 // 创建meta文件，存放文件基本信息
                 String metaPath = hashDirPath + File.separator + "meta";
                 File metaFile = FileUtil.createFile(metaPath);
-                FileUtil.writeContent(metaFile, previewFileEntity, "GBK");
+                FileUtil.writeContent(metaFile, previewFile, "GBK");
             }
         }
     }

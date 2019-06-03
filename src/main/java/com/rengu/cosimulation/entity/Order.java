@@ -3,23 +3,22 @@ package com.rengu.cosimulation.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
 /**
  * Author: XYmar
- * Date: 2019/3/28 14:06
+ * Date: 2019/4/11 10:34
  */
-@Entity
 @Data
-public class LibraryEntity implements Serializable {
-    @Id
+public class Order implements Serializable {
+
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    private String type;           // 库类型
-    private String description;    // 描述
+    private String tag;
+    private String extension;
+    private String targetPath;
+    private Device targetDevice;
 }

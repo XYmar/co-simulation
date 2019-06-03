@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.utils;
 
 
-import com.rengu.cosimulation.entity.PreviewFileEntity;
+import com.rengu.cosimulation.entity.PreviewFile;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -160,19 +160,19 @@ public class FileUtil {
     /**
      * 写入文件
      * @param metaFile   目标文件
-     * @param PreviewFileEntity  写入内容
+     * @param PreviewFile  写入内容
      * @param encoding   指定文件编码
      */
-    public static void writeContent(File metaFile, PreviewFileEntity PreviewFileEntity, String encoding) {
+    public static void writeContent(File metaFile, PreviewFile PreviewFile, String encoding) {
         FileOutputStream fos = null;
         OutputStreamWriter os = null;
         try {
             fos = new FileOutputStream(metaFile.getPath());
             os = new OutputStreamWriter(fos, encoding);
             // 遍历对象属性
-            for (Field field : PreviewFileEntity.getClass().getDeclaredFields()) {
+            for (Field field : PreviewFile.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
-                os.write(field.getName() + ":" + field.get(PreviewFileEntity) + "\n");
+                os.write(field.getName() + ":" + field.get(PreviewFile) + "\n");
             }
         }catch (FileNotFoundException e) {
             e.printStackTrace();

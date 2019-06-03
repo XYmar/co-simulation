@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class SubtaskFilesHistoryEntity  implements Serializable {
+public class SubtaskFileHis implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -31,12 +31,12 @@ public class SubtaskFilesHistoryEntity  implements Serializable {
     boolean ifTemp;                          // 是否是临时文件
 
     @ManyToOne
-    private FileEntity fileEntity;
+    private Files files;
     @ManyToOne
-    private SubtaskEntity subTaskEntity;
+    private Subtask subTask;
     @ManyToOne
-    @JoinColumn(name = "subtaskEntity_id")
-    private SubtaskFilesEntity leastSubtaskFilesEntity;                 // 历史文件对应的子任务
+    @JoinColumn(name = "subtask_id")
+    private SubtaskFile leastSubtaskFile;                 // 历史文件对应的子任务
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<SublibraryEntity> sublibraryEntitySet;
+    private Set<SubDepot> subDepotSet;
 }

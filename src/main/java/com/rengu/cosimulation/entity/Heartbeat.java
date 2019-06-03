@@ -11,7 +11,7 @@ import java.util.Date;
  * Date: 2019/4/11 10:26
  */
 @Data
-public class HeartbeatEntity implements Serializable {
+public class Heartbeat implements Serializable {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();

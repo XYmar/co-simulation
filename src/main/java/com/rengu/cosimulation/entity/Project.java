@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class ProjectEntity implements Serializable {
+public class Project implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -27,9 +27,9 @@ public class ProjectEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private String finishTime;                 // 节点计划
     @ManyToOne
-    private UserEntity pic;                        // 项目负责人
+    private Users pic;                        // 项目负责人
     @ManyToOne
-    private UserEntity creator;                    // 创建者
+    private Users creator;                    // 创建者
     private boolean deleted = false;               // 项目是否删除
     private int state;                             // 项目状态：0:未进行  1:进行中  2:已完成  3:超时
     private int secretClass;                       // 项目密级

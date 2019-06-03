@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class ProcessNodeEntity1 implements Serializable {
+public class ProcessNode implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -35,11 +35,11 @@ public class ProcessNodeEntity1 implements Serializable {
     private String nodeSize;                           // 节点框的大小
 
     @ManyToOne
-    private ProjectEntity projectEntity;               // 节点所属项目
+    private Project project;               // 节点所属项目
 
     @OneToOne(cascade= CascadeType.ALL)
-    @JoinColumn(name = "SubtaskEntity_id")//设置在employee表中的关联字段(外键)
-    private SubtaskEntity subtaskEntity;
+    @JoinColumn(name = "Subtask_id")//设置在employee表中的关联字段(外键)
+    private Subtask subtask;
     @OneToMany(cascade= CascadeType.ALL)
-    private List<LinkEntity> linkEntityList;            // 节点对应的流程连接
+    private List<Link> linkList;            // 节点对应的流程连接
 }

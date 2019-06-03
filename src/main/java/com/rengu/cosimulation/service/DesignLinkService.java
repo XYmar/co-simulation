@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.DesignLinkEntity;
+import com.rengu.cosimulation.entity.DesignLink;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.DesignLinkRepository;
@@ -28,14 +28,14 @@ public class DesignLinkService {
 
     // 设计环节新增
     @CacheEvict(value = "DesignLink_Cache", allEntries = true)
-    public DesignLinkEntity saveDesignLink(DesignLinkEntity designLinkEntity){
-        if(designLinkEntity == null){
+    public DesignLink saveDesignLink(DesignLink designLink){
+        if(designLink == null){
             throw new ResultException(ResultCode.DESIGN_LINK_ARGS_NOT_FOUND_ERROR);
         }
-        if(hasDesignLinkByName(designLinkEntity.getName())){
+        if(hasDesignLinkByName(designLink.getName())){
             throw new ResultException(ResultCode.DESIGN_LINK_NAME_EXISTED_ERROR);
         }
-        return designLinkRepository.save(designLinkEntity);
+        return designLinkRepository.save(designLink);
     }
 
     // 根据名称查询设计环节是否存在
@@ -48,13 +48,13 @@ public class DesignLinkService {
     }
 
     // 查询所有设计环节
-    public List<DesignLinkEntity> getDesignLinks(){
+    public List<DesignLink> getDesignLinks(){
         return designLinkRepository.findAll();
     }
 
     // 根据id查询设计环节
     @Cacheable(value = "DesignLink_Cache", key = "#designLinkId")
-    public DesignLinkEntity getDesignLinkById(String designLinkId){
+    public DesignLink getDesignLinkById(String designLinkId){
         if(!hasDesignLinkById(designLinkId)){
             throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
@@ -71,36 +71,36 @@ public class DesignLinkService {
 
     // 根据id修改设计环节
     @CachePut(value = "DesignLink_Cache", key = "#designLinkId")
-    public DesignLinkEntity updateDesignLinkById(String designLinkId, DesignLinkEntity designLinkEntityArgs){
+    public DesignLink updateDesignLinkById(String designLinkId, DesignLink designLinkArgs){
         if(!hasDesignLinkById(designLinkId)){
             throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        DesignLinkEntity designLinkEntity = getDesignLinkById(designLinkId);
-        if(designLinkEntityArgs == null){
+        DesignLink designLink = getDesignLinkById(designLinkId);
+        if(designLinkArgs == null){
             throw new ResultException(ResultCode.DESIGN_LINK_ARGS_NOT_FOUND_ERROR);
         }
-        if(!StringUtils.isEmpty(designLinkEntityArgs.getName()) && !designLinkEntity.getName().equals(designLinkEntityArgs.getName())){
-            if(hasDesignLinkByName(designLinkEntityArgs.getName())){
+        if(!StringUtils.isEmpty(designLinkArgs.getName()) && !designLink.getName().equals(designLinkArgs.getName())){
+            if(hasDesignLinkByName(designLinkArgs.getName())){
                 throw new ResultException(ResultCode.DESIGN_LINK_NAME_EXISTED_ERROR);
             }
-            designLinkEntity.setName(designLinkEntityArgs.getName());
+            designLink.setName(designLinkArgs.getName());
         }
-        designLinkEntity.setDescription(designLinkEntityArgs.getDescription());
-        if(!StringUtils.isEmpty(String.valueOf(designLinkEntityArgs.getType()))){
-            designLinkEntity.setType(designLinkEntityArgs.getType());
+        designLink.setDescription(designLinkArgs.getDescription());
+        if(!StringUtils.isEmpty(String.valueOf(designLinkArgs.getType()))){
+            designLink.setType(designLinkArgs.getType());
         }
-        return designLinkRepository.save(designLinkEntity);
+        return designLinkRepository.save(designLink);
     }
 
     // 根据id删除设计环节
     @CacheEvict(value = "DesignLink_Cache", key = "#designLinkId")
-    public DesignLinkEntity deleteByDesignLinkId(String designLinkId) {
+    public DesignLink deleteByDesignLinkId(String designLinkId) {
         if(!hasDesignLinkById(designLinkId)){
             throw new ResultException(ResultCode.DESIGN_LINK_ID_NOT_FOUND_ERROR);
         }
-        DesignLinkEntity designLinkEntity = getDesignLinkById(designLinkId);
-        designLinkRepository.delete(designLinkEntity);
-        return designLinkEntity;
+        DesignLink designLink = getDesignLinkById(designLinkId);
+        designLinkRepository.delete(designLink);
+        return designLink;
     }
 
 }

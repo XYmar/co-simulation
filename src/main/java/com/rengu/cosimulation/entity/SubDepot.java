@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class SublibraryEntity implements Serializable {
+public class SubDepot implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -24,6 +24,6 @@ public class SublibraryEntity implements Serializable {
     private String type;                    // 子库类型
     private String description;             // 子库描述
     @ManyToOne
-    @JoinColumn(name = "LibraryEntity_id")  // 外键
-    private LibraryEntity libraryEntity;
+    @JoinColumn(name = "Depot_id")  // 外键
+    private Depot depot;
 }

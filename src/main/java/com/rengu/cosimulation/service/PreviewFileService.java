@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.service;
 
 import com.rengu.cosimulation.conventer.*;
-import com.rengu.cosimulation.entity.PreviewFileEntity;
+import com.rengu.cosimulation.entity.PreviewFile;
 import com.rengu.cosimulation.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,28 +50,28 @@ public class PreviewFileService {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public void conventer(PreviewFileEntity previewFileEntity) {
-//        if (PreviewFileEntity.getState() != PreviewFileEntity.STATE_YXZ) {
-//            throw new RuntimeException("the file state:" + PreviewFileEntity.getState()
+    public void conventer(PreviewFile previewFile) {
+//        if (PreviewFile.getState() != PreviewFile.STATE_YXZ) {
+//            throw new RuntimeException("the files state:" + PreviewFile.getState()
 //                    + " is not 2.");
 //        }
         try {
             //  获得文件名的后缀
-            String subfix = FileUtil.getFileSufix(previewFileEntity.getFilePath());
+            String subfix = FileUtil.getFileSufix(previewFile.getFilePath());
             if(this.pdfType.contains(subfix.toLowerCase())) {
-                this.pdfFileConventer.conventer(previewFileEntity);
+                this.pdfFileConventer.conventer(previewFile);
             }else if(this.textType.contains(subfix.toLowerCase())) {
-                this.textFileConventer.conventer(previewFileEntity);
+                this.textFileConventer.conventer(previewFile);
             }else if(this.imgType.contains(subfix.toLowerCase())) {
-                this.imageFileConventer.conventer(previewFileEntity);
+                this.imageFileConventer.conventer(previewFile);
             }else if(this.compressType.contains(subfix.toLowerCase())) {
-                this.compressedFileConventer.conventer(previewFileEntity);
+                this.compressedFileConventer.conventer(previewFile);
             }else if(this.officeType.contains(subfix.toLowerCase())) {
              /*   if("xlsx".equals(subfix.toLowerCase()) || "xls".equals(subfix.toLowerCase())
                         || "pptx".equals(subfix.toLowerCase()) || "ppt".equals(subfix.toLowerCase())) {
-                    this.officeFileConventer.conventerToHtml(previewFileEntity);
+                    this.officeFileConventer.conventerToHtml(previewFile);
                 }else {*/
-                    this.officeFileConventer.conventerToPdf(previewFileEntity);
+                    this.officeFileConventer.conventerToPdf(previewFile);
 //                }
             }
         }catch (Exception e) {

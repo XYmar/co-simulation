@@ -1,7 +1,6 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.RoleEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Role;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.RoleRepository;
@@ -35,20 +34,20 @@ public class RoleService {
 
     // 保存角色
     @CacheEvict(value = "Role_Cache", allEntries = true)
-    public RoleEntity saveRole(RoleEntity roleEntity){
-        if(roleEntity == null){
+    public Role saveRole(Role role){
+        if(role == null){
             throw new RuntimeException(ApplicationMessage.ROLE_ARGS_NOT_FOUND);
         }
-        if(StringUtils.isEmpty(roleEntity.getName())){
+        if(StringUtils.isEmpty(role.getName())){
             throw new ResultException(ResultCode.ROLE_NAME_ARGS_NOT_FOUND_ERROR);
         }
-        if(hasRoleByName(roleEntity.getName())){
+        if(hasRoleByName(role.getName())){
             throw new ResultException(ResultCode.ROLE_NAME_EXISTED_ERROR);
         }
-        if(roleEntity.getChangeable() == null){
-            roleEntity.setChangeable(true);
+        if(role.getChangeable() == null){
+            role.setChangeable(true);
         }
-        return roleRepository.save(roleEntity);
+        return roleRepository.save(role);
     }
 
     // 根据名称查询角色是否存在
@@ -61,18 +60,18 @@ public class RoleService {
     }
 
     // 查询所有角色信息
-    public List<RoleEntity> getAll() {
+    public List<Role> getAll() {
         return roleRepository.findAll();
     }
 
     // 根据角色名称查询角色信息
-    public RoleEntity getRoleByName(String name) {
+    public Role getRoleByName(String name) {
         return roleRepository.findByName(name);
     }
 
     // 根据ID查询角色信息
     @Cacheable(value = "Role_Cache", key = "#roleId")
-    public RoleEntity getRoleById(String roleId) {
+    public Role getRoleById(String roleId) {
         if(!hasRoleById(roleId)){
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
@@ -89,40 +88,40 @@ public class RoleService {
 
     // 根据ID修改角色信息
     @CachePut(value = "Role_Cache", key = "#roleId")
-    public RoleEntity updateRoleByRoleId(String roleId, RoleEntity roleEntityArgs) {
+    public Role updateRoleByRoleId(String roleId, Role roleArgs) {
         if(!hasRoleById(roleId)){
             throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
         }
-        RoleEntity roleEntity = getRoleById(roleId);
-        if(!roleEntity.getChangeable()){    // 不可修改的角色
+        Role role = getRoleById(roleId);
+        if(!role.getChangeable()){    // 不可修改的角色
            throw new ResultException(ResultCode.ROLE_CHANGE_NOT_SUPPORT_ERROR);
         }
-        if(roleEntityArgs == null){
+        if(roleArgs == null){
             throw new ResultException(ResultCode.ROLE_ARGS_NOT_FOUND_ERROR);
         }
 
-        if(!StringUtils.isEmpty(roleEntityArgs.getName()) && !roleEntity.getName().equals(roleEntityArgs.getName())){
-            if(hasRoleByName(roleEntityArgs.getName())){
+        if(!StringUtils.isEmpty(roleArgs.getName()) && !role.getName().equals(roleArgs.getName())){
+            if(hasRoleByName(roleArgs.getName())){
                 throw new ResultException(ResultCode.ROLE_NAME_EXISTED_ERROR);
             }
-            roleEntity.setName(roleEntityArgs.getName());
+            role.setName(roleArgs.getName());
         }
-        if(!StringUtils.isEmpty(roleEntityArgs.getDescription()) && !roleEntity.getDescription().equals(roleEntityArgs.getDescription())){
-            roleEntity.setDescription(roleEntityArgs.getDescription());
+        if(!StringUtils.isEmpty(roleArgs.getDescription()) && !role.getDescription().equals(roleArgs.getDescription())){
+            role.setDescription(roleArgs.getDescription());
         }
-        return roleRepository.save(roleEntity);
+        return roleRepository.save(role);
     }
 
     // 根据ID删除角色信息
-    public RoleEntity deleteByRoleId(String roleId) {
+    public Role deleteByRoleId(String roleId) {
         if(!hasRoleById(roleId)){
             throw new ResultException(ResultCode.ROLE_ID_NOT_FOUND_ERROR);
         }
-        RoleEntity roleEntity = getRoleById(roleId);
-        if(!roleEntity.getChangeable()){    // 不可修改的角色
+        Role role = getRoleById(roleId);
+        if(!role.getChangeable()){    // 不可修改的角色
             throw new ResultException(ResultCode.ROLE_CHANGE_NOT_SUPPORT_ERROR);
         }
-        roleRepository.delete(roleEntity);
-        return roleEntity;
+        roleRepository.delete(role);
+        return role;
     }
 }

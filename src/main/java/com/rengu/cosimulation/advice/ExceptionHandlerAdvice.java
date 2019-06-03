@@ -1,7 +1,6 @@
 package com.rengu.cosimulation.advice;
 
-import com.alibaba.fastjson.JSON;
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.utils.ResultUtils;
@@ -37,7 +36,7 @@ public class ExceptionHandlerAdvice implements ResponseBodyAdvice {
     private Logger logger = LoggerFactory.getLogger(ExceptionHandlerAdvice.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResultEntity handleIllegalParamException(MethodArgumentNotValidException e) {
+    public Result handleIllegalParamException(MethodArgumentNotValidException e) {
         List<ObjectError> errors = e.getBindingResult().getAllErrors();
         String tips = "参数不合法";
         if (errors.size() > 0) {
@@ -48,25 +47,25 @@ public class ExceptionHandlerAdvice implements ResponseBodyAdvice {
 
     // 权限问题
     @ExceptionHandler(AccessDeniedException.class)
-    public ResultEntity handleAccessDeniedException(AccessDeniedException e) {
+    public Result handleAccessDeniedException(AccessDeniedException e) {
         String tips = e.getMessage();
         return ResultUtils.warn(ResultCode.ACCESS_DENIED_ERROR, tips);
     }
 
     // 未传递参数异常
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResultEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public Result handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         String tips = "未传递参数";
         return ResultUtils.warn(ResultCode.ARGS_NOT_FOUND_ERROR, tips);
     }
 
     @ExceptionHandler(ResultException.class)
-    public ResultEntity handleResultException(ResultException e, HttpServletRequest request) {
+    public Result handleResultException(ResultException e, HttpServletRequest request) {
         return ResultUtils.warn(e.getResultCode());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResultEntity handleException(Exception e, HttpServletRequest request) {
+    public Result handleException(Exception e, HttpServletRequest request) {
         return ResultUtils.warn(ResultCode.WEAK_NET_WORK);
     }
 

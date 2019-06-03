@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class SublibraryFilesHistoryEntity implements Serializable {
+public class SubdepotFileHis implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -40,22 +40,22 @@ public class SublibraryFilesHistoryEntity implements Serializable {
     private int rejectState;               // 记录被驳回的流程
 
     @ManyToOne
-    private FileEntity fileEntity;
+    private Files files;
     @ManyToOne
     @JoinColumn(name = "subibraryEntity_id")
-    private SublibraryEntity sublibraryEntity;
+    private SubDepot subDepot;
     @ManyToOne
-    @JoinColumn(name = "sublibraryFilesEntity_id")
-    private SublibraryFilesEntity leastSublibraryFilesEntity;                 // 历史文件对应的子库文件
+    @JoinColumn(name = "subDepotFile_id")
+    private SubDepotFile leastSubDepotFile;                 // 历史文件对应的子库文件
     @ManyToMany
-    private Set<UserEntity> proofreadUserSet;  // 校对人
+    private Set<Users> proofSet;  // 校对人
     @ManyToMany
-    private Set<UserEntity> auditUserSet;  // 审核人
+    private Set<Users> auditSet;  // 审核人
     @ManyToMany
-    private Set<UserEntity> countersignUserSet;  // 会签人
+    private Set<Users> countSet;  // 会签人
     @ManyToMany
-    private Set<UserEntity> approveUserSet;  // 批准人
+    private Set<Users> approveSet;  // 批准人
     @ManyToOne
-    @JoinColumn(name = "userEntity_id")
-    private UserEntity userEntity;
+    @JoinColumn(name = "users_id")
+    private Users users;
 }

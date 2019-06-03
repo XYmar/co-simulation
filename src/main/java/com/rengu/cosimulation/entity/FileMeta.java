@@ -12,7 +12,7 @@ import java.util.Date;
  */
 
 @Data
-public class FileMetaEntity implements Serializable {
+public class FileMeta implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     private String fileId;

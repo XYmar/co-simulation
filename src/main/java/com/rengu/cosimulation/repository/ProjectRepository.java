@@ -1,10 +1,9 @@
 package com.rengu.cosimulation.repository;
 
-import com.rengu.cosimulation.entity.ProjectEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Project;
+import com.rengu.cosimulation.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.web.ProjectedPayload;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,11 +13,13 @@ import java.util.List;
  * Date: 2019/2/20 09:33
  */
 @Repository
-public interface ProjectRepository extends JpaRepository<ProjectEntity, String>, JpaSpecificationExecutor<ProjectEntity> {
+public interface ProjectRepository extends JpaRepository<Project, String>, JpaSpecificationExecutor<Project> {
 
-    List<ProjectEntity> findByPicOrCreatorAndDeleted(UserEntity pic, UserEntity creator, boolean deleted);
+    List<Project> findByPicOrCreatorAndDeleted(Users pic, Users creator, boolean deleted);
 
     boolean existsByNameAndDeleted(String name, boolean deleted);
 
-    List<ProjectEntity> findByDeleted(boolean deleted);
+    List<Project> findByDeleted(boolean deleted);
+
+    List<Project> findByPic(Users pic);
 }

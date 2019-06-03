@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.DownloadLogsEntity;
+import com.rengu.cosimulation.entity.DownloadLog;
 import com.rengu.cosimulation.repository.DownloadLogsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class DownloadLogsService {
     }
 
     // 获取下载日志信息
-    public List<DownloadLogsEntity> getLogs(){
+    public List<DownloadLog> getLogs(){
         return downloadLogsRepository.findAll();
     }
 }
