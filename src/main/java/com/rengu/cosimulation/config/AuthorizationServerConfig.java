@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.config;
 
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -90,9 +90,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public class CustomTokenEnhancer implements TokenEnhancer {
         @Override
         public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-            UserEntity loginUser = userService.getUserByUsername(authentication.getName());
+            Users loginUsers = userService.getUserByUsername(authentication.getName());
             Map<String, Object> additionalInfo = new HashMap<>();
-            additionalInfo.put("userId", loginUser.getId());
+            additionalInfo.put("userId", loginUsers.getId());
             ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
             return accessToken;
         }

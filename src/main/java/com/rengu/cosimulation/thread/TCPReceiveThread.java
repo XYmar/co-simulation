@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.thread;
 
-import com.rengu.cosimulation.entity.DiskScanResultEntity;
-import com.rengu.cosimulation.entity.ProcessScanResultEntity;
+import com.rengu.cosimulation.entity.DiskScan;
+import com.rengu.cosimulation.entity.ProcessScan;
 import com.rengu.cosimulation.service.OrderService;
 import com.rengu.cosimulation.service.ScanHandlerService;
 import com.rengu.cosimulation.utils.ApplicationConfig;
@@ -63,7 +63,7 @@ public class TCPReceiveThread {
         if (messageType.equals(OrderService.PROCESS_SCAN_RESULT_TAG)) {
             String id = new String(bytes, pointer, 37).trim();
             pointer = pointer + 37;
-            List<ProcessScanResultEntity> processScanResultEntityList = new ArrayList<>();
+            List<ProcessScan> processScanList = new ArrayList<>();
             while (pointer + 5 + 128 + 8 + 8 < bytes.length) {
                 try {
                     String pid = new String(bytes, pointer, 5).trim();
@@ -74,22 +74,22 @@ public class TCPReceiveThread {
                     pointer = pointer + 8;
                     double ramUsedSize = Double.parseDouble(new String(bytes, pointer, 8).trim()) / 1024;
                     pointer = pointer + 8;
-                    ProcessScanResultEntity processScanResultEntity = new ProcessScanResultEntity();
-                    processScanResultEntity.setPid(pid);
-                    processScanResultEntity.setName(name);
-                    processScanResultEntity.setRamUsedSize(ramUsedSize);
-                    processScanResultEntityList.add(processScanResultEntity);
+                    ProcessScan processScan = new ProcessScan();
+                    processScan.setPid(pid);
+                    processScan.setName(name);
+                    processScan.setRamUsedSize(ramUsedSize);
+                    processScanList.add(processScan);
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
             }
-            ScanHandlerService.PROCESS_SCAN_RESULT.put(id, processScanResultEntityList);
+            ScanHandlerService.PROCESS_SCAN_RESULT.put(id, processScanList);
         }
         // 扫描磁盘结果解析
         if (messageType.equals(OrderService.DISK_SCAN_RESULT_TAG)) {
             String id = new String(bytes, pointer, 37).trim();
             pointer = pointer + 37;
-            List<DiskScanResultEntity> diskScanResultEntityList = new ArrayList<>();
+            List<DiskScan> diskScanList = new ArrayList<>();
             while (pointer + 32 + 12 + 12 <= bytes.length) {
                 try {
                     String name = new String(bytes, pointer, 32).trim().replace("\\", "/");
@@ -98,16 +98,16 @@ public class TCPReceiveThread {
                     pointer = pointer + 12;
                     double usedSize = Double.parseDouble(new String(bytes, pointer, 12).trim());
                     pointer = pointer + 12;
-                    DiskScanResultEntity diskScanResultEntity = new DiskScanResultEntity();
-                    diskScanResultEntity.setName(name);
-                    diskScanResultEntity.setSize(size);
-                    diskScanResultEntity.setUsedSize(usedSize);
-                    diskScanResultEntityList.add(diskScanResultEntity);
+                    DiskScan diskScan = new DiskScan();
+                    diskScan.setName(name);
+                    diskScan.setSize(size);
+                    diskScan.setUsedSize(usedSize);
+                    diskScanList.add(diskScan);
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
             }
-            ScanHandlerService.DISK_SCAN_RESULT.put(id, diskScanResultEntityList);
+            ScanHandlerService.DISK_SCAN_RESULT.put(id, diskScanList);
         }
     }
 }

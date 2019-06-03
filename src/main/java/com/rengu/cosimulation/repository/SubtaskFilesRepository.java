@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.repository;
 
-import com.rengu.cosimulation.entity.SubtaskEntity;
-import com.rengu.cosimulation.entity.SubtaskFilesEntity;
+import com.rengu.cosimulation.entity.Subtask;
+import com.rengu.cosimulation.entity.SubtaskFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SubtaskFilesRepository extends JpaRepository<SubtaskFilesEntity, String> {
-    boolean existsByNameAndPostfixAndSubTaskEntity(String name, String extension, SubtaskEntity subTaskEntity);
+public interface SubtaskFilesRepository extends JpaRepository<SubtaskFile, String> {
+    boolean existsByNameAndPostfixAndSubtask(String name, String extension, Subtask subTask);
 
-    Optional<SubtaskFilesEntity> findByNameAndPostfixAndSubTaskEntity(String name, String postfix, SubtaskEntity subTaskEntity);
+    Optional<SubtaskFile> findByNameAndPostfixAndSubtask(String name, String postfix, Subtask subTask);
 
-    List<SubtaskFilesEntity> findBySubTaskEntity(SubtaskEntity subTaskEntity);
+    List<SubtaskFile> findBySubtask(Subtask subTask);
 }

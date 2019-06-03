@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.utils;
 
-import com.rengu.cosimulation.entity.PreviewFileEntity;
+import com.rengu.cosimulation.entity.PreviewFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +35,7 @@ public class PreviewFileInit  {
     /**
      * @Fields PreviewFileEntityMap uuid作为key
      */
-    private Map<String, PreviewFileEntity> PreviewFileEntityMap;
+    private Map<String, PreviewFile> PreviewFileEntityMap;
 
     @PostConstruct
     public void init() {
@@ -70,8 +70,8 @@ public class PreviewFileInit  {
         return result;
     }
 
-    public PreviewFileEntity findByHashCode(String hashCode) {
-        PreviewFileEntity tmp = this.PreviewFileEntityMap.get(hashCode);
+    public PreviewFile findByHashCode(String hashCode) {
+        PreviewFile tmp = this.PreviewFileEntityMap.get(hashCode);
         if (tmp == null) {
             return null;
         } else {
@@ -79,19 +79,19 @@ public class PreviewFileInit  {
         }
     }
 
-      public void saveFile(PreviewFileEntity PreviewFileEntity){
+      public void saveFile(PreviewFile PreviewFile){
           // 得到文件hash编码，以此作为判断唯一文件的依据
-          this.PreviewFileEntityMap.put(PreviewFileEntity.getFileId(), PreviewFileEntity);
+          this.PreviewFileEntityMap.put(PreviewFile.getFileId(), PreviewFile);
       }
 //    @Override
-//    public void saveFile(InputStream is, PreviewFileEntity PreviewFileEntity) {
+//    public void saveFile(InputStream is, PreviewFile PreviewFile) {
 //        // 获取单次操作唯一目录
-//        File currDir = getOnlyDir(3, this.rootTemp);
-//        PreviewFileEntity.setTempDir(currDir.getAbsolutePath());
+//        Files currDir = getOnlyDir(3, this.rootTemp);
+//        PreviewFile.setTempDir(currDir.getAbsolutePath());
 //        // 存储文件
 //        FileOutputStream out = null;
 //        try {
-//            String tempPath = PreviewFileEntity.getTempDir() + File.separator + PreviewFileEntity.getOriginalFile();
+//            String tempPath = PreviewFile.getTempDir() + Files.separator + PreviewFile.getOriginalFile();
 //            out = new FileOutputStream(tempPath);
 //            byte[] data = new byte[1024];
 //            int tmp = 0;
@@ -115,11 +115,11 @@ public class PreviewFileInit  {
 //        }
 //
 //        // 2个map中PreviewFileEntity使用同一个对象,修改时会同步变化
-////        PreviewFileEntity.setState(PreviewFileEntity.STATE_YXZ);
-//        String filePath = PreviewFileEntity.getFilePath();
+////        PreviewFile.setState(PreviewFile.STATE_YXZ);
+//        String filePath = PreviewFile.getFilePath();
 //        // 得到文件hash编码，以此作为判断唯一文件的依据
-//        PreviewFileEntity.setFileId(FileUtil.getFileHashCode(filePath));
-//        this.PreviewFileEntityMap.put(PreviewFileEntity.getFileId(), PreviewFileEntity);
+//        PreviewFile.setFileId(FileUtil.getFileHashCode(filePath));
+//        this.PreviewFileEntityMap.put(PreviewFile.getFileId(), PreviewFile);
 //    }
 
     /**
@@ -146,7 +146,7 @@ public class PreviewFileInit  {
      *            重复尝试次数
      * @param root
      *            根目录
-     * @return File
+     * @return Files
      */
     private File getOnlyDir(int num, String root) {
         if (num == 0) {
@@ -163,17 +163,17 @@ public class PreviewFileInit  {
         }
     }
 
-    public PreviewFileEntity removeFromMap(String pathId) {
+    public PreviewFile removeFromMap(String pathId) {
         return this.PreviewFileEntityMap.remove(pathId);
     }
 
-    public int rollbackFromMap(PreviewFileEntity PreviewFileEntity) {
-        this.PreviewFileEntityMap.put(PreviewFileEntity.getFileId(), PreviewFileEntity);
+    public int rollbackFromMap(PreviewFile PreviewFile) {
+        this.PreviewFileEntityMap.put(PreviewFile.getFileId(), PreviewFile);
         return 1;
     }
 
-    public int delete(PreviewFileEntity PreviewFileEntity) {
-        File dir = new File(PreviewFileEntity.getFilePath());
+    public int delete(PreviewFile PreviewFile) {
+        File dir = new File(PreviewFile.getFilePath());
 
         deleteDir(dir);
         // 此处连续尝试删除3次,有可能文件正在被其他线程打开,而删除失败

@@ -1,9 +1,11 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.DepartmentEntity;
+import com.rengu.cosimulation.entity.Department;
+import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.DepartmentRepository;
+import com.rengu.cosimulation.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,48 +19,52 @@ import java.util.List;
 @Service
 public class DepartmentService {
     private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public DepartmentService(DepartmentRepository departmentRepository) {
+    public DepartmentService(DepartmentRepository departmentRepository, UserRepository userRepository) {
         this.departmentRepository = departmentRepository;
+        this.userRepository = userRepository;
     }
 
     // 查询所有部门
-    public List<DepartmentEntity> getAll(){
+    public List<Department> getAll(){
         return departmentRepository.findAll();
     }
 
     // 新增部门
-    public DepartmentEntity saveDepartment(DepartmentEntity departmentEntity){
-        return departmentRepository.save(departmentEntity);
+    public Department saveDepartment(Department department){
+        return departmentRepository.save(department);
     }
 
     // 修改部门信息
-    public DepartmentEntity updateDepartmentById(String id, DepartmentEntity departmentEntityArgs){
+    public Department updateDepartmentById(String id, Department departmentArgs){
         if(!hasDepartmentById(id)){
             throw new ResultException(ResultCode.DEPARTMENT_ID_NOT_FOUND_ERROR);
         }
-        DepartmentEntity departmentEntity = getDepartmentById(id);
-        if(!StringUtils.isEmpty(departmentEntityArgs.getName()) && !departmentEntity.getName().equals(departmentEntityArgs.getName())){
-            if(hasDepartmentByName(departmentEntityArgs.getName())){
+        Department department = getDepartmentById(id);
+        if(!StringUtils.isEmpty(departmentArgs.getName()) && !department.getName().equals(departmentArgs.getName())){
+            if(hasDepartmentByName(departmentArgs.getName())){
                 throw new ResultException(ResultCode.DEPARTMENT_NAME_EXISTED_ERROR);
             }
-            departmentEntity.setName(departmentEntityArgs.getName());
+            department.setName(departmentArgs.getName());
         }
-        if(!StringUtils.isEmpty(departmentEntityArgs.getDescription())){
-            departmentEntity.setDescription(departmentEntityArgs.getDescription());
+        if(!StringUtils.isEmpty(departmentArgs.getDescription())){
+            department.setDescription(departmentArgs.getDescription());
         }
-        return departmentRepository.save(departmentEntity);
+        return departmentRepository.save(department);
     }
 
     // 删除部门
-    public DepartmentEntity deleteDepartmentById(String id){
+    public Department deleteDepartmentById(String id){
         if(!hasDepartmentById(id)){
             throw new ResultException(ResultCode.DEPARTMENT_ID_NOT_FOUND_ERROR);
         }
-        DepartmentEntity departmentEntity = getDepartmentById(id);
-        departmentRepository.delete(departmentEntity);
-        return departmentEntity;
+        Department department = getDepartmentById(id);
+        List<Users> usersList = userRepository.findByDepartment(department);
+        userRepository.deleteInBatch(usersList);
+        departmentRepository.delete(department);
+        return department;
     }
 
     // 根据id查询部门是否存在
@@ -70,7 +76,7 @@ public class DepartmentService {
     }
 
     // 根据id查询部门
-    public DepartmentEntity getDepartmentById(String id){
+    public Department getDepartmentById(String id){
         if(!hasDepartmentById(id)){
             throw new ResultException(ResultCode.DEPARTMENT_ID_NOT_FOUND_ERROR);
         }
@@ -78,7 +84,7 @@ public class DepartmentService {
     }
 
     // 根据名称查询部门
-    public DepartmentEntity getDepartmentByName(String name){
+    public Department getDepartmentByName(String name){
         if(!hasDepartmentByName(name)){
             throw new ResultException(ResultCode.DEPARTMENT_NAME_NOT_FOUND_ERROR);
         }

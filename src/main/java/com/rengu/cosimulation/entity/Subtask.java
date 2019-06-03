@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class SubtaskEntity implements Serializable {
+public class Subtask implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @NotBlank(message = ApplicationMessage.DESIGN_LINK_NAME_NOT_FOUND)
@@ -30,30 +30,30 @@ public class SubtaskEntity implements Serializable {
     private int manyCounterSignState;          // 多人会签时，文件状态(几人已会签过)
     private int auditMode;                     // 会签模式               0：未选择   1：无会签  2：一人会签 3：多人会签
     @ManyToOne
-    @JoinColumn(name = "userEntity_id")
-    private UserEntity userEntity;             // 负责人
+    @JoinColumn(name = "users_id")
+    private Users users;             // 负责人
     @ManyToMany
-    private Set<UserEntity> proofreadUserSet;  // 校对人
+    private Set<Users> proofSet;  // 校对人
     @ManyToMany
-    private Set<UserEntity> auditUserSet;  // 审核人
+    private Set<Users> auditSet;  // 审核人
     @ManyToMany
-    private Set<UserEntity> countersignUserSet;  // 会签人
+    private Set<Users> countSet;  // 会签人
     @ManyToMany
-    private Set<UserEntity> approveUserSet;  // 批准人
+    private Set<Users> approveSet;  // 批准人
     /*@ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserEntity> collatorSet;       // 核对人
+    private Set<Users> collatorSet;       // 核对人
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserEntity> auditorSet;        // 审核人
+    private Set<Users> auditorSet;        // 审核人
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserEntity> countersignSet;    // 会签人
+    private Set<Users> countersignSet;    // 会签人
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<UserEntity> apporverSet;       // 批准人*/
+    private Set<Users> apporverSet;       // 批准人*/
     @ManyToOne
-    private DesignLinkEntity designLinkEntity;    //设计环节
+    private DesignLink designLink;    //设计环节
 
     @ManyToOne
-    private ProjectEntity projectEntity;        // 所属项目
-//    @OneToMany(mappedBy="subtaskEntity")
-//    private Set<ProcessNodeEntity> processNodeEntities;  // 子任务对应的流程图节点
+    private Project project;        // 所属项目
+//    @OneToMany(mappedBy="subtask")
+//    private Set<ProcessNode0> processNodeEntities;  // 子任务对应的流程图节点
 
 }

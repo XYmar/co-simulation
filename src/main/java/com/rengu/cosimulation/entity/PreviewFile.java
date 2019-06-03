@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @Date 2019/3/18 16:08
  */
 @Data
-public class PreviewFileEntity implements Serializable {
+public class PreviewFile implements Serializable {
     //  预览文件ID
     private String fileId;
     //  预览文件地址

@@ -8,18 +8,13 @@ import java.util.Date;
 
 /**
  * Author: XYmar
- * Date: 2019/2/28 11:12
- * 文件块
+ * Date: 2019/4/11 11:06
  */
 @Data
-public class ChunkEntity implements Serializable {
+public class DiskScan implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    private int chunkNumber;
-    private int totalChunks;
-    private long chunkSize;
-    private long totalSize;
-    private String identifier;
-    private String filename;
-    private String relativePath;
+    private String name;
+    private double size;
+    private double usedSize;
 }

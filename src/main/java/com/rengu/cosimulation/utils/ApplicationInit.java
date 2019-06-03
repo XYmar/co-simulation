@@ -1,12 +1,9 @@
 package com.rengu.cosimulation.utils;
 
-import com.rengu.cosimulation.entity.DepartmentEntity;
-import com.rengu.cosimulation.entity.DesignLinkEntity;
-import com.rengu.cosimulation.entity.RoleEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Department;
+import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.service.DepartmentService;
 import com.rengu.cosimulation.service.DesignLinkService;
-import com.rengu.cosimulation.service.RoleService;
 import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.thread.UDPReceiveThread;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +12,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Author: XYmar
@@ -55,10 +48,10 @@ public class ApplicationInit  implements ApplicationRunner {
          * 初始化部门 信息化部
          * */
         if(!departmentService.hasDepartmentByName(ApplicationConfig.INFORMATION_MINISTRY)){
-            DepartmentEntity departmentEntity = new DepartmentEntity();
-            departmentEntity.setName(ApplicationConfig.INFORMATION_MINISTRY);
-            departmentEntity.setDescription(ApplicationConfig.INFORMATION_MINISTRY_DESCRIPTION);
-            departmentService.saveDepartment(departmentEntity);
+            Department department = new Department();
+            department.setName(ApplicationConfig.INFORMATION_MINISTRY);
+            department.setDescription(ApplicationConfig.INFORMATION_MINISTRY_DESCRIPTION);
+            departmentService.saveDepartment(department);
         }
 
         /**
@@ -66,29 +59,29 @@ public class ApplicationInit  implements ApplicationRunner {
          * */
         // 初始化管理员用户
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME)) {
-            UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME);
-            userEntity.setPassword(ApplicationConfig.DEFAULT_ADMIN_PASSWORD);
-            userEntity.setSecretClass(3);
-            userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, userEntity, ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
+            Users users = new Users();
+            users.setUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME);
+            users.setPassword(ApplicationConfig.DEFAULT_ADMIN_PASSWORD);
+            users.setSecretClass(3);
+            userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, users, ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
         }
 
         // 初始化安全保密员用户
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME)) {
-            UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME);
-            userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
-            userEntity.setSecretClass(3);
-            userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, userEntity, ApplicationConfig.DEFAULT_SECURITY_GUARD_ROLE_NAME);
+            Users users = new Users();
+            users.setUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME);
+            users.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
+            users.setSecretClass(3);
+            userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, users, ApplicationConfig.DEFAULT_SECURITY_GUARD_ROLE_NAME);
         }
 
         // 初始化安全审计员用户
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME)) {
-            UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME);
-            userEntity.setPassword(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_PASSWORD);
-            userEntity.setSecretClass(3);
-            userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, userEntity, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
+            Users users = new Users();
+            users.setUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME);
+            users.setPassword(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_PASSWORD);
+            users.setSecretClass(3);
+            userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, users, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);
         }
     }
 

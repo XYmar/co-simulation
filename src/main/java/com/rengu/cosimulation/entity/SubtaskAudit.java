@@ -1,5 +1,6 @@
 package com.rengu.cosimulation.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -10,14 +11,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: XYmar
- * Date: 2019/4/4 9:54
- * 子库文件审核详情
- */
 @Entity
 @Data
-public class SublibraryFilesAuditEntity implements Serializable {
+public class SubtaskAudit implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -28,7 +24,21 @@ public class SublibraryFilesAuditEntity implements Serializable {
     private boolean ifOver;                       // 本阶段的审批是否结束
 
     @ManyToOne
-    private SublibraryFilesEntity sublibraryFilesEntity;
+    private Subtask subtask;
     @ManyToOne
-    private UserEntity userEntity;                 // 此文件审核人
+    private Users users;                 // 审核人
+
+
+   /* private String illustration;  //  审核信息
+    private String auditTime;  //  审核时间
+    private boolean pass;  //  true：通过 false：驳回
+    private int assessState; // 0：校对中   1：审核中  2：会签中  3：批准中
+
+    @ManyToOne
+    private Users users;
+    @OneToOne
+    private Subtask subtask;*/
+
+
+
 }

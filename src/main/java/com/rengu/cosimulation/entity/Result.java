@@ -12,7 +12,7 @@ import java.util.Date;
  * Date: 2019/2/13 14:53
  */
 @Data
-public class ResultEntity<T>  implements Serializable {
+public class Result<T>  implements Serializable {
 
     private int code;
     private String msg;
@@ -20,15 +20,15 @@ public class ResultEntity<T>  implements Serializable {
     private Date createTime = new Date();
     private T data;
 
-    public ResultEntity() {
+    public Result() {
     }
 
-    public ResultEntity(ResultCode resultCode, T data) {
+    public Result(ResultCode resultCode, T data) {
         this(resultCode);
         this.data = data;
     }
 
-    public ResultEntity(ResultCode resultCode) {
+    public Result(ResultCode resultCode) {
         this.code = resultCode.getCode();
         this.msg = resultCode.getMsg();
     }

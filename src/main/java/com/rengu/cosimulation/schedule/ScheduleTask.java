@@ -1,6 +1,5 @@
 package com.rengu.cosimulation.schedule;
 
-import com.rengu.cosimulation.entity.PreviewFileEntity;
 import com.rengu.cosimulation.service.ProjectService;
 import com.rengu.cosimulation.utils.PreviewFileInit;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +9,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Author: XYmar

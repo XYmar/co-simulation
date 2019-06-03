@@ -1,9 +1,9 @@
 package com.rengu.cosimulation.repository;
 
-import com.rengu.cosimulation.entity.ProjectEntity;
-import com.rengu.cosimulation.entity.SublibraryEntity;
-import com.rengu.cosimulation.entity.SublibraryFilesEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Project;
+import com.rengu.cosimulation.entity.SubDepot;
+import com.rengu.cosimulation.entity.SubDepotFile;
+import com.rengu.cosimulation.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SublibraryFilesRepository extends JpaRepository<SublibraryFilesEntity, String>, JpaSpecificationExecutor<ProjectEntity> {
-    boolean existsByNameAndPostfixAndSublibraryEntity(String name, String extension, SublibraryEntity sublibraryEntity);
+public interface SublibraryFilesRepository extends JpaRepository<SubDepotFile, String>, JpaSpecificationExecutor<Project> {
+    boolean existsByNameAndPostfixAndSubDepot(String name, String extension, SubDepot subDepot);
 
-    Optional<SublibraryFilesEntity> findByNameAndPostfixAndSublibraryEntity(String name, String postfix, SublibraryEntity sublibraryEntity);
+    Optional<SubDepotFile> findByNameAndPostfixAndSubDepot(String name, String postfix, SubDepot subDepot);
 
-    List<SublibraryFilesEntity> findBySublibraryEntityAndIfApprove(SublibraryEntity sublibraryEntity, boolean ifApprove);
+    List<SubDepotFile> findBySubDepotAndIfApprove(SubDepot subDepot, boolean ifApprove);
 
-    List<SublibraryFilesEntity> findByProofreadUserSetContaining(UserEntity userEntity);
-    List<SublibraryFilesEntity> findByAuditUserSetContaining(UserEntity userEntity);
-    List<SublibraryFilesEntity> findByCountersignUserSetContaining(UserEntity userEntity);
-    List<SublibraryFilesEntity> findByApproveUserSet(UserEntity userEntity);
-    List<SublibraryFilesEntity> findByState(int state);
-    List<SublibraryFilesEntity> findByUserEntityAndIfApprove(UserEntity userEntity, boolean ifApprove);
+    List<SubDepotFile> findByProofSetContaining(Users users);
+    List<SubDepotFile> findByAuditSetContaining(Users users);
+    List<SubDepotFile> findByCountSetContaining(Users users);
+    List<SubDepotFile> findByApproveSet(Users users);
+    List<SubDepotFile> findByState(int state);
+    List<SubDepotFile> findByUsersAndIfApprove(Users users, boolean ifApprove);
 }

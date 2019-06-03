@@ -2,6 +2,9 @@ package com.rengu.cosimulation.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.Serializable;
@@ -14,7 +17,7 @@ import java.util.UUID;
  */
 @Data
 @Entity
-public class DeviceEntity implements Serializable {
+public class Device implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -23,5 +26,7 @@ public class DeviceEntity implements Serializable {
     private String hostAddress;
     private String description;
     private String deployPath;
-    private boolean deleted = false;
+    @Column(name = "ifDeleted")
+    @Type(type="yes_no")
+    private boolean ifDeleted = false;
 }

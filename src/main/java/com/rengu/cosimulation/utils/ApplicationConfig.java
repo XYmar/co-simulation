@@ -20,7 +20,7 @@ public class ApplicationConfig {
     public static final String DEFAULT_ADMIN_ROLE_NAME = "admin";                              //系统管理员
     public static final String DEFAULT_SECURITY_GUARD_ROLE_NAME = "security_guard";            //安全保密员
     public static final String DEFAULT_SECURITY_AUDITOR_ROLE_NAME = "security_auditor";        //安全审计员
-    public static final String DEFAULT_USER_ROLE_NAME = "user";        //普通用户
+    public static final String DEFAULT_USER_ROLE_NAME = "users";        //普通用户
     // 客户目前新加三个可变角色
     public static final String DEFAULT_PROJECT_MANAGER_ROLE_NAME = "project_manager";          //项目管理员
     public static final String DEFAULT_FILE_AUDITOR__ROLE_NAME = "file_auditor";               //仿真技术文件审核员
@@ -112,9 +112,9 @@ public class ApplicationConfig {
 
     // 通知操作的主体
     public static final int MAINBODY_NONE = 0;                           // 无操作主体
-    public static final int MAINBODY_USERENTITY = 1;                      // 用户
-    public static final int MAINBODY_PROJECTENTITY = 2;                   // 项目
-    public static final int MAINBODY_SUBTASKENTITY = 3;                   // 子任务
+    public static final int MAINBODY_Users = 1;                      // 用户
+    public static final int MAINBODY_Project = 2;                   // 项目
+    public static final int MAINBODY_Subtask = 3;                   // 子任务
     public static final int MAINBODY_SUBLIBRARY_FILE_ENTITY = 4;                // 子库文件
 
 

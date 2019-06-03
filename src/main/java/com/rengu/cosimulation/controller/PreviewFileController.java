@@ -60,43 +60,43 @@ public class PreviewFileController {
     private String pdfType;
 
     @GetMapping("/previewSublibraryFile")
-    public ResultEntity localSublibraryFile(String sublibraryFileId) {
-        SublibraryFilesEntity sublibraryFilesEntity = sublibraryFilesService.getSublibraryFileById(sublibraryFileId);
-        String filePath = sublibraryFilesEntity.getFileEntity().getLocalPath();
+    public Result localSublibraryFile(String sublibraryFileId) {
+        SubDepotFile subDepotFile = sublibraryFilesService.getSublibraryFileById(sublibraryFileId);
+        String filePath = subDepotFile.getFiles().getLocalPath();
         return localAllFiles(filePath);
     }
 
-    private ResultEntity localAllFiles(String filePath) {
-        PreviewFileEntity previewFileEntity = new PreviewFileEntity();
-        previewFileEntity.setFilePath(filePath);
-        previewFileEntity.setFileId(SHAUtil.SHAHashCode(filePath));
+    private Result localAllFiles(String filePath) {
+        PreviewFile previewFile = new PreviewFile();
+        previewFile.setFilePath(filePath);
+        previewFile.setFileId(SHAUtil.SHAHashCode(filePath));
         // 判断文件是否存在
         //  拿到文件地址转换文件
-        previewFileInit.saveFile(previewFileEntity);
-        previewFileService.conventer(previewFileEntity);
-//        return previewUrl(previewFileEntity, model, request);
-        System.out.print(previewUrl(previewFileEntity).size());
-        System.out.print(previewUrl(previewFileEntity).get("fileType"));
-        return ResultUtils.success(previewUrl(previewFileEntity));
+        previewFileInit.saveFile(previewFile);
+        previewFileService.conventer(previewFile);
+//        return previewUrl(previewFile, model, request);
+        System.out.print(previewUrl(previewFile).size());
+        System.out.print(previewUrl(previewFile).get("fileType"));
+        return ResultUtils.success(previewUrl(previewFile));
     }
 
     @GetMapping("/previewFile")
-    public ResultEntity localFile(String subtaskFileId) {
-        SubtaskFilesEntity subtaskfileEntity = subtaskFilesService.getSubtaskFileById(subtaskFileId);
-        String filePath = subtaskfileEntity.getFileEntity().getLocalPath();
+    public Result localFile(String subtaskFileId) {
+        SubtaskFile subtaskfileEntity = subtaskFilesService.getSubtaskFileById(subtaskFileId);
+        String filePath = subtaskfileEntity.getFiles().getLocalPath();
         return localAllFiles(filePath);
     }
 
     /**
      * 获取重定向路径
      */
-    private Map<String, String> previewUrl(PreviewFileEntity PreviewFileEntity) {
-        File file = new File(rootPath + File.separator + PreviewFileEntity.getFileId()
-                + File.separator + "resource" + File.separator + PreviewFileEntity.getConventedFileName());
-        String subfix = FileUtil.getFileSufix(PreviewFileEntity.getFilePath());
+    private Map<String, String> previewUrl(PreviewFile PreviewFile) {
+        File file = new File(rootPath + File.separator + PreviewFile.getFileId()
+                + File.separator + "resource" + File.separator + PreviewFile.getConventedFileName());
+        String subfix = FileUtil.getFileSufix(PreviewFile.getFilePath());
         //返回一个后缀名以及pathId给你，根据后缀名判断该通往哪个页面
         Map<String, String> map = new HashMap<>();
-        map.put("pathId", PreviewFileEntity.getFileId());
+        map.put("pathId", PreviewFile.getFileId());
         map.put("fileSubfixType", subfix);
         if (file.exists()) {
             // 判断文件类型，不同的文件做不同的展示
@@ -107,14 +107,14 @@ public class PreviewFileController {
             } else if (this.imgType.contains(subfix.toLowerCase())) {
                 map.put("fileType", "picture");
             } else if (this.compressType.contains(subfix.toLowerCase())) {
-                map.put("fileTree", PreviewFileEntity.getFileTree());
+                map.put("fileTree", PreviewFile.getFileTree());
             } else if (this.officeType.contains(subfix.toLowerCase())) {
                 if ("pptx".equalsIgnoreCase(subfix.toLowerCase()) ||
                         "ppt".equalsIgnoreCase(subfix.toLowerCase())) {
-                    List<String> imgFiles = previewFileInit.getImageFilesOfPPT(PreviewFileEntity.getFileId());
+                    List<String> imgFiles = previewFileInit.getImageFilesOfPPT(PreviewFile.getFileId());
                     StringBuilder imgPaths = new StringBuilder();
                     for (String s : imgFiles) {
-                        imgPaths.append(PreviewFileEntity.getFileId()).append("/resource/").append(s.substring(s.lastIndexOf("\\"))).append(",");
+                        imgPaths.append(PreviewFile.getFileId()).append("/resource/").append(s.substring(s.lastIndexOf("\\"))).append(",");
                     }
                     map.put("imgPaths", imgPaths.toString());
                     map.put("fileType", "ppt");
@@ -126,7 +126,7 @@ public class PreviewFileController {
             map.put("fileType", "fileNotSupported");
         }
         return map;
-//        if (file.exists()) {
+//        if (files.exists()) {
 //            // 判断文件类型，不同的文件做不同的展示
 //            if (this.pdfType.contains(subfix.toLowerCase())) {
 //                return "office";
@@ -135,15 +135,15 @@ public class PreviewFileController {
 //            } else if (this.imgType.contains(subfix.toLowerCase())) {
 //                return "picture";
 //            } else if (this.compressType.contains(subfix.toLowerCase())) {
-//                model.addAttribute("fileTree", PreviewFileEntity.getFileTree());
+//                model.addAttribute("fileTree", PreviewFile.getFileTree());
 //                return "compress";
 //            } else if (this.officeType.contains(subfix.toLowerCase())) {
 //                if ("pptx".equalsIgnoreCase(subfix.toLowerCase()) ||
 //                        "ppt".equalsIgnoreCase(subfix.toLowerCase())) {
-//                    List<String> imgFiles = previewFileInit.getImageFilesOfPPT(PreviewFileEntity.getFileId());
+//                    List<String> imgFiles = previewFileInit.getImageFilesOfPPT(PreviewFile.getFileId());
 //                    String imgPaths = "";
 //                    for (String s : imgFiles) {
-//                        imgPaths += (PreviewFileEntity.getFileId() + "/resource/"
+//                        imgPaths += (PreviewFile.getFileId() + "/resource/"
 //                                + s.substring(s.lastIndexOf("\\"), s.length()) + ",");
 //                    }
 //                    model.addAttribute("imgPaths", imgPaths);
@@ -162,32 +162,32 @@ public class PreviewFileController {
 
     @GetMapping(value = "/viewer/document/{pathId}")
     public void onlinePreview(@PathVariable String pathId, String fileFullPath, HttpServletResponse response) throws IOException {
-        PreviewFileEntity previewFileEntity = previewFileInit.findByHashCode(pathId);
+        PreviewFile previewFile = previewFileInit.findByHashCode(pathId);
         // 得到转换后的文件地址
         String fileUrl;
         if (fileFullPath != null) {
             fileUrl = rootPath + File.separator + fileFullPath;
         } else {
-            if (previewFileEntity.getConventedFileName() == null || previewFileEntity.getConventedFileName().equals("")) {
-                fileUrl = rootPath + File.separator + previewFileEntity.getFileId() + File.separator + "resource" + File.separator;
+            if (previewFile.getConventedFileName() == null || previewFile.getConventedFileName().equals("")) {
+                fileUrl = rootPath + File.separator + previewFile.getFileId() + File.separator + "resource" + File.separator;
             }
-            fileUrl = rootPath + File.separator + previewFileEntity.getFileId() + File.separator + "resource" + File.separator + previewFileEntity.getConventedFileName();
+            fileUrl = rootPath + File.separator + previewFile.getFileId() + File.separator + "resource" + File.separator + previewFile.getConventedFileName();
         }
         File file = new File(fileUrl);
         // 设置内容长度
         response.setContentLength((int) file.length());
         // 内容配置中要转码,inline 浏览器支持的格式会在浏览器中打开,否则下载
-        String fullFileName = FileUtil.getFileName(previewFileEntity.getFilePath());
+        String fullFileName = FileUtil.getFileName(previewFile.getFilePath());
         response.setHeader("Content-Disposition", "inline;fileName=\"" + fullFileName + "\"");
         // 设置content-type
         response.addHeader("Access-Control-Allow-Origin", "*");
-        response.setContentType(previewFileEntity.getOriginalMIMEType());
-        System.out.println(previewFileEntity.getOriginalMIMEType());
+        response.setContentType(previewFile.getOriginalMIMEType());
+        System.out.println(previewFile.getOriginalMIMEType());
         @Cleanup FileInputStream is = new FileInputStream(new File(fileUrl));
         @Cleanup OutputStream os = response.getOutputStream();
         IOUtils.copy(is, os);
         response.flushBuffer();
-//        FileInputStream is = new FileInputStream(new File(fileUrl));
+//        FileInputStream is = new FileInputStream(new Files(fileUrl));
 //        OutputStream os = response.getOutputStream();
 //        printFile(is, os);
     }

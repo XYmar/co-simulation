@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.LibraryEntity;
-import com.rengu.cosimulation.entity.SublibraryEntity;
+import com.rengu.cosimulation.entity.Depot;
+import com.rengu.cosimulation.entity.SubDepot;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.SubLibraryRepository;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.xml.transform.Result;
 import java.util.List;
 
 /**
@@ -28,12 +27,12 @@ public class SublibraryService {
     }
 
     // 根据库id查询子库
-    public List<SublibraryEntity> getSublibrariesByLibraryId(String libraryId){
+    public List<SubDepot> getSublibrariesByLibraryId(String libraryId){
         if(!libraryService.hasLibraryById(libraryId)){
             throw new ResultException(ResultCode.LIBRARY_ID_NOT_FOUND_ERROR);
         }
-        LibraryEntity libraryEntity = libraryService.getLibraryById(libraryId);
-        return subLibraryRepository.findByLibraryEntity(libraryEntity);
+        Depot depot = libraryService.getLibraryById(libraryId);
+        return subLibraryRepository.findByDepot(depot);
     }
 
     // 根据id查询子库是否存在
@@ -45,7 +44,7 @@ public class SublibraryService {
     }
 
     // 根据id查询子库
-    public SublibraryEntity getSublibraryById(String id){
+    public SubDepot getSublibraryById(String id){
         if(!hasSublibraryById(id)){
             throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
         }
@@ -53,44 +52,44 @@ public class SublibraryService {
     }
 
     // 新增子库
-    public SublibraryEntity saveSublibrary(SublibraryEntity sublibraryEntity,String libraryId){
+    public SubDepot saveSublibrary(SubDepot subDepot, String libraryId){
         if(!libraryService.hasLibraryById(libraryId)){
             throw new ResultException(ResultCode.LIBRARY_ID_NOT_FOUND_ERROR);
         }
-        if(hasSublibraryByType(sublibraryEntity.getType())){
+        if(hasSublibraryByType(subDepot.getType())){
             throw new ResultException(ResultCode.SUBLIBRARY_TYPE_EXISTED_ERROR);
         }
-        LibraryEntity libraryEntity = libraryService.getLibraryById(libraryId);
-        sublibraryEntity.setLibraryEntity(libraryEntity);
-        return subLibraryRepository.save(sublibraryEntity);
+        Depot depot = libraryService.getLibraryById(libraryId);
+        subDepot.setDepot(depot);
+        return subLibraryRepository.save(subDepot);
     }
 
     // 删除子库
-    public SublibraryEntity deleteSublibraryById(String id){
+    public SubDepot deleteSublibraryById(String id){
         if(!hasSublibraryById(id)){
             throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
         }
-        SublibraryEntity sublibraryEntity = getSublibraryById(id);
-        subLibraryRepository.delete(sublibraryEntity);
-        return sublibraryEntity;
+        SubDepot subDepot = getSublibraryById(id);
+        subLibraryRepository.delete(subDepot);
+        return subDepot;
     }
 
     // 修改子库
-    public SublibraryEntity updateSublibraryById(String id, SublibraryEntity sublibraryEntityArgs){
+    public SubDepot updateSublibraryById(String id, SubDepot subDepotArgs){
         if(!hasSublibraryById(id)){
             throw new ResultException(ResultCode.SUBLIBRARY_ID_NOT_FOUND_ERROR);
         }
-        SublibraryEntity sublibraryEntity = getSublibraryById(id);
-        if(!StringUtils.isEmpty(sublibraryEntityArgs.getType()) && !sublibraryEntity.getType().equals(sublibraryEntityArgs.getType())){
-            if(hasSublibraryByType(sublibraryEntityArgs.getType())){
+        SubDepot subDepot = getSublibraryById(id);
+        if(!StringUtils.isEmpty(subDepotArgs.getType()) && !subDepot.getType().equals(subDepotArgs.getType())){
+            if(hasSublibraryByType(subDepotArgs.getType())){
                 throw new ResultException(ResultCode.SUBLIBRARY_TYPE_EXISTED_ERROR);
             }
-            sublibraryEntity.setType(sublibraryEntityArgs.getType());
+            subDepot.setType(subDepotArgs.getType());
         }
-        if(!StringUtils.isEmpty(sublibraryEntityArgs.getDescription())){
-            sublibraryEntity.setDescription(sublibraryEntityArgs.getDescription());
+        if(!StringUtils.isEmpty(subDepotArgs.getDescription())){
+            subDepot.setDescription(subDepotArgs.getDescription());
         }
-        return subLibraryRepository.save(sublibraryEntity);
+        return subLibraryRepository.save(subDepot);
     }
 
     // 根据类型判断子库是否存在

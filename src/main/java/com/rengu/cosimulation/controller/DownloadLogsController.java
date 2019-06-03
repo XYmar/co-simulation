@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.DownloadLogsService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class DownloadLogsController {
     }
 
     @GetMapping
-    public ResultEntity getLogs(){
+    public Result getLogs(){
         return ResultUtils.success(downloadLogsService.getLogs());
     }
 }

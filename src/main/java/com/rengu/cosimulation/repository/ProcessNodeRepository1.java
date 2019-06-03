@@ -1,8 +1,8 @@
 package com.rengu.cosimulation.repository;
 
-import com.rengu.cosimulation.entity.ProcessNodeEntity1;
-import com.rengu.cosimulation.entity.ProjectEntity;
-import com.rengu.cosimulation.entity.SubtaskEntity;
+import com.rengu.cosimulation.entity.ProcessNode;
+import com.rengu.cosimulation.entity.Project;
+import com.rengu.cosimulation.entity.Subtask;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,10 +13,10 @@ import java.util.List;
  * Date: 2019/4/17 18:58
  */
 @Repository
-public interface ProcessNodeRepository1 extends JpaRepository<ProcessNodeEntity1, String> {
-    boolean existsByProjectEntity(ProjectEntity projectEntity);
-    List<ProcessNodeEntity1> findByProjectEntity(ProjectEntity projectEntity);
-    ProcessNodeEntity1 findBySubtaskEntity(SubtaskEntity subtaskEntity);
-    List<ProcessNodeEntity1> findByProjectEntityAndLinkEntityList(ProjectEntity projectEntity, List linkEntity);
+public interface ProcessNodeRepository1 extends JpaRepository<ProcessNode, String> {
+    boolean existsByProject(Project project);
+    List<ProcessNode> findByProject(Project project);
+    ProcessNode findBySubtask(Subtask subtask);
+    List<ProcessNode> findByProjectAndLinkList(Project project, List link);
 
 }

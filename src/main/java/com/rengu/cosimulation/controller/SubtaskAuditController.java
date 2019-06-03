@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.SubtaskAuditService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class SubtaskAuditController {
 
     // 根据用户id及子任务id查询该文件审核详情(当前的)
     @GetMapping(value = "/{subtaskId}")
-    public ResultEntity getSublibraryFilesAuditId(@PathVariable(value = "subtaskId") String subtaskId, String subtaskDate) throws ParseException {
+    public Result getSublibraryFilesAuditId(@PathVariable(value = "subtaskId") String subtaskId, String subtaskDate) throws ParseException {
         return ResultUtils.success(subtaskAuditService.getSubtaskAudits(subtaskId, subtaskDate));
     }
 }

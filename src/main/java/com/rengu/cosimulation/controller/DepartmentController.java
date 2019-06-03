@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.DepartmentEntity;
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.Department;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.DepartmentService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,25 +25,25 @@ public class DepartmentController {
 
     // 查询所有部门信息
     @GetMapping
-    public ResultEntity getAll(){
+    public Result getAll(){
         return ResultUtils.success(departmentService.getAll());
     }
 
     // 新增部门信息
     @PostMapping
-    public ResultEntity saveDepartment(@RequestBody @Valid DepartmentEntity departmentEntity){
-        return ResultUtils.success(departmentService.saveDepartment(departmentEntity));
+    public Result saveDepartment(@RequestBody @Valid Department department){
+        return ResultUtils.success(departmentService.saveDepartment(department));
     }
 
     // 修改部门信息
     @PostMapping(value = "/{departmentId}")
-    public ResultEntity updateDepartmentById(@PathVariable(value = "departmentId") String departmentId, @RequestBody @Valid DepartmentEntity departmentEntity){
-        return ResultUtils.success(departmentService.updateDepartmentById(departmentId, departmentEntity));
+    public Result updateDepartmentById(@PathVariable(value = "departmentId") String departmentId, @RequestBody @Valid Department department){
+        return ResultUtils.success(departmentService.updateDepartmentById(departmentId, department));
     }
 
     // 删除部门信息
     @DeleteMapping(value = "/{departmentId}")
-    public ResultEntity deleteById(@PathVariable(value = "departmentId") String departmentId){
+    public Result deleteById(@PathVariable(value = "departmentId") String departmentId){
         return ResultUtils.success(departmentService.deleteDepartmentById(departmentId));
     }
 }

@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
-public class SubtaskFilesEntity implements Serializable {
+public class SubtaskFile implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -28,9 +28,9 @@ public class SubtaskFilesEntity implements Serializable {
     private String fileNo;                   // 文件图号
     private String version;               // 版本（根据提交次数累加，只有修改才变更版本）
     @ManyToOne
-    private FileEntity fileEntity;
+    private Files files;
     @ManyToOne
-    private SubtaskEntity subTaskEntity;
+    private Subtask subtask;
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<SublibraryEntity> sublibraryEntitySet;
+    private Set<SubDepot> subDepotSet;
 }
