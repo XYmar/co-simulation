@@ -43,7 +43,7 @@ public class FileController {
 
     // 检查文件块是否存在
     @PostMapping(value = "/chunks")
-    public void saveChunk(Chunk chunk, @RequestParam(value = "files") MultipartFile multipartFile) throws IOException {
+    public void saveChunk(Chunk chunk, @RequestParam(value = "file") MultipartFile multipartFile) throws IOException {
         fileService.saveChunk(chunk, multipartFile);
     }
 

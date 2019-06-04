@@ -21,12 +21,10 @@ public class Message implements Serializable {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @OneToOne
-    private Users mainOperator;             // 主要操作人
+    private String mainOperatorName;             // 主要操作人
     private int messageOperate;                  // 操作
     private int mainBody;                        // 操作主体
     private String description;                  // 操作描述
     private boolean ifRead;                   // 操作是否与被操作人有关
-    @OneToOne
-    private Users arrangedPerson;           // 被操作人
+    private String arrangedPersonName;           // 被操作人
 }
