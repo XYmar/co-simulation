@@ -25,7 +25,7 @@ public class FormatUtils {
         if (temp.endsWith("/")) {
             temp = temp.substring(0, temp.length() - 1);
         }
-        if (System.getProperty("files.separator").equals("\\")) {
+        if (System.getProperty("file.separator").equals("\\")) {
             temp = temp.replace('/', '\\');
         }
         return FilenameUtils.separatorsToUnix(temp);

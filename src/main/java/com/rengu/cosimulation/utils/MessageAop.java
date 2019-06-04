@@ -60,8 +60,8 @@ public class MessageAop {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         if (httpServletRequest.getUserPrincipal() != null) {
-            Users mainOperator = null;
-            Users arrangedPerson = null;
+            String mainOperatorName = null;
+            String arrangedPersonName = null;
             int messageOperate = ApplicationConfig.ARRANGE_NONE_OPERATE;
             int mainBody = ApplicationConfig.MAINBODY_NONE;
             String description = "";
@@ -72,8 +72,8 @@ public class MessageAop {
                     return;
                 }
                 Users users = (Users) result.getData();
-                mainOperator = userService.getUserByUsername("admin");                         // 操作人
-                arrangedPerson = users;                                                   // 被操作人
+                mainOperatorName = userService.getUserByUsername("admin").getUsername();                         // 操作人
+                arrangedPersonName = users.getUsername();                                                   // 被操作人
                 switch (joinPoint.getSignature().getName()) {
                     case "distributeUserById": {
                         messageOperate = ApplicationConfig.ARRANGE_ROLE_OPERATE;
@@ -101,13 +101,13 @@ public class MessageAop {
                    return;
                 }
                 Project project = (Project) result.getData();
-                mainOperator = project.getCreator();                         // 操作人
-                arrangedPerson = project.getPic();                           // 被操作人
+                mainOperatorName = project.getCreator().getUsername();                         // 操作人
+                arrangedPersonName = project.getPic().getUsername();                           // 被操作人
                 switch (joinPoint.getSignature().getName()) {
                     case "saveProject": {
                         messageOperate = ApplicationConfig.ARRANGE_PROJECTPIC_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
-                        description = mainOperator.getUsername() + "创建了项目" + project.getName() + "， 并指定您为项目负责人";
+                        description = mainOperatorName + "创建了项目" + project.getName() + "， 并指定您为项目负责人";
                         break;
                     }
                     case "arrangeProject": {
@@ -139,7 +139,7 @@ public class MessageAop {
                     case "updateProjectPic": {             // 修改项目负责人
                         messageOperate = ApplicationConfig.ARRANGE_PROJECTPIC_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
-                        description = mainOperator.getUsername() + "  指定您为项目负责人";
+                        description = mainOperatorName + "  指定您为项目负责人";
                         break;
                     }
                     default:
@@ -154,17 +154,17 @@ public class MessageAop {
                 Subtask subtask = (Subtask) result.getData();
                 switch (joinPoint.getSignature().getName()) {
                     case "updateSubtaskById": {
-                        mainOperator = subtask.getProject().getPic();                 // 操作人
-                        arrangedPerson = subtask.getUsers();                           // 被操作人
+                        mainOperatorName = subtask.getProject().getPic().getUsername();                 // 操作人
+                        arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
                         mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                         messageOperate = ApplicationConfig.ARRANGE_SUBTASKPIC_OPERATE;
-                        description = mainOperator.getUsername() + "将您指定为子任务  " + subtask.getName() + "  的负责人";
+                        description = mainOperatorName + "将您指定为子任务  " + subtask.getName() + "  的负责人";
                         break;
                     }
                     case "arrangeAssessorsByIds": {
                         messageOperate = ApplicationConfig.ARRANGE_AUDIT_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
-                        mainOperator = subtask.getUsers();
+                        mainOperatorName = subtask.getUsers().getUsername();
                         Set<Users> proofreadUsersSet = subtask.getProofSet();
                         Set<Users> auditUsersSet = subtask.getAuditSet();
                         Set<Users> countersignUsersSet = subtask.getCountSet();
@@ -176,8 +176,8 @@ public class MessageAop {
                         List<Message> messageList = new ArrayList<>();
                         for(Users users : proofreadUsersSet){
                             Message message = new Message();
-                            message.setMainOperator(mainOperator);
-                            message.setArrangedPerson(users);
+                            message.setMainOperatorName(mainOperatorName);
+                            message.setArrangedPersonName(users.getUsername());
                             message.setMessageOperate(messageOperate);
                             message.setMainBody(mainBody);
                             message.setDescription(subtask.getUsers().getUsername() + "指定您为子任务 " + subtask.getProject().getName() + "的审核人员");
@@ -187,8 +187,8 @@ public class MessageAop {
                         break;
                     }
                     case "handleModifyApply": {
-                        mainOperator = subtask.getProject().getPic();                 // 操作人
-                        arrangedPerson = subtask.getUsers();                           // 被操作人
+                        mainOperatorName = subtask.getProject().getPic().getUsername();                 // 操作人
+                        arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
                         mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
                         description = "您的二次修改申请  " + (subtask.isIfModifyApprove() ? "已通过" : "未通过");
@@ -196,15 +196,15 @@ public class MessageAop {
                     }
                     case "subtaskAudit": {
                         if(subtask.isIfApprove()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = subtask.getUsers();                           // 被操作人
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
                             mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             description = "您在项目  " + subtask.getProject().getName() + " 中的子任务  "  + subtask.getName() + "已审核通过，相关文件已入库";
                         }
                         if(subtask.isIfReject()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = subtask.getUsers();                           // 被操作人
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
                             mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             description = "您在项目  " + subtask.getProject().getName() + " 中的子任务  "  + subtask.getName() + "已被驳回";
@@ -236,8 +236,8 @@ public class MessageAop {
                         List<Message> messageList = new ArrayList<>();
                         for(Users users : subLibraryProofreadUsersSet){
                             Message message = new Message();
-                            message.setMainOperator(subDepotFile.getUsers());
-                            message.setArrangedPerson(users);
+                            message.setMainOperatorName(subDepotFile.getUsers().getUsername());
+                            message.setArrangedPersonName(users.getUsername());
                             message.setMessageOperate(messageOperate);
                             message.setMainBody(mainBody);
                             message.setDescription(subDepotFile.getUsers().getUsername() + "指定您为文件 " + subDepotFile.getName() + "的审核人员");
@@ -248,8 +248,8 @@ public class MessageAop {
                         break;
                     }
                     case "handleModifyApply": {
-                        mainOperator = userService.getUserByUsername("admin");                 // 操作人
-                        arrangedPerson = subDepotFile.getUsers();                           // 被操作人
+                        mainOperatorName = userService.getUserByUsername("admin").getUsername();                 // 操作人
+                        arrangedPersonName = subDepotFile.getUsers().getUsername();                           // 被操作人
                         mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
                         description = "您的二次修改申请  " + (subDepotFile.isIfModifyApprove() ? "已通过" : "未通过");
@@ -257,15 +257,15 @@ public class MessageAop {
                     }
                     case "sublibraryFileAudit": {
                         if(subDepotFile.isIfApprove()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = subDepotFile.getUsers();                           // 被操作人
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subDepotFile.getUsers().getUsername();                           // 被操作人
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                             description = "您上传的文件  " + subDepotFile.getName() + "已审核通过，相关文件已入库";
                         }
                         if(subDepotFile.isIfReject()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = subDepotFile.getUsers();                           // 被操作人
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subDepotFile.getUsers().getUsername();                           // 被操作人
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                             description = "您上传的文件  " + subDepotFile.getName() + "已被驳回";
@@ -277,8 +277,8 @@ public class MessageAop {
             }
             if (messageOperate != ApplicationConfig.ARRANGE_NONE_OPERATE || !StringUtils.isEmpty(description)) {
                 Message message = new Message();
-                message.setMainOperator(mainOperator);
-                message.setArrangedPerson(arrangedPerson);
+                message.setMainOperatorName(mainOperatorName);
+                message.setArrangedPersonName(arrangedPersonName);
                 message.setMessageOperate(messageOperate);
                 message.setMainBody(mainBody);
                 message.setDescription(description);
@@ -289,7 +289,6 @@ public class MessageAop {
             List<Users> usersList = userService.getAll();
             for(Users users : usersList){          // 向所有用户推送消息
                 Long count = messageRepository.countByArrangedPersonAndIfRead(users, false);
-                simpMessagingTemplate.convertAndSend("/personalInfo/" + users.getUsername(), ResultUtils.success(count));
             }
         }
     }
