@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Repository
 public interface MessageRepository extends JpaRepository<Message, String> {
-    List<Message> findByArrangedPerson(Users arrangedPerson);
-    List<Message> findByArrangedPersonAndIfRead(Users users, boolean ifRead);
-    Long countByArrangedPersonAndIfRead(Users users, boolean ifRead);
+    List<Message> findByArrangedPersonName(String arrangedPersonName);
+    List<Message> findByArrangedPersonNameAndIfRead(String arrangedPersonName, boolean ifRead);
+    Long countByArrangedPersonNameAndIfRead(String arrangedPersonName, boolean ifRead);
 }

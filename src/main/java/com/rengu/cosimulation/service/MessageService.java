@@ -53,7 +53,7 @@ public class MessageService {
     // 清空所有已读通知
     public List<Message> clearAllRead(String userId){
         Users users = userService.getUserById(userId);
-        List<Message> messageList = messageRepository.findByArrangedPersonAndIfRead(users, true);
+        List<Message> messageList = messageRepository.findByArrangedPersonNameAndIfRead(users.getUsername(), true);
         messageRepository.deleteAll(messageList);
         return messageList;
     }
@@ -61,13 +61,13 @@ public class MessageService {
     // 根据状态查询通知: 查看所有已读未读消息
     public List<Message> findByIfRead(String userId, boolean ifRead){
         Users users = userService.getUserById(userId);
-        return messageRepository.findByArrangedPersonAndIfRead(users, ifRead);
+        return messageRepository.findByArrangedPersonNameAndIfRead(users.getUsername(), ifRead);
     }
 
     // 查看全部通知，根据被操作用户返回消息
     public List<Message> getMessagesByUser(String userId){
         Users users = userService.getUserById(userId);
-        return messageRepository.findByArrangedPerson(users);
+        return messageRepository.findByArrangedPersonName(users.getUsername());
     }
 
     // 根据Id查询用户是否存在
