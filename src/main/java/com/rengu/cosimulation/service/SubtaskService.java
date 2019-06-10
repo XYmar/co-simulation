@@ -200,7 +200,7 @@ public class SubtaskService {
     // 提交审核  根据子任务id为子任务选择审核模式及四类审核人  提交：第一次提交，直接修改，二次修改
     public Subtask arrangeAssessorsByIds(String subtaskId, String userId, int commitMode, boolean ifBackToStart, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
         Subtask subtask = getSubtaskById(subtaskId);
-        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){                     // 子任务审核中及审核后无权进行删除
+        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPROVE){                     // 子任务审核中及审核后无权进行删除
             throw new ResultException(ResultCode.ARRANGE_DENIED_ERROR);
         }
         if(commitMode == ApplicationConfig.SUBTASK_DIRECT_MODIFY){    // 直接修改提交审核
@@ -452,6 +452,15 @@ public class SubtaskService {
             list.add(map);
         }
         return list;
+    }
+
+    // 用户是否是项目负责人
+    public boolean ifIncharge(String userId){
+        Users users = userService.getUserById(userId);
+        List<Subtask> subtaskList = subtaskRepository.findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users, users);
+        List<Project> projectList = projectRepository.findByPicOrCreator(users, users);
+
+        return (subtaskList.size() > 0 || projectList.size() > 0);
     }
 
 }

@@ -1,11 +1,11 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.Department;
-import com.rengu.cosimulation.entity.Role;
-import com.rengu.cosimulation.entity.Users;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
+import com.rengu.cosimulation.repository.ProjectRepository;
 import com.rengu.cosimulation.repository.RoleRepository;
+import com.rengu.cosimulation.repository.SubtaskRepository;
 import com.rengu.cosimulation.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,12 +29,16 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final DepartmentService departmentService;
+    private final ProjectRepository projectRepository;
+    private final SubtaskRepository subtaskRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleService roleService, DepartmentService departmentService) {
+    public UserService(UserRepository userRepository, RoleService roleService, DepartmentService departmentService, ProjectRepository projectRepository, SubtaskRepository subtaskRepository) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
+        this.projectRepository = projectRepository;
+        this.subtaskRepository = subtaskRepository;
     }
 
     // 保存用户 , 一个角色
@@ -152,8 +156,20 @@ public class UserService implements UserDetailsService {
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
         Users users = getUserById(userId);
-        users.setRoleEntities(new HashSet<>());
-        userRepository.save(users);
+        List<Project> projectList = projectRepository.findByPicOrCreator(users, users);
+        if(projectList.size() > 0){
+            for(Project project : projectList){
+                if(project.getPic().getId().equals(userId)){
+                    project.setPic(null);
+                }else {
+                    project.setCreator(null);
+                }
+            }
+        }
+        List<Subtask> subtaskList = subtaskRepository.findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users, users);
+        if(subtaskList.size() > 0){
+            subtaskRepository.deleteInBatch(subtaskList);
+        }
         userRepository.delete(users);
         return users;
     }

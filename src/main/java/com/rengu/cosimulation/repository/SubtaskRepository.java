@@ -27,4 +27,6 @@ public interface SubtaskRepository extends JpaRepository<Subtask, String> {
     void deleteAllByProject(Project project);
 
     List<Subtask>  findByUsers(Users users);
+    List<Subtask>  findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(Users users, Users proof, Users audit, Users count, Users approve);
+
 }

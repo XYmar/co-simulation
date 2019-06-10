@@ -121,4 +121,10 @@ public class SubtaskController {
     public Result getProjectTrees(@RequestHeader(value = "userSecretClass") int userSecretClass){
         return ResultUtils.success(subtaskService.getProjectTrees(userSecretClass));
     }
+
+    // 查询用户是否是项目或子任务负责人
+    @PostMapping("/ifIncharge")
+    public Result ifIncharge(String userId){
+        return ResultUtils.success(subtaskService.ifIncharge(userId));
+    }
 }
