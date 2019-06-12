@@ -49,14 +49,14 @@ public class UserService implements UserDetailsService {
             throw new ResultException(ResultCode.USER_ARGS_NOT_FOUND_ERROR);
         }
         if(StringUtils.isEmpty(users.getUsername())){
-            throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.USER_USERNAME_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(users.getRealName())){
+            throw new ResultException(ResultCode.USER_REALNAME_NOT_FOUND_ERROR);
         }
         if (hasUserByUsername(users.getUsername())) {
             throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
         }
-        /*if(StringUtils.isEmpty(users.getPassword())){
-            throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
-        }*/
         if(StringUtils.isEmpty(String.valueOf(users.getSecretClass()))){
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_FOUND_ERROR);
         }
@@ -73,7 +73,7 @@ public class UserService implements UserDetailsService {
         }
 
         if(!departmentService.hasDepartmentByName(departmentName)){
-            throw new ResultException(ResultCode.DEPARTMENT_NAME_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.USER_DEPARTMENT_ARGS_NOT_FOUND_ERROR);
         }
         Department department = departmentService.getDepartmentByName(departmentName);
         users.setDepartment(department);
@@ -140,6 +140,10 @@ public class UserService implements UserDetailsService {
                 throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
             }
             users.setUsername(usersArgs.getUsername());
+        }
+
+        if(!StringUtils.isEmpty(usersArgs.getRealName()) && !users.getRealName().equals(usersArgs.getRealName())){
+            users.setRealName(usersArgs.getRealName());
         }
 
         return userRepository.save(users);

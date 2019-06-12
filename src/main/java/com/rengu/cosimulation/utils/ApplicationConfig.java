@@ -32,12 +32,15 @@ public class ApplicationConfig {
 
     // 默认的系统管理员
     public static final String DEFAULT_ADMIN_USERNAME = "admin";
+    public static final String DEFAULT_ADMIN_REALNAME = "admin";
     public static final String DEFAULT_ADMIN_PASSWORD = "admin";
     // 默认的安全保密员
     public static final String DEFAULT_SECURITY_GUARD_USERNAME = "securityGuard";
+    public static final String DEFAULT_SECURITY_GUARD_REALNAME = "securityGuard";
     public static final String DEFAULT_SECURITY_GUARD_PASSWORD = "securityGuard";
     // 默认的安全审计员
     public static final String DEFAULT_SECURITY_AUDITOR_USERNAME = "securityAuditor";
+    public static final String DEFAULT_SECURITY_AUDITOR_REALNAME = "securityAuditor";
     public static final String DEFAULT_SECURITY_AUDITOR_PASSWORD = "securityAuditor";
 
     // 默认设计环节

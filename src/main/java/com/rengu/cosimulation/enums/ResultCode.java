@@ -27,6 +27,7 @@ public enum ResultCode {
     USER_SECRETCLASS_NOT_FOUND_ERROR(10018,"请指定用户密级"),
     USER_ROLE_NOT_FOUND_ERROR(10019,"请指定用户角色"),
     USER_SECRETCLASS_NOT_SUPPORT_ERROR(10020,"用户权限不够，请重新指定"),
+    USER_REALNAME_NOT_FOUND_ERROR(10021, "未发现该用户姓名"),
 
     // 部门相关    1003x
     DEPARTMENT_ID_NOT_FOUND_ERROR(10030,"未发现该部门ID"),

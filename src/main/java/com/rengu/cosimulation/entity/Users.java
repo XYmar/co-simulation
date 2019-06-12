@@ -26,6 +26,7 @@ public class Users implements UserDetails, Serializable {
     @JsonIgnore
     private String password;
     private int secretClass;                       // 人员密级
+    private String realName;                       // 姓名
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
