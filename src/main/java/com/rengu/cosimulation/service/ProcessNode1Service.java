@@ -7,6 +7,7 @@ import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.ProcessNodeRepository1;
 import com.rengu.cosimulation.repository.SubtaskRepository;
+import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -106,6 +107,14 @@ public class ProcessNode1Service {
             throw new ResultException(ResultCode.PROCESS_NODE_ID_NOT_FOUND_ERROR);
         }
         return processNodeRepository1.findById(processNodeId).get();
+    }
+
+    // 项目是否已经包含项目流程
+    public boolean ifHasProcessNode(String projectId){
+        Project project = projectService.getProjectById(projectId);
+        List<ProcessNode> processNodeList = processNodeRepository1.findByProject(project);
+
+        return (processNodeList.size() > 0);
     }
 
 }

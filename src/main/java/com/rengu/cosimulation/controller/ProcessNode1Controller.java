@@ -34,4 +34,10 @@ public class ProcessNode1Controller {
     public Result getProcessNodesByProjectId(@PathVariable(value = "projectId") String projectId){
         return ResultUtils.success(processNode1Service.getProcessNodesByProjectId(projectId));
     }
+
+    // 项目是否已经包含项目流程
+    @PostMapping("/ifHasProcessNode")
+    public Result ifHasProcessNode(String projectId){
+        return ResultUtils.success(processNode1Service.ifHasProcessNode(projectId));
+    }
 }
