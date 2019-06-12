@@ -29,10 +29,11 @@ public class SubtaskService {
     private final SubtaskAuditRepository subtaskAuditRepository;
     private final SublibraryFilesService sublibraryFilesService;
     private final LinkRepository linkRepository;
+    private final SublibraryFilesRepository sublibraryFilesRepository;
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository, SublibraryFilesRepository sublibraryFilesRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
@@ -41,6 +42,7 @@ public class SubtaskService {
         this.sublibraryFilesService = sublibraryFilesService;
         this.linkRepository = linkRepository;
         this.projectRepository = projectRepository;
+        this.sublibraryFilesRepository = sublibraryFilesRepository;
     }
 
     // 根据项目id查询所有子任务
@@ -459,8 +461,9 @@ public class SubtaskService {
         Users users = userService.getUserById(userId);
         List<Subtask> subtaskList = subtaskRepository.findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users, users);
         List<Project> projectList = projectRepository.findByPicOrCreator(users, users);
+        List<SubDepotFile> subDepotFileList = sublibraryFilesRepository.findByProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users);
 
-        return (subtaskList.size() > 0 || projectList.size() > 0);
+        return (subtaskList.size() > 0 || projectList.size() > 0 || subDepotFileList.size() > 0);
     }
 
 }

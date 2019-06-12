@@ -14,9 +14,11 @@ import java.util.Optional;
  */
 @Repository
 public interface UserRepository extends JpaRepository<Users, String> {
-    boolean existsByUsername(String username);
+    boolean existsByUsernameAndDeleted(String username, Boolean deleted);
 
-    Optional<Users> findByUsername(String username);
+    Optional<Users> findByUsernameAndDeleted(String username, Boolean deleted);
 
     List<Users> findByDepartment(Department department);
+
+    List<Users> findByDeleted(Boolean deleted);
 }

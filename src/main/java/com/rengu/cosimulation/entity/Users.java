@@ -30,6 +30,7 @@ public class Users implements UserDetails, Serializable {
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;                 // 是否可用：可用  禁用
+    private boolean deleted = false;
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roleEntities;
     @ManyToOne(fetch = FetchType.EAGER)
