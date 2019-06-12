@@ -1,6 +1,7 @@
 package com.rengu.cosimulation.repository;
 
 import com.rengu.cosimulation.entity.Department;
+import com.rengu.cosimulation.entity.Role;
 import com.rengu.cosimulation.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -21,4 +22,6 @@ public interface UserRepository extends JpaRepository<Users, String> {
     List<Users> findByDepartment(Department department);
 
     List<Users> findByDeleted(Boolean deleted);
+
+    List<Users> findByRoleEntitiesContaining(Role role);
 }

@@ -1,9 +1,11 @@
 package com.rengu.cosimulation.service;
 
 import com.rengu.cosimulation.entity.Role;
+import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.RoleRepository;
+import com.rengu.cosimulation.repository.UserRepository;
 import com.rengu.cosimulation.utils.ApplicationMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Author: XYmar
@@ -26,10 +30,12 @@ import java.util.List;
 public class RoleService {
 
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public RoleService(RoleRepository roleRepository) {
+    public RoleService(RoleRepository roleRepository, UserRepository userRepository) {
         this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
     }
 
     // 保存角色
@@ -120,6 +126,19 @@ public class RoleService {
         Role role = getRoleById(roleId);
         if(!role.getChangeable()){    // 不可修改的角色
             throw new ResultException(ResultCode.ROLE_CHANGE_NOT_SUPPORT_ERROR);
+        }
+        List<Users> usersList = userRepository.findByRoleEntitiesContaining(role);
+        if(usersList.size() > 0){
+            for(Users users : usersList){
+                if(users.getRoleEntities().size() == 1){
+                    Set<Role> roleHashSet = new HashSet<>();
+                    roleHashSet.add(getRoleByName("normal_designer"));
+                    users.setRoleEntities(roleHashSet);
+                }else {
+                    users.getRoleEntities().remove(role);
+                }
+            }
+            userRepository.saveAll(usersList);
         }
         roleRepository.delete(role);
         return role;
