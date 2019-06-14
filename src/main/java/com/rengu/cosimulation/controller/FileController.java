@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Author: XYmar
@@ -49,7 +50,7 @@ public class FileController {
 
     // 合并文件块
     @PostMapping(value = "/chunks/merge")
-    public Result mergeChunks(Chunk chunk) throws IOException {
+    public Result mergeChunks(Chunk chunk) throws IOException, ExecutionException, InterruptedException {
         return ResultUtils.success(fileService.mergeChunks(chunk));
     }
 }

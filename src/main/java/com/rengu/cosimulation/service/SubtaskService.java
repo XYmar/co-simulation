@@ -79,10 +79,10 @@ public class SubtaskService {
         Project project = projectService.getProjectById(projectId);
         Users users = userService.getUserById(userId);
         Subtask subtask = getSubtaskById(subtaskById);
-        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){              // 子任务审核中及审核后无权进行修改
+        if (subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY) {              // 子任务审核中及审核后无权进行修改
             throw new ResultException(ResultCode.MODIFY_DENIED_ERROR);
         }
-        if(!project.getPic().getId().equals(loginUserId)){
+        if (!project.getPic().getId().equals(loginUserId)) {
             throw new ResultException(ResultCode.SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE);
         }
         if (users.getSecretClass() < project.getSecretClass()) {
@@ -102,7 +102,7 @@ public class SubtaskService {
             throw new ResultException(ResultCode.SUBTASK_ID_NOT_FOUND_ERROR);
         }
         Subtask subtask = getSubtaskById(subtaskId);
-        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){                     // 子任务审核中及审核后无权进行删除
+        if (subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY) {                     // 子任务审核中及审核后无权进行删除
             throw new ResultException(ResultCode.DELETE_DENIED_ERROR);
         }
         subtaskRepository.delete(subtask);
@@ -110,26 +110,26 @@ public class SubtaskService {
     }
 
     // 判断项目的所有子任务是否已全部完成，完成后将项目状态设置为完成
-    public void setProjectComplete(Project project){
+    public void setProjectComplete(Project project) {
         List<ProcessNode> processNodeList = processNodeRepository1.findByProject(project);
 
         // 查找最后的节点  即查找无已此节点为父节点的link，然后找到对应的节点,查看他们的状态
         boolean ifAllComplete = true;
-        for(ProcessNode processNode : processNodeList){
-            if(!linkRepository.existsByProjectAndParentId(project, processNode.getId())){
-                if(!(processNode.getSubtask().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER)){
+        for (ProcessNode processNode : processNodeList) {
+            if (!linkRepository.existsByProjectAndParentId(project, processNode.getId())) {
+                if (!(processNode.getSubtask().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER)) {
                     ifAllComplete = false;
                 }
             }
         }
-        if(ifAllComplete){
+        if (ifAllComplete) {
             project.setState(ApplicationConfig.PROJECT_OVER);
         }
         projectRepository.save(project);
     }
 
     // 根据子任务开启其后续任务
-    public void startNextSubtasksById(Subtask subtask){
+    public void startNextSubtasksById(Subtask subtask) {
         // 根据子任务查找对应的节点
         ProcessNode processNode = processNodeRepository1.findBySubtask(subtask);
         // 根据连接关系找到对应的子节点连接
@@ -137,20 +137,20 @@ public class SubtaskService {
 
         List<ProcessNode> processNodeList = new ArrayList<>();
         // 根据连接查找子节点
-        for(Link link : childLinkList){
+        for (Link link : childLinkList) {
             processNodeList.add(processNodeRepository1.findById(link.getSelfId()).get());
         }
 
         // 获取后续子任务   如果没有后续子任务了则
         List<Subtask> subtaskList = new ArrayList<>();
-        if(processNodeList.size() > 0){
-            for(ProcessNode processNodeEntity : processNodeList){
+        if (processNodeList.size() > 0) {
+            for (ProcessNode processNodeEntity : processNodeList) {
                 subtaskList.add(processNodeEntity.getSubtask());
             }
         }
 
-        if(subtaskList.size() > 0){                     // 如果后续有子任务的话则开启子任务
-            for(Subtask subtask1 : subtaskList){
+        if (subtaskList.size() > 0) {                     // 如果后续有子任务的话则开启子任务
+            for (Subtask subtask1 : subtaskList) {
                 subtask1.setState(ApplicationConfig.SUBTASK_START);
             }
             subtaskRepository.saveAll(subtaskList);
@@ -158,7 +158,7 @@ public class SubtaskService {
     }
 
     // 根据子任务查询其父节点任务是否全部完成
-    public boolean ifAllParentSubtasksOver(Subtask subtask){
+    public boolean ifAllParentSubtasksOver(Subtask subtask) {
         boolean ifOver = false;
         // 根据子任务查找对应的节点
         ProcessNode processNode = processNodeRepository1.findBySubtask(subtask);
@@ -166,7 +166,7 @@ public class SubtaskService {
         List<Link> parentLinkList = linkRepository.findBySelfId(processNode.getId());
         // 根据连接查找父节点
         List<ProcessNode> parentProcessNodeEntityList = new ArrayList<>();
-        for(Link link : parentLinkList){
+        for (Link link : parentLinkList) {
             parentProcessNodeEntityList.add(processNodeRepository1.findById(link.getParentId()).get());
         }
         /*for(ProcessNode processNodeEntity : parentProcessNodeEntityList){
@@ -179,14 +179,11 @@ public class SubtaskService {
                 parentProcessNodeEntityList.add(parentProcessNodeEntity);
             }
         }*/
-        if(parentProcessNodeEntityList.size() == 0){             // 无父节点时
+        if (parentProcessNodeEntityList.size() == 0) {             // 无父节点时
             ifOver = true;
-        }else{
-            for(ProcessNode processNodeEntity11 : parentProcessNodeEntityList){
-                ifOver = false;
-                if(processNodeEntity11.getSubtask().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
-                    ifOver = true;
-                }
+        } else {
+            for (ProcessNode processNodeEntity11 : parentProcessNodeEntityList) {
+                ifOver = processNodeEntity11.getSubtask().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER;
             }
         }
 
@@ -194,35 +191,35 @@ public class SubtaskService {
     }
 
     /**
-     *    第一次提交： 判断父节点是否全部完成;
-     *    直接修改：   指定驳回流程（是否回到初始流程） --> 修改子任务状态到指定的流程
-     *    二次修改：   重新提交，重新指定 --> 不用判断父节点是否全部完成
-     *                 重置各种状态
-     * */
+     * 第一次提交： 判断父节点是否全部完成;
+     * 直接修改：   指定驳回流程（是否回到初始流程） --> 修改子任务状态到指定的流程
+     * 二次修改：   重新提交，重新指定 --> 不用判断父节点是否全部完成
+     * 重置各种状态
+     */
     // 提交审核  根据子任务id为子任务选择审核模式及四类审核人  提交：第一次提交，直接修改，二次修改
     public Subtask arrangeAssessorsByIds(String subtaskId, String userId, int commitMode, boolean ifBackToStart, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
         Subtask subtask = getSubtaskById(subtaskId);
-        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPROVE){                     // 子任务审核中及审核后无权进行删除
+        if (subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPROVE) {                     // 子任务审核中及审核后无权进行删除
             throw new ResultException(ResultCode.ARRANGE_DENIED_ERROR);
         }
-        if(commitMode == ApplicationConfig.SUBTASK_DIRECT_MODIFY){    // 直接修改提交审核
-            if(ifBackToStart){                // 驳回后的修改提交到第一个流程
+        if (commitMode == ApplicationConfig.SUBTASK_DIRECT_MODIFY) {    // 直接修改提交审核
+            if (ifBackToStart) {                // 驳回后的修改提交到第一个流程
                 subtask.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
-            }else{
+            } else {
                 subtask.setState(subtask.getRejectState());
             }
-        }else{              // 第一次提交、二次修改
-            if(commitMode == ApplicationConfig.SUBTASK_SECOND_MODIFY){           // 二次修改  重置二次修改申请状态状态
+        } else {              // 第一次提交、二次修改
+            if (commitMode == ApplicationConfig.SUBTASK_SECOND_MODIFY) {           // 二次修改  重置二次修改申请状态状态
                 subtask.setIfModifyApprove(false);
             }
             Users users = userService.getUserById(userId);
-            if(!ifAllParentSubtasksOver(subtask)){                            // 父节点未全部完成
+            if (!ifAllParentSubtasksOver(subtask)) {                            // 父节点未全部完成
                 throw new ResultException(ResultCode.SUBTASK_PARENT_NOT_ALL_OVER);
             }
             if (!users.getId().equals(subtask.getUsers().getId())) {           // 只有子任务负责人才可选择审核人
                 throw new ResultException(ResultCode.SUBTASK_USER_ARRANGE_AUTHORITY_DENIED_ERROR);
             }
-            if(StringUtils.isEmpty(String.valueOf(auditMode))){
+            if (StringUtils.isEmpty(String.valueOf(auditMode))) {
                 throw new ResultException(ResultCode.AUDITMODE_NOT_FOUND_ERROR);
             }
             if (ArrayUtils.isEmpty(proofreadUserIds)) {
@@ -231,8 +228,8 @@ public class SubtaskService {
             if (ArrayUtils.isEmpty(auditUserIds)) {
                 throw new ResultException(ResultCode.AUDITUSERS_NOT_FOUND_ERROR);
             }
-            if(auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN){
-                if(ArrayUtils.isEmpty(countersignUserIds)){
+            if (auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN) {
+                if (ArrayUtils.isEmpty(countersignUserIds)) {
                     throw new ResultException(ResultCode.COUNTERSIGNUSERS_NOT_FOUND_ERROR);
                 }
             }
@@ -241,24 +238,23 @@ public class SubtaskService {
             }
             subtask.setProofSet(idsToSet(proofreadUserIds));
             subtask.setAuditSet(idsToSet(auditUserIds));
-            if(auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN){
+            if (auditMode != ApplicationConfig.AUDIT_NO_COUNTERSIGN) {
                 subtask.setCountSet(idsToSet(countersignUserIds));
             }
             subtask.setApproveSet(idsToSet(approveUserIds));
             subtask.setAuditMode(auditMode);
             subtask.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
-            subtask.setIfReject(false);
-            subtask.setIfApprove(false);
         }
-
+        subtask.setIfReject(false);
+        subtask.setIfApprove(false);
         return subtaskRepository.save(subtask);
     }
 
     // 根据用户id数组，将用户数组转为set集合
-    private Set<Users> idsToSet(String[] ids){
+    private Set<Users> idsToSet(String[] ids) {
         Set<Users> usersEntities = new HashSet<>();
-        if(!ArrayUtils.isEmpty(ids)){
-            for(String id : ids){
+        if (!ArrayUtils.isEmpty(ids)) {
+            for (String id : ids) {
                 usersEntities.add(userService.getUserById(id));
             }
         }
@@ -278,17 +274,17 @@ public class SubtaskService {
     }
 
     // 审核操作
-    public Subtask subtaskAudit(String subtaskId, String userId, Subtask subtaskArgs, SubtaskAudit subtaskAuditArgs){
+    public Subtask subtaskAudit(String subtaskId, String userId, Subtask subtaskArgs, SubtaskAudit subtaskAuditArgs) {
         Subtask subtask = getSubtaskById(subtaskId);
         Users users = userService.getUserById(userId);             // 登录的用户
 
-        if(StringUtils.isEmpty(String.valueOf(subtaskArgs.getState()))){
+        if (StringUtils.isEmpty(String.valueOf(subtaskArgs.getState()))) {
             throw new ResultException(ResultCode.STATE_NOT_FOUND_ERROR);
         }
-        if(subtaskArgs.getState() == 3){        // 校对中设置状态为校对
+        if (subtaskArgs.getState() == 3) {        // 校对中设置状态为校对
             subtask.setState(ApplicationConfig.SUBTASK_PROOFREAD);
         }
-        if(subtaskArgs.getState() != subtask.getState()){
+        if (subtaskArgs.getState() != subtask.getState()) {
             throw new ResultException(ResultCode.CURRENT_PROGRESS_NOT_ARRIVE_ERROR);
         }
 
@@ -310,30 +306,30 @@ public class SubtaskService {
          *                                             记录当前驳回的阶段
          * */
         // 若当前用户已审批过过则报错，您已执行过审批操作
-        if(subtaskAuditRepository.existsBySubtaskAndUsersAndStateAndIfOver(subtask, users, subtaskArgs.getState(), false)){
+        if (subtaskAuditRepository.existsBySubtaskAndUsersAndStateAndIfOver(subtask, users, subtaskArgs.getState(), false)) {
             throw new ResultException(ResultCode.USER_ALREADY_COUNTERSIGN_ERROR);
         }
 
-        if(subtaskAuditArgs.isIfPass()){
-            if(subtask.getUsers().getId().equals(userId)){    // 自己无权通过
+        if (subtaskAuditArgs.isIfPass()) {
+            if (subtask.getUsers().getId().equals(userId)) {    // 自己无权通过
                 throw new ResultException(ResultCode.USER_PASS_DENIED_ERROR);
             }
-            if(subtaskArgs.getState() == ApplicationConfig.SUBTASK_AUDIT){               // 当前为审核
-                if(subtaskArgs.getAuditMode() == ApplicationConfig.AUDIT_NO_COUNTERSIGN){  // 无会签
+            if (subtaskArgs.getState() == ApplicationConfig.SUBTASK_AUDIT) {               // 当前为审核
+                if (subtaskArgs.getAuditMode() == ApplicationConfig.AUDIT_NO_COUNTERSIGN) {  // 无会签
                     subtask.setState(ApplicationConfig.SUBTASK_APPROVE);
-                }else{
+                } else {
                     subtask.setState(ApplicationConfig.SUBTASK_COUNTERSIGN);
                 }
                 subtaskAudit.setState(subtaskArgs.getState());
-            }else if(subtaskArgs.getState() == ApplicationConfig.SUBTASK_COUNTERSIGN && subtaskArgs.getAuditMode() == ApplicationConfig.AUDIT_MANY_COUNTERSIGN){
+            } else if (subtaskArgs.getState() == ApplicationConfig.SUBTASK_COUNTERSIGN && subtaskArgs.getAuditMode() == ApplicationConfig.AUDIT_MANY_COUNTERSIGN) {
                 // 当前为会签 且模式为多人会签
-                if((subtask.getManyCounterSignState() + 1) != subtask.getCountSet().size()){
+                if ((subtask.getManyCounterSignState() + 1) != subtask.getCountSet().size()) {
                     subtask.setManyCounterSignState(subtask.getManyCounterSignState() + 1);
-                }else{                          // 所有人都已会签过
+                } else {                          // 所有人都已会签过
                     subtask.setState(subtaskArgs.getState() + 1);
                 }
                 subtaskAudit.setState(subtaskArgs.getState());
-            }else if(subtaskArgs.getState() == ApplicationConfig.SUBTASK_APPROVE){                   // 当前为批准，即批准通过后
+            } else if (subtaskArgs.getState() == ApplicationConfig.SUBTASK_APPROVE) {                   // 当前为批准，即批准通过后
                 subtask.setIfApprove(true);                                                          // 通过审核
                 subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                              // 审批结束
                 subtaskAudit.setState(subtaskArgs.getState());
@@ -346,11 +342,11 @@ public class SubtaskService {
 
                 // 子任务全部完成后项目完成
                 setProjectComplete(subtask.getProject());
-            }else{
+            } else {
                 subtask.setState(subtaskArgs.getState() + 1);
                 subtaskAudit.setState(subtaskArgs.getState());                                 // 在哪步驳回
             }
-        }else{                // 驳回
+        } else {                // 驳回
             subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                                  // 审批结束
             subtaskAudit.setState(subtaskArgs.getState());
             subtask.setRejectState(subtaskArgs.getState());
@@ -367,9 +363,9 @@ public class SubtaskService {
         subtaskAuditRepository.save(subtaskAudit);
 
         // 批准通过后 或 驳回后, 将详情改为已结束
-        if(!(subtaskAuditArgs.isIfPass()) || subtaskArgs.getState() == ApplicationConfig.SUBTASK_APPROVE){
+        if (!(subtaskAuditArgs.isIfPass()) || subtaskArgs.getState() == ApplicationConfig.SUBTASK_APPROVE) {
             List<SubtaskAudit> subtaskAuditList = subtaskAuditRepository.findBySubtask(subtask);
-            for(SubtaskAudit subtaskAudit1 : subtaskAuditList){
+            for (SubtaskAudit subtaskAudit1 : subtaskAuditList) {
                 subtaskAudit1.setIfOver(true);
             }
             subtaskAuditRepository.saveAll(subtaskAuditList);
@@ -392,9 +388,9 @@ public class SubtaskService {
     }
 
     // 申请二次修改
-    public Subtask applyForModify(String subtaskId){
+    public Subtask applyForModify(String subtaskId) {
         Subtask subtask = getSubtaskById(subtaskId);
-        if(subtask.getState() != ApplicationConfig.SUBTASK_AUDIT_OVER){
+        if (subtask.getState() != ApplicationConfig.SUBTASK_AUDIT_OVER) {
             throw new ResultException(ResultCode.SECOND_MODIFY_DENIED_ERROR);
         }
         subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
@@ -402,10 +398,10 @@ public class SubtaskService {
     }
 
     // 项目负责人查询所有待审核的二次修改申请
-    public List<Subtask> findByState(String userId){
+    public List<Subtask> findByState(String userId) {
         List<Project> projectList = projectRepository.findByPic(userService.getUserById(userId));
         List<Subtask> allSubtaskList = new ArrayList<>();
-        for(Project project : projectList){
+        for (Project project : projectList) {
             List<Subtask> subtaskList = subtaskRepository.findByProjectAndState(project, ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
             allSubtaskList.addAll(subtaskList);
         }
@@ -414,24 +410,25 @@ public class SubtaskService {
     }
 
     // 项目负责人处理二次修改申请
-    public Subtask handleModifyApply(String subtaskId, boolean ifModifyApprove){
+    public Subtask handleModifyApply(String subtaskId, boolean ifModifyApprove) {
         Subtask subtask = getSubtaskById(subtaskId);
         subtask.setIfModifyApprove(ifModifyApprove);
-        if(ifModifyApprove){
+        if (ifModifyApprove) {
             subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE);
-        }else{
+            subtask.setIfReject(false);
+        } else {
             subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);
         }
         return subtaskRepository.save(subtask);
     }
 
     // 根据子任务负责人查询其所有项目(去重后)
-    public List<Project> findProjectsByUserId(Users users){
+    public List<Project> findProjectsByUserId(Users users) {
         // 根据子任务负责人查询其所有项目(去重后)
         List<Subtask> subtaskEntities = subtaskRepository.findByUsers(users);
         Map<String, Project> projectMap = new HashMap<>();
-        for(Subtask subtask : subtaskEntities){
-            if(!projectMap.containsKey(subtask.getProject().getId())){
+        for (Subtask subtask : subtaskEntities) {
+            if (!projectMap.containsKey(subtask.getProject().getId())) {
                 projectMap.put(subtask.getProject().getId(), subtask.getProject());
             }
         }
@@ -444,10 +441,10 @@ public class SubtaskService {
     }
 
     // 返回整个系统的所有项目及以下子任务的树结构
-    public List<Map<String, Object>> getProjectTrees(int secretClass){
+    public List<Map<String, Object>> getProjectTrees(int secretClass) {
         List<Map<String, Object>> list = new ArrayList<>();
         List<Project> projectList = projectService.getProjectsBySecretClass(secretClass, false);
-        for(Project project : projectList){
+        for (Project project : projectList) {
             Map<String, Object> map = new HashMap<>();
             map.put("project", project);
             map.put("subtask", findByProjectId(project.getId()));
@@ -457,7 +454,7 @@ public class SubtaskService {
     }
 
     // 用户是否是项目负责人
-    public boolean ifIncharge(String userId){
+    public boolean ifIncharge(String userId) {
         Users users = userService.getUserById(userId);
         List<Subtask> subtaskList = subtaskRepository.findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users, users);
         List<Project> projectList = projectRepository.findByPicOrCreator(users, users);

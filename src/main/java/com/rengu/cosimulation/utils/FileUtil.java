@@ -2,6 +2,7 @@ package com.rengu.cosimulation.utils;
 
 
 import com.rengu.cosimulation.entity.PreviewFile;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -12,102 +13,111 @@ import java.nio.charset.Charset;
  * @Author YJH
  * @Date 2019/3/13 10:08
  */
+
+@Slf4j
 public class FileUtil {
 
     /**
      * 获取文件名
+     *
      * @param filePath
      * @return
      */
-   public static String getFileName(String filePath) {
-       File tempFile =new File( filePath.trim());
-       String fileName = tempFile.getName();
-       return fileName;
-   }
+    public static String getFileName(String filePath) {
+        File tempFile = new File(filePath.trim());
+        String fileName = tempFile.getName();
+        return fileName;
+    }
 
-   public static void main(String args[]) {
-       String filePath = "E:\\JJS_IM_DEV-updater-1.0.2.zip";
-       int splitIndex = filePath.lastIndexOf(".");
-   }
-    /**
-     *  获取文件hash值
-     * @param filePath
-     * @return
-     */
-   public static String getFileHashCode(String filePath) {
-       String hashCode = SHAUtil.SHAHashCode(filePath);
-       return hashCode;
-   }
+    public static void main(String[] args) {
+        String filePath = "E:\\JJS_IM_DEV-updater-1.0.2.zip";
+        int splitIndex = filePath.lastIndexOf(".");
+    }
 
     /**
-     *  获取文件大小
+     * 获取文件hash值
+     *
      * @param filePath
      * @return
      */
-   public static long getFileSize(String filePath) {
-      File file = new File(filePath);
-      if(file.exists() && file.isFile()) {
-          return file.length();
-      }else {
-          return 0;
-      }
-   }
+    public static String getFileHashCode(String filePath) {
+        String hashCode = SHAUtil.SHAHashCode(filePath);
+        return hashCode;
+    }
+
+    /**
+     * 获取文件大小
+     *
+     * @param filePath
+     * @return
+     */
+    public static long getFileSize(String filePath) {
+        File file = new File(filePath);
+        if (file.exists() && file.isFile()) {
+            return file.length();
+        } else {
+            return 0;
+        }
+    }
 
     /**
      * 创建文件目录
+     *
      * @param destDirName
      * @return
      */
-   public static File createDir(String destDirName) {
-       File dir = new File(destDirName);
-       if(!dir.exists()) {
-           dir.mkdirs();
-       }
-       return dir;
-   }
+    public static File createDir(String destDirName) {
+        File dir = new File(destDirName);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
+    }
 
     /**
      * 文件复制
+     *
      * @param sourcePath
      * @param destPath
      */
-   public static void copyFile(String sourcePath, String destPath) {
-       InputStream fis = null;
-       OutputStream fos = null;
-       try {
-           File source = FileUtil.createFile(sourcePath);
-           int flag = 0;
-           if(sourcePath.contains(File.separator)) {
-               flag = sourcePath.lastIndexOf(File.separator);
-           }
-           String txts= sourcePath.substring(flag);
-           File target = FileUtil.createFile(destPath + File.separator+ FileUtil.getFileName(sourcePath) );
-           fis = new FileInputStream(source);
-           fos = new FileOutputStream(target);
-           byte[] buf = new byte[4096];
-           int i;
-           while ((i = fis.read(buf)) != -1) {
-               fos.write(buf, 0, i);
-           }
-       } catch (Exception e) {
-           e.printStackTrace();
-       }finally {
-           try {
-               if(fos != null) {
-                   fos.flush();
-                   fos.close();
-               }
-               if(fis != null) {
-                   fis.close();
-               }
-           }catch (IOException e) {
-               e.printStackTrace();
-           }
-       }
-   }
+    public static void copyFile(String sourcePath, String destPath) {
+        InputStream fis = null;
+        OutputStream fos = null;
+        try {
+            File source = FileUtil.createFile(sourcePath);
+            int flag = 0;
+            if (sourcePath.contains(File.separator)) {
+                flag = sourcePath.lastIndexOf(File.separator);
+            }
+            String txts = sourcePath.substring(flag);
+            File target = FileUtil.createFile(destPath + File.separator + FileUtil.getFileName(sourcePath));
+            fis = new FileInputStream(source);
+            fos = new FileOutputStream(target);
+            byte[] buf = new byte[4096];
+            int i;
+            while ((i = fis.read(buf)) != -1) {
+                fos.write(buf, 0, i);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.flush();
+                    fos.close();
+                }
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     /**
      * 文件按指定编码复制
+     *
      * @param inputFile
      * @param inputCharset
      * @param outputFile
@@ -139,18 +149,19 @@ public class FileUtil {
 
     /**
      * 创建文件
+     *
      * @param filePath
      */
-    public static File createFile (String filePath) {
+    public static File createFile(String filePath) {
         try {
             File file = new File(filePath);
-            if(!file.exists()) {
+            if (!file.exists()) {
                 // 先得到文件的上级目录，并创建上级目录，在创建文件
                 file.getParentFile().mkdir();
                 file.createNewFile();
             }
             return file;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -159,9 +170,10 @@ public class FileUtil {
 
     /**
      * 写入文件
-     * @param metaFile   目标文件
-     * @param PreviewFile  写入内容
-     * @param encoding   指定文件编码
+     *
+     * @param metaFile    目标文件
+     * @param PreviewFile 写入内容
+     * @param encoding    指定文件编码
      */
     public static void writeContent(File metaFile, PreviewFile PreviewFile, String encoding) {
         FileOutputStream fos = null;
@@ -174,23 +186,23 @@ public class FileUtil {
                 field.setAccessible(true);
                 os.write(field.getName() + ":" + field.get(PreviewFile) + "\n");
             }
-        }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        }catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
-        } finally{
+        } finally {
             try {
-                if(os != null) {
+                if (os != null) {
                     os.flush();
                     os.close();
                 }
-                if(fos != null) {
+                if (fos != null) {
                     fos.flush();
                     fos.close();
                 }
-            }catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -198,6 +210,7 @@ public class FileUtil {
 
     /**
      * 获取文件后缀名
+     *
      * @param fileName
      * @return String
      */
@@ -208,13 +221,14 @@ public class FileUtil {
 
     /**
      * 判断文件编码格式
+     *
      * @param path
      * @return
      */
     public static String getFileEncodeUTFGBK(String path) {
         String enc = Charset.forName("GBK").name();
         File file = new File(path);
-        InputStream in= null;
+        InputStream in = null;
         try {
             in = new FileInputStream(file);
             byte[] b = new byte[3];
@@ -228,15 +242,13 @@ public class FileUtil {
             e.printStackTrace();
         } finally {
             try {
-                if(in != null) {
+                if (in != null) {
                     in.close();
                 }
-            }catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         return enc;
     }
-
-
 }
