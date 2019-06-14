@@ -17,6 +17,8 @@ public interface ProjectRepository extends JpaRepository<Project, String>, JpaSp
 
     List<Project> findByPicOrCreatorAndDeleted(Users pic, Users creator, boolean deleted);
 
+    List<Project> findByPicOrCreator(Users pic, Users creator);
+
     boolean existsByNameAndDeleted(String name, boolean deleted);
 
     List<Project> findByDeleted(boolean deleted);

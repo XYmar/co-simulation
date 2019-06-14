@@ -43,7 +43,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         // 放行新增角色接口
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/role").permitAll();
         // 放行文件导出接口
-        http.authorizeRequests().antMatchers("/subtasks/*/export", "/subtaskFiles/*/users/*/export","/sublibraryFiles/*/export","/sublibraryFiles/*/users/*/export").permitAll();
+        http.authorizeRequests().antMatchers("/subtasks/*/export", "/subtaskFiles/*/user/*/export","/sublibraryFiles/*/export","/sublibraryFiles/*/user/*/export").permitAll();
         // 放行websocket接口
         http.authorizeRequests().antMatchers("/COSIMULATION/**").permitAll();
         // 放行actuator接口

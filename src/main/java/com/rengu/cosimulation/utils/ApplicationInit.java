@@ -61,6 +61,7 @@ public class ApplicationInit  implements ApplicationRunner {
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME)) {
             Users users = new Users();
             users.setUsername(ApplicationConfig.DEFAULT_ADMIN_USERNAME);
+            users.setRealName(ApplicationConfig.DEFAULT_ADMIN_REALNAME);
             users.setPassword(ApplicationConfig.DEFAULT_ADMIN_PASSWORD);
             users.setSecretClass(3);
             userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, users, ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME);
@@ -70,6 +71,7 @@ public class ApplicationInit  implements ApplicationRunner {
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME)) {
             Users users = new Users();
             users.setUsername(ApplicationConfig.DEFAULT_SECURITY_GUARD_USERNAME);
+            users.setRealName(ApplicationConfig.DEFAULT_SECURITY_GUARD_REALNAME);
             users.setPassword(ApplicationConfig.DEFAULT_SECURITY_GUARD_PASSWORD);
             users.setSecretClass(3);
             userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, users, ApplicationConfig.DEFAULT_SECURITY_GUARD_ROLE_NAME);
@@ -79,6 +81,7 @@ public class ApplicationInit  implements ApplicationRunner {
         if (!userService.hasUserByUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME)) {
             Users users = new Users();
             users.setUsername(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_USERNAME);
+            users.setRealName(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_REALNAME);
             users.setPassword(ApplicationConfig.DEFAULT_SECURITY_AUDITOR_PASSWORD);
             users.setSecretClass(3);
             userService.saveUser(ApplicationConfig.INFORMATION_MINISTRY, users, ApplicationConfig.DEFAULT_SECURITY_AUDITOR_ROLE_NAME);

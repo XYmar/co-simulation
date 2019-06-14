@@ -288,7 +288,8 @@ public class MessageAop {
             // Long count = messageRepository.countByArrangedPersonAndIfRead(userService.getUserByUsername(username), false);
             List<Users> usersList = userService.getAll();
             for(Users users : usersList){          // 向所有用户推送消息
-                Long count = messageRepository.countByArrangedPersonAndIfRead(users, false);
+                Long count = messageRepository.countByArrangedPersonNameAndIfRead(users.getUsername(), false);
+                simpMessagingTemplate.convertAndSend("/personalInfo/" + users.getUsername(), ResultUtils.success(count));
             }
         }
     }

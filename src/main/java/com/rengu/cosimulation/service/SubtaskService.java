@@ -29,10 +29,11 @@ public class SubtaskService {
     private final SubtaskAuditRepository subtaskAuditRepository;
     private final SublibraryFilesService sublibraryFilesService;
     private final LinkRepository linkRepository;
+    private final SublibraryFilesRepository sublibraryFilesRepository;
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository, SublibraryFilesRepository sublibraryFilesRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
@@ -41,6 +42,7 @@ public class SubtaskService {
         this.sublibraryFilesService = sublibraryFilesService;
         this.linkRepository = linkRepository;
         this.projectRepository = projectRepository;
+        this.sublibraryFilesRepository = sublibraryFilesRepository;
     }
 
     // 根据项目id查询所有子任务
@@ -200,7 +202,7 @@ public class SubtaskService {
     // 提交审核  根据子任务id为子任务选择审核模式及四类审核人  提交：第一次提交，直接修改，二次修改
     public Subtask arrangeAssessorsByIds(String subtaskId, String userId, int commitMode, boolean ifBackToStart, int auditMode, String[] proofreadUserIds, String[] auditUserIds, String[] countersignUserIds, String[] approveUserIds) {
         Subtask subtask = getSubtaskById(subtaskId);
-        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY){                     // 子任务审核中及审核后无权进行删除
+        if(subtask.getState() >= ApplicationConfig.SUBTASK_TO_BE_AUDIT && subtask.getState() <= ApplicationConfig.SUBTASK_APPROVE){                     // 子任务审核中及审核后无权进行删除
             throw new ResultException(ResultCode.ARRANGE_DENIED_ERROR);
         }
         if(commitMode == ApplicationConfig.SUBTASK_DIRECT_MODIFY){    // 直接修改提交审核
@@ -452,6 +454,16 @@ public class SubtaskService {
             list.add(map);
         }
         return list;
+    }
+
+    // 用户是否是项目负责人
+    public boolean ifIncharge(String userId){
+        Users users = userService.getUserById(userId);
+        List<Subtask> subtaskList = subtaskRepository.findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users, users);
+        List<Project> projectList = projectRepository.findByPicOrCreator(users, users);
+        List<SubDepotFile> subDepotFileList = sublibraryFilesRepository.findByProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users);
+
+        return (subtaskList.size() > 0 || projectList.size() > 0 || subDepotFileList.size() > 0);
     }
 
 }

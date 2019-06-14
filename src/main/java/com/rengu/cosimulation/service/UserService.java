@@ -1,12 +1,10 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.Department;
-import com.rengu.cosimulation.entity.Role;
-import com.rengu.cosimulation.entity.Users;
+import com.rengu.cosimulation.entity.*;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
-import com.rengu.cosimulation.repository.RoleRepository;
-import com.rengu.cosimulation.repository.UserRepository;
+import com.rengu.cosimulation.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -25,16 +23,23 @@ import java.util.*;
  * Date: 2019/2/12 16:15
  */
 @Service
+@Slf4j
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final DepartmentService departmentService;
+    private final ProjectRepository projectRepository;
+    private final SubtaskRepository subtaskRepository;
+    private final SublibraryFilesRepository sublibraryFilesRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleService roleService, DepartmentService departmentService) {
+    public UserService(UserRepository userRepository, RoleService roleService, DepartmentService departmentService, ProjectRepository projectRepository, SubtaskRepository subtaskRepository, SublibraryFilesRepository sublibraryFilesRepository) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
+        this.projectRepository = projectRepository;
+        this.subtaskRepository = subtaskRepository;
+        this.sublibraryFilesRepository = sublibraryFilesRepository;
     }
 
     // 保存用户 , 一个角色
@@ -44,14 +49,14 @@ public class UserService implements UserDetailsService {
             throw new ResultException(ResultCode.USER_ARGS_NOT_FOUND_ERROR);
         }
         if(StringUtils.isEmpty(users.getUsername())){
-            throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.USER_USERNAME_NOT_FOUND_ERROR);
+        }
+        if(StringUtils.isEmpty(users.getRealName())){
+            throw new ResultException(ResultCode.USER_REALNAME_NOT_FOUND_ERROR);
         }
         if (hasUserByUsername(users.getUsername())) {
             throw new ResultException(ResultCode.USER_USERNAME_EXISTED_ERROR);
         }
-        /*if(StringUtils.isEmpty(users.getPassword())){
-            throw new ResultException(ResultCode.USER_PASSWORD_ARGS_NOT_FOUND_ERROR);
-        }*/
         if(StringUtils.isEmpty(String.valueOf(users.getSecretClass()))){
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_FOUND_ERROR);
         }
@@ -68,21 +73,16 @@ public class UserService implements UserDetailsService {
         }
 
         if(!departmentService.hasDepartmentByName(departmentName)){
-            throw new ResultException(ResultCode.DEPARTMENT_NAME_NOT_FOUND_ERROR);
+            throw new ResultException(ResultCode.USER_DEPARTMENT_ARGS_NOT_FOUND_ERROR);
         }
         Department department = departmentService.getDepartmentByName(departmentName);
         users.setDepartment(department);
         return userRepository.save(users);
     }
 
-    //保存管理员用户
-    /*public Users saveAdminUser(Users users, String roleName) {
-        return saveUser(users);
-    }*/
-
     // 查询所有用户
     public List<Users> getAll() {
-        return userRepository.findAll();
+        return userRepository.findByDeleted(false);
     }
 
     // 根据用户名查询用户是否存在
@@ -90,7 +90,7 @@ public class UserService implements UserDetailsService {
         if (StringUtils.isEmpty(username)) {
             return false;
         }
-        return userRepository.existsByUsername(username);
+        return userRepository.existsByUsernameAndDeleted(username, false);
     }
 
     // 根据用户名查询用户
@@ -99,7 +99,7 @@ public class UserService implements UserDetailsService {
         if (!hasUserByUsername(username)) {
             throw new ResultException(ResultCode.USER_USERNAME_NOT_FOUND_ERROR);
         }
-        return userRepository.findByUsername(username).get();
+        return userRepository.findByUsernameAndDeleted(username, false).get();
     }
 
     @Override
@@ -142,6 +142,10 @@ public class UserService implements UserDetailsService {
             users.setUsername(usersArgs.getUsername());
         }
 
+        if(!StringUtils.isEmpty(usersArgs.getRealName()) && !users.getRealName().equals(usersArgs.getRealName())){
+            users.setRealName(usersArgs.getRealName());
+        }
+
         return userRepository.save(users);
     }
 
@@ -152,9 +156,47 @@ public class UserService implements UserDetailsService {
             throw new ResultException(ResultCode.USER_ID_NOT_FOUND_ERROR);
         }
         Users users = getUserById(userId);
-        users.setRoleEntities(new HashSet<>());
-        userRepository.save(users);
-        userRepository.delete(users);
+        List<SubDepotFile> subDepotFiles = sublibraryFilesRepository.findByUsers(users);
+        if(subDepotFiles.size() > 0){             // 用户为子库文件上传者时则假删除，否则直接删除
+            users.setEnabled(false);
+            users.setDeleted(true);
+            userRepository.save(users);
+        }else {
+            List<Project> projectList = projectRepository.findByPicOrCreator(users, users);
+            if(projectList.size() > 0){
+                for(Project project : projectList){
+                    if(project.getPic().getId().equals(userId)){
+                        project.setPic(null);
+                    }else {
+                        project.setCreator(null);
+                    }
+                }
+            }
+            List<Subtask> subtaskList = subtaskRepository.findByUsersOrProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users, users);
+            if(subtaskList.size() > 0){
+                for(Subtask subtask : subtaskList){
+                    if(subtask.getUsers().getId().equals(userId)){
+                        subtask.setUsers(null);
+                    }
+                    subtask.getProofSet().remove(users);
+                    subtask.getAuditSet().remove(users);
+                    subtask.getCountSet().remove(users);
+                    subtask.getApproveSet().remove(users);
+                }
+                subtaskRepository.saveAll(subtaskList);
+            }
+            List<SubDepotFile> subDepotFileList = sublibraryFilesRepository.findByProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(users, users, users, users);
+            if(subDepotFileList.size() > 0){
+                for(SubDepotFile subDepotFile : subDepotFileList){
+                    subDepotFile.getProofSet().remove(users);
+                    subDepotFile.getAuditSet().remove(users);
+                    subDepotFile.getCountSet().remove(users);
+                    subDepotFile.getApproveSet().remove(users);
+                }
+                sublibraryFilesRepository.saveAll(subDepotFileList);
+            }
+            userRepository.delete(users);
+        }
         return users;
     }
 
