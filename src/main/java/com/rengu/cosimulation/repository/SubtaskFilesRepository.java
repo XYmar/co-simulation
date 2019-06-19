@@ -15,4 +15,7 @@ public interface SubtaskFilesRepository extends JpaRepository<SubtaskFile, Strin
     Optional<SubtaskFile> findByNameAndPostfixAndSubtask(String name, String postfix, Subtask subTask);
 
     List<SubtaskFile> findBySubtask(Subtask subTask);
+
+    // 查看重复文件，只可能存在一个
+    SubtaskFile findByNameAndFileNoAndProductNoAndPostfixAndSecretClassAndSubtaskAndVersionAndType(String name, String fileNo, String productNo, String postfix, int secretClass, Subtask subtask, String version, String type);
 }

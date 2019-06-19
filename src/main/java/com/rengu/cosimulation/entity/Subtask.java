@@ -27,6 +27,7 @@ public class Subtask implements Serializable {
     private boolean ifReject;                  // 是否被驳回
     private int rejectState;                   // 记录被驳回的流程
     private boolean ifModifyApprove;           // 二次修改申请是否通过
+    private String version;
     private int manyCounterSignState;          // 多人会签时，文件状态(几人已会签过)
     private int auditMode;                     // 会签模式               0：未选择   1：无会签  2：一人会签 3：多人会签
     @ManyToOne
@@ -40,14 +41,6 @@ public class Subtask implements Serializable {
     private Set<Users> countSet;  // 会签人
     @ManyToMany
     private Set<Users> approveSet;  // 批准人
-    /*@ManyToMany(fetch = FetchType.EAGER)
-    private Set<Users> collatorSet;       // 核对人
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Users> auditorSet;        // 审核人
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Users> countersignSet;    // 会签人
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Users> apporverSet;       // 批准人*/
     @ManyToOne
     private DesignLink designLink;    //设计环节
 

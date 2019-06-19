@@ -18,6 +18,6 @@ public interface SubtaskAuditRepository extends JpaRepository<SubtaskAudit, Stri
     boolean existsBySubtaskAndUsersAndStateAndIfOver(Subtask subtask, Users users, int state, boolean ifOver);
     List<SubtaskAudit> findBySubtaskAndCreateTimeAfter(Subtask subtask, Date sublibraryDate);
     List<SubtaskAudit> findBySubtask(Subtask subtask);
-    List<SubtaskAudit> findByUsersAndState(Users users, int state);
+    List<SubtaskAudit> findByUsersAndStateAndIfOver(Users users, int state, boolean ifOver);
     List<SubtaskAudit> findByUsers(Users users);
 }

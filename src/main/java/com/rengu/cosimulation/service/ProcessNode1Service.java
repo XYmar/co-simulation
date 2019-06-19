@@ -68,6 +68,11 @@ public class ProcessNode1Service {
                 subtask.setName(processNode.getNodeName());
                 subtask.setProject(project);
                 subtask.setManyCounterSignState(0);                            // 多人会签模式，此时无人开始会签
+
+                // 若此节点的父节点已经完成，则设置此子任务为正在进行中
+                /*if(){
+
+                }*/
             }
             processNodeEntity.setNodeName(processNode.getNodeName());
             processNodeEntity.setNodeSize(processNode.getNodeSize());

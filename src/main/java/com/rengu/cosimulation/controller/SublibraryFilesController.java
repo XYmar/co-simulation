@@ -154,7 +154,7 @@ public class SublibraryFilesController {
 
     // 根据用户查询自己未通过的子库文件
     @GetMapping(value = "/getFailedFiles")
-    public Result getFailedFilesByUser(@RequestHeader(value = "userId") String userId){
-        return ResultUtils.success(sublibraryFilesService.getFailedFilesByUser(userId));
+    public Result getFailedFilesByUser(@RequestHeader(value = "userId") String userId, String subDepotId){
+        return ResultUtils.success(sublibraryFilesService.getFailedFilesByUser(userId, subDepotId));
     }
 }

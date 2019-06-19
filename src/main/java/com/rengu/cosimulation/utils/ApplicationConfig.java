@@ -69,6 +69,7 @@ public class ApplicationConfig {
     public static final int SUBTASK_AUDIT_OVER = 7;                    // 审批结束
     public static final int SUBTASK_APPLY_FOR_MODIFY = 8;              // 申请二次修改中
     public static final int SUBTASK_APPLY_FOR_MODIFY_APPROVE = 9;      // 二次修改中
+    public static final int SUBTASK_APPLY_FOR_MODIFY_APPROVE_AND_COMMITED = 10;      // 二次修改并且已提交
 
     // 子任务提交审核方式： 第一次提交  直接修改  二次修改
     public static final int SUBTASK_FIRST_COMMIT = 0;                     // 第一次提交
@@ -76,13 +77,16 @@ public class ApplicationConfig {
     public static final int SUBTASK_SECOND_MODIFY = 2;                    // 二次修改
 
     // 子库文件审核环节
-    public static final int SUBLIBRARY_FILE_PROOFREAD = 1;             // 校对中
-    public static final int SUBLIBRARY_FILE_AUDIT = 2;                 // 审核中
-    public static final int SUBLIBRARY_FILE_COUNTERSIGN = 3;           // 会签中
-    public static final int SUBLIBRARY_FILE_APPROVE = 4;               // 批准中
-    public static final int SUBLIBRARY_FILE_AUDIT_OVER = 5;                  // 审批结束
-    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY = 6;      // 申请二次修改中
-    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE = 7;      // 二次修改中
+    public static final int SUBLIBRARY_FILE_TO_BE_AUDIT = 1;                   // 待审批
+    public static final int SUBLIBRARY_FILE_PROOFREAD = 2;             // 校对中
+    public static final int SUBLIBRARY_FILE_AUDIT = 3;                 // 审核中
+    public static final int SUBLIBRARY_FILE_COUNTERSIGN = 4;           // 会签中
+    public static final int SUBLIBRARY_FILE_APPROVE = 5;               // 批准中
+    public static final int SUBLIBRARY_FILE_AUDIT_OVER = 6;                   // 审批结束
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY = 7;      // 申请二次修改中
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE = 8;      // 二次修改中
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE_OVER = 9;      // 二次修改中
+    public static final int SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE_AND_COMMITED = 10;      // 二次修改中
 
     public static final int SUBLIBRARY_FILE_IFAPPROVE = 1;                  // 审核通过
     public static final int SUBLIBRARY_FILE_IFREJECT = 2;               // 审核未通过

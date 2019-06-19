@@ -58,4 +58,10 @@ public class SublibraryController {
     public Result saveSublibraryFilesBySublibraryId(@PathVariable(value = "sublibraryId") String sublibraryId, @PathVariable(value = "userId") String userId, @RequestBody List<FileMeta> fileMetaList){
         return ResultUtils.success(sublibraryFilesService.saveSublibraryFilesBySublibraryId(sublibraryId, userId, fileMetaList));
     }
+
+    // 根据子库id查看是否有重复文件
+    @PostMapping(value = "/{sublibraryId}/findExistSubDepotFiles/byUser/{userId}")
+    public Result findExistSubDepotFiles(@PathVariable(value = "sublibraryId") String sublibraryId, @PathVariable(value = "userId") String userId, @RequestBody List<FileMeta> fileMetaList){
+        return ResultUtils.success(sublibraryFilesService.findExistSubDepotFiles(sublibraryId, userId, fileMetaList));
+    }
 }

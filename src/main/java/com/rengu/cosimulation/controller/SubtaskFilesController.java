@@ -69,6 +69,12 @@ public class SubtaskFilesController {
         return ResultUtils.success(subtaskFilesService.modifySubtaskFiles(subtaskFileId, fileMeta));
     }
 
+    // 批量删除
+    @PatchMapping(value = "/deleteFilesInBatch")
+    public Result deleteFilesInBatch(@RequestParam(value = "ids") String[] ids){
+        return ResultUtils.success(subtaskFilesService.deleteFilesInBatch(ids));
+    }
+
     // 根据子任务文件id查找其历史版本文件
     @GetMapping(value = "/{subtaskFileId}/getSublibraryHistoriesFiles")
     public Result getSubtaskHistoriesFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId) {

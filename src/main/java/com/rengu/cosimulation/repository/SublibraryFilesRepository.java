@@ -24,7 +24,8 @@ public interface SublibraryFilesRepository extends JpaRepository<SubDepotFile, S
     List<SubDepotFile> findByCountSetContaining(Users users);
     List<SubDepotFile> findByApproveSet(Users users);
     List<SubDepotFile> findByState(int state);
-    List<SubDepotFile> findByUsersAndIfApprove(Users users, boolean ifApprove);
+    List<SubDepotFile> findBySubDepotAndUsersAndIfApprove(SubDepot subDepot, Users users, boolean ifApprove);
     List<SubDepotFile> findByProofSetContainingOrAuditSetContainingOrCountSetContainingOrApproveSetContaining(Users proof, Users audit, Users count, Users approve);
     List<SubDepotFile> findByUsers(Users users);
+    SubDepotFile findByNameAndFileNoAndProductNoAndPostfixAndSecretClassAndSubDepotAndTypeAndUsersAndVersion(String name, String fileNo, String productNo, String postfix, int secretClass, SubDepot subDepot, String type, Users user, String version);
 }

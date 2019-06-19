@@ -62,6 +62,12 @@ public class SubtaskController {
         return ResultUtils.success(subtaskFilesService.saveSubtaskFilesByProDesignId(subtaskId, projectId, fileMetaList));
     }
 
+    // 根据文件属性判断重复文件
+    @PostMapping(value = "/{subtaskId}/findExistSubtaskFiles")
+    public Result findExistSubtaskFiles(@PathVariable(value = "subtaskId") String subtaskId, @RequestBody List<FileMeta> fileMetaList){
+        return ResultUtils.success(subtaskFilesService.findExistSubtaskFiles(subtaskId, fileMetaList));
+    }
+
     // 根据用户id查询待校对、待审核、待会签、待批准
     @GetMapping(value = "/byAssessorId/{assessorId}")
     public Result findSubtasksByAssessor(@PathVariable(value = "assessorId") String userId) {
@@ -94,8 +100,8 @@ public class SubtaskController {
 
     // 申请二次修改
     @PostMapping(value = "/{subtaskId}/applyForModify")
-    public Result applyForModify(@PathVariable(value = "subtaskId") String subtaskId){
-        return ResultUtils.success(subtaskService.applyForModify(subtaskId));
+    public Result applyForModify(@PathVariable(value = "subtaskId") String subtaskId, String version){
+        return ResultUtils.success(subtaskService.applyForModify(subtaskId, version));
     }
 
     // 项目负责人查询所有待审核的二次修改申请

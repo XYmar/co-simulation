@@ -13,7 +13,7 @@ import java.util.List;
 public interface SublibraryFilesAuditRepository extends JpaRepository<SubDepotFileAudit, String> {
     boolean existsBySubDepotFileAndUsersAndStateAndIfOver(SubDepotFile subDepotFile, Users users, int state, boolean ifOver);
     List<SubDepotFileAudit> findBySubDepotFileAndCreateTimeAfter(SubDepotFile subDepotFile, Date sublibraryDate);
-    List<SubDepotFileAudit> findByUsersAndState(Users users, int state);
+    List<SubDepotFileAudit> findByUsersAndStateAndIfOver(Users users, int state, boolean ifOver);
     List<SubDepotFileAudit> findBySubDepotFile(SubDepotFile subDepotFile);
     List<SubDepotFileAudit> findBySubDepotFileAndIfOver(SubDepotFile subDepotFile, boolean ifOver);
 }

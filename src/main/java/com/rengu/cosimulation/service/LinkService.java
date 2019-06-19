@@ -5,6 +5,7 @@ import com.rengu.cosimulation.entity.ProcessNode;
 import com.rengu.cosimulation.entity.Project;
 import com.rengu.cosimulation.repository.LinkRepository;
 import com.rengu.cosimulation.repository.ProcessNodeRepository1;
+import com.rengu.cosimulation.utils.ApplicationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,9 +61,16 @@ public class LinkService {
         List<ProcessNode> processNodeList = processNode1Service.getProcessNodesByProjectId(projectId);      // 所有节点
         for(ProcessNode processNode : processNodeList){
             List<Link> selfLinks = linkRepository.findBySelfId(processNode.getId());
-           // List<Link> selfLinks = linkRepository.findBySelfId("0037aeae-b50a-47f3-b917-f7f7ab81bc9b");
+
             if(selfLinks.size() > 0){
                 processNode.setLinkList(selfLinks);
+
+                for(Link link : selfLinks){
+                    if(processNodeRepository1.findById(link.getParentId()).get().getSubtask().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
+                        processNode.getSubtask().setState(ApplicationConfig.SUBTASK_START);
+                        break;
+                    }
+                }
             }
         }
         return processNodeRepository1.saveAll(processNodeList);

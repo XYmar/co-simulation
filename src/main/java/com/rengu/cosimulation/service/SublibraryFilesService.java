@@ -92,6 +92,34 @@ public class SublibraryFilesService {
         return subDepotFileList;
     }
 
+    // 上传前判断哪些已存在
+    public List<SubDepotFile> findExistSubDepotFiles(String sublibraryId, String userId, List<FileMeta> fileMetaList) {
+        SubDepot subDepot = sublibraryService.getSublibraryById(sublibraryId);
+        Users users = userService.getUserById(userId);
+        List<SubDepotFile> subDepotFileList = new ArrayList<>();
+
+        for (FileMeta fileMeta : fileMetaList) {
+            String name = FilenameUtils.getBaseName(fileMeta.getRelativePath());
+            String fileNo = fileMeta.getFileNo();
+            String productNo = fileMeta.getProductNo();
+            String postfix = FilenameUtils.getExtension(fileMeta.getRelativePath());
+            int secretClass = fileMeta.getSecretClass();
+            String version;
+            if(!StringUtils.isEmpty(fileMeta.getVersion())){
+                version = fileMeta.getVersion();
+            }else {
+                version = "M1";
+            }
+            String type = fileMeta.getType();
+
+            SubDepotFile subDepotFile = sublibraryFilesRepository.findByNameAndFileNoAndProductNoAndPostfixAndSecretClassAndSubDepotAndTypeAndUsersAndVersion(name, fileNo, productNo, postfix, secretClass, subDepot, type, users, version);
+            if(!StringUtils.isEmpty(subDepotFile)){
+                subDepotFileList.add(subDepotFile);
+            }
+        }
+        return subDepotFileList;
+    }
+
     // 子任务入库
     public void stockIn(Subtask subtask){
         List<SubtaskFile> subtaskFileList = subtaskFilesRepository.findBySubtask(subtask);    // 子任务下的文件
@@ -246,6 +274,13 @@ public class SublibraryFilesService {
             }
             subDepotFile.setApproveSet(idsToSet(approveUserIds));
             subDepotFile.setAuditMode(auditMode);
+            if(subDepotFile.getState() == ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE){
+                subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE_OVER);
+            }else {
+                subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_TO_BE_AUDIT);
+            }
+            subDepotFile.setIfReject(false);
+            subDepotFile.setIfApprove(false);
             subDepotFileList.add(subDepotFile);
         }
 
@@ -271,7 +306,7 @@ public class SublibraryFilesService {
         sublibraryFilesToBeAudited.put("auditFiles", sublibraryFilesRepository.findByAuditSetContaining(users));
         sublibraryFilesToBeAudited.put("countersignFiles", sublibraryFilesRepository.findByCountSetContaining(users));
         sublibraryFilesToBeAudited.put("approveFiles", sublibraryFilesRepository.findByApproveSet(users));
-        sublibraryFilesToBeAudited.put("alreadyAudit", sublibraryFilesAuditRepository.findByUsersAndState(users, ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN));
+        sublibraryFilesToBeAudited.put("alreadyAudit", sublibraryFilesAuditRepository.findByUsersAndStateAndIfOver(users, ApplicationConfig.SUBLIBRARY_FILE_COUNTERSIGN, false));
         return sublibraryFilesToBeAudited;
     }
 
@@ -279,12 +314,13 @@ public class SublibraryFilesService {
     public SubDepotFile sublibraryFileAudit(String sublibraryFileId, String userId, SubDepotFile subDepotFileArgs, SubDepotFileAudit subDepotFileAuditArgs){
         SubDepotFile subDepotFile = getSublibraryFileById(sublibraryFileId);
         Users users = userService.getUserById(userId);             // 登录的用户
+        int state = subDepotFile.getState();
 
         if(StringUtils.isEmpty(String.valueOf(subDepotFileArgs.getState()))){
             throw new ResultException(ResultCode.SUBLIBRARY_FILE_STATE_NOT_FOUND_ERROR);
         }
 
-        if(subDepotFileArgs.getState() == 1){        // 校对中设置状态为校对
+        if(subDepotFileArgs.getState() == ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD){        // 校对中设置状态为校对
             subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_PROOFREAD);
         }
         if(subDepotFileArgs.getState() != subDepotFile.getState()){
@@ -338,7 +374,11 @@ public class SublibraryFilesService {
                 subDepotFileAudit.setState(subDepotFileArgs.getState());                         // 在哪步驳回
             }
         }else{                // 驳回
-            subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);                          // 审批结束
+            if(state == ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE_OVER) {             // 二次修改被驳回后仍为二次修改状态
+                subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE);
+            }else {
+                subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);                          // 审批结束
+            }
             subDepotFileAudit.setState(subDepotFileArgs.getState());
             subDepotFile.setRejectState(subDepotFileArgs.getState());
 
@@ -419,7 +459,8 @@ public class SublibraryFilesService {
 
         if(fileMeta.isIfDirectModify()){            // 直接修改
             if(fileMeta.isIfBackToStart()){                // 驳回后的修改提交到第一个流程
-                subDepotFile.setState(0);
+                subDepotFile.setAuditSet(null);
+                subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_TO_BE_AUDIT);
             }else{
                 subDepotFile.setState(subDepotFile.getRejectState());
             }
@@ -437,7 +478,7 @@ public class SublibraryFilesService {
             saveSublibraryFilesHistoryBySublibraryFile(subDepotFile, false);
 
             subDepotFile.setVersion(fileMeta.getVersion());
-            subDepotFile.setState(0);
+            // subDepotFile.setState(0);
             subDepotFile.setAuditMode(0);
             subDepotFile.setIfModifyApprove(false);
             subDepotFile.setIfApprove(false);
@@ -450,18 +491,20 @@ public class SublibraryFilesService {
             subDepotFile.setApproveSet(usersSet);
         }
 
-        subDepotFile.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMeta.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMeta.getRelativePath()));
-        subDepotFile.setCreateTime(new Date());
-        subDepotFile.setPostfix(FilenameUtils.getExtension(fileMeta.getRelativePath()));
-        subDepotFile.setType(fileMeta.getType());
-        subDepotFile.setSecretClass(fileMeta.getSecretClass());
-        subDepotFile.setProductNo(fileMeta.getProductNo());
-        subDepotFile.setFileNo(fileMeta.getFileNo());
-        subDepotFile.setIfApprove(false);
-        subDepotFile.setIfReject(false);
-        subDepotFile.setRejectState(0);
-        subDepotFile.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
-        subDepotFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
+        if(!StringUtils.isEmpty(fileMeta)){            // 库文件驳回后修改，可以只修改基本信息，即可以不修改文件内容
+            subDepotFile.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMeta.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMeta.getRelativePath()));
+            subDepotFile.setCreateTime(new Date());
+            subDepotFile.setPostfix(FilenameUtils.getExtension(fileMeta.getRelativePath()));
+            subDepotFile.setType(fileMeta.getType());
+            subDepotFile.setSecretClass(fileMeta.getSecretClass());
+            subDepotFile.setProductNo(fileMeta.getProductNo());
+            subDepotFile.setFileNo(fileMeta.getFileNo());
+            subDepotFile.setIfApprove(false);
+            subDepotFile.setIfReject(false);
+            subDepotFile.setRejectState(0);
+            subDepotFile.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
+            subDepotFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
+        }
 
         return sublibraryFilesRepository.save(subDepotFile);
     }
@@ -552,8 +595,9 @@ public class SublibraryFilesService {
     }
 
     // 根据用户查询自己未通过的子库文件
-    public List<SubDepotFile> getFailedFilesByUser(String userId){
+    public List<SubDepotFile> getFailedFilesByUser(String userId, String subDepotId){
         Users users = userService.getUserById(userId);
-        return sublibraryFilesRepository.findByUsersAndIfApprove(users, false);
+        SubDepot subDepot = sublibraryService.getSublibraryById(subDepotId);
+        return sublibraryFilesRepository.findBySubDepotAndUsersAndIfApprove(subDepot, users, false);
     }
 }

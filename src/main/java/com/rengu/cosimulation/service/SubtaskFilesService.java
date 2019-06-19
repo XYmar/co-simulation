@@ -95,7 +95,10 @@ public class SubtaskFilesService {
                 subtaskFile.setSecretClass(fileMeta.getSecretClass());
                 subtaskFile.setProductNo(fileMeta.getProductNo());
                 subtaskFile.setFileNo(fileMeta.getFileNo());
-                subtaskFile.setVersion("M1");
+                // subtaskFile.setVersion("M1");
+                if(!StringUtils.isEmpty(fileMeta.getVersion())){
+                    subtaskFile.setVersion(fileMeta.getVersion());
+                }
                 subtaskFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
                 Set<SubDepot> sublibraryEntities = subtaskFile.getSubDepotSet();
                 sublibraryEntities.add(subDepot);
@@ -109,7 +112,11 @@ public class SubtaskFilesService {
                 subtaskFile.setSecretClass(fileMeta.getSecretClass());
                 subtaskFile.setProductNo(fileMeta.getProductNo());
                 subtaskFile.setFileNo(fileMeta.getFileNo());
-                subtaskFile.setVersion("M1");
+                if(!StringUtils.isEmpty(fileMeta.getVersion())){
+                    subtaskFile.setVersion(fileMeta.getVersion());
+                }else {
+                    subtaskFile.setVersion("M1");
+                }
                 subtaskFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
                 subtaskFile.setSubtask(subTask);
                 Set<SubDepot> sublibraryEntities = subtaskFile.getSubDepotSet() == null ? new HashSet<>() : subtaskFile.getSubDepotSet();
@@ -120,6 +127,34 @@ public class SubtaskFilesService {
         }
         return subtaskFileList;
     }
+
+    // 上传前判断哪些已存在
+    public List<SubtaskFile> findExistSubtaskFiles(String subtaskId, List<FileMeta> fileMetaList) {
+        Subtask subTask = subtaskService.getSubtaskById(subtaskId);
+
+        List<SubtaskFile> subtaskFileList = new ArrayList<>();
+        for (FileMeta fileMeta : fileMetaList) {
+            String name = FilenameUtils.getBaseName(fileMeta.getRelativePath());
+            String fileNo = fileMeta.getFileNo();
+            String productNo = fileMeta.getProductNo();
+            String postfix = FilenameUtils.getExtension(fileMeta.getRelativePath());
+            int secretClass = fileMeta.getSecretClass();
+            String version;
+            if(!StringUtils.isEmpty(fileMeta.getVersion())){
+                version = fileMeta.getVersion();
+            }else {
+                version = "M1";
+            }
+            String type = fileMeta.getType();
+
+            SubtaskFile subtaskFile = subtaskFilesRepository.findByNameAndFileNoAndProductNoAndPostfixAndSecretClassAndSubtaskAndVersionAndType(name, fileNo, productNo, postfix, secretClass, subTask, version, type);
+            if(!StringUtils.isEmpty(subtaskFile)){
+                subtaskFileList.add(subtaskFile);
+            }
+        }
+        return subtaskFileList;
+    }
+
 
     // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
     @CacheEvict(value = "SubtaskFiles_Cache", allEntries = true)
@@ -156,7 +191,7 @@ public class SubtaskFilesService {
             }
             // 修改前保存此文件历史
             saveSubtaskFilesHistoryBySubtaskFile(subtaskFile, false);
-            subtaskFile.setVersion(fileMeta.getVersion());
+            subtaskFile.setVersion(subtask.getVersion());
         }
 
         subtaskFile.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMeta.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMeta.getRelativePath()));
@@ -173,6 +208,19 @@ public class SubtaskFilesService {
         subtaskFile.setSubDepotSet(sublibraryEntities);
 
         return subtaskFilesRepository.save(subtaskFile);
+    }
+
+    // 批量删除
+    public List<SubtaskFile> deleteFilesInBatch(String[] ids) {
+        List<SubtaskFile> subtaskFileList = new ArrayList<>();
+        for (String id : ids) {
+            SubtaskFile subtaskFile = getSubtaskFileById(id);
+            subtaskFileList.add(subtaskFile);
+            List<SubtaskFileHis> sublibraryFilesHistoryEntityList = subtaskFilesHistoryRepository.findByLeastSubtaskFile(subtaskFile);
+            subtaskFilesHistoryRepository.deleteInBatch(sublibraryFilesHistoryEntityList);
+        }
+        subtaskFilesRepository.deleteInBatch(subtaskFileList);
+        return subtaskFileList;
     }
 
     // 从子库文件生成子库文件历史
@@ -309,7 +357,9 @@ public class SubtaskFilesService {
         saveSubtaskFilesBySubtaskFile(subtaskFile, sourceNode);
         subtaskFilesHistoryRepository.delete(sourceNode);
 
-        return getSubtaskFileById(subtaskFileId);
+        SubtaskFile subtaskFile1 = getSubtaskFileById(subtaskFileId);
+        subtaskFile1.setVersion(subtaskFile.getVersion());
+        return subtaskFilesRepository.save(subtaskFile1);
     }
 
     // 更换版本（二次修改可恢复其中任意版本）   版本为空则为直接修改，否则为二次修改，切换到指定版本

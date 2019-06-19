@@ -211,6 +211,9 @@ public class SubtaskService {
         } else {              // 第一次提交、二次修改
             if (commitMode == ApplicationConfig.SUBTASK_SECOND_MODIFY) {           // 二次修改  重置二次修改申请状态状态
                 subtask.setIfModifyApprove(false);
+                subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE_AND_COMMITED);
+            }else {
+                subtask.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
             }
             Users users = userService.getUserById(userId);
             if (!ifAllParentSubtasksOver(subtask)) {                            // 父节点未全部完成
@@ -243,7 +246,7 @@ public class SubtaskService {
             }
             subtask.setApproveSet(idsToSet(approveUserIds));
             subtask.setAuditMode(auditMode);
-            subtask.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
+            // subtask.setState(ApplicationConfig.SUBTASK_TO_BE_AUDIT);
         }
         subtask.setIfReject(false);
         subtask.setIfApprove(false);
@@ -269,7 +272,7 @@ public class SubtaskService {
         subtaskToBeAudited.put("auditSubtask", subtaskRepository.findByAuditSetContaining(users));
         subtaskToBeAudited.put("countersignSubtask", subtaskRepository.findByCountSetContaining(users));
         subtaskToBeAudited.put("approveSubtask", subtaskRepository.findByApproveSet(users));
-        subtaskToBeAudited.put("alreadyAudit", subtaskAuditRepository.findByUsersAndState(users, ApplicationConfig.SUBTASK_COUNTERSIGN));
+        subtaskToBeAudited.put("alreadyAudit", subtaskAuditRepository.findByUsersAndStateAndIfOver(users, ApplicationConfig.SUBTASK_COUNTERSIGN, false));
         return subtaskToBeAudited;
     }
 
@@ -277,6 +280,7 @@ public class SubtaskService {
     public Subtask subtaskAudit(String subtaskId, String userId, Subtask subtaskArgs, SubtaskAudit subtaskAuditArgs) {
         Subtask subtask = getSubtaskById(subtaskId);
         Users users = userService.getUserById(userId);             // 登录的用户
+        int state = subtask.getState();
 
         if (StringUtils.isEmpty(String.valueOf(subtaskArgs.getState()))) {
             throw new ResultException(ResultCode.STATE_NOT_FOUND_ERROR);
@@ -347,7 +351,11 @@ public class SubtaskService {
                 subtaskAudit.setState(subtaskArgs.getState());                                 // 在哪步驳回
             }
         } else {                // 驳回
-            subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                                  // 审批结束
+            if(state == ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE_AND_COMMITED){                   // 二次修改被驳回后仍可继续二次修改
+                subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE);
+            }else {
+                subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                                  // 审批结束
+            }
             subtaskAudit.setState(subtaskArgs.getState());
             subtask.setRejectState(subtaskArgs.getState());
 
@@ -388,12 +396,13 @@ public class SubtaskService {
     }
 
     // 申请二次修改
-    public Subtask applyForModify(String subtaskId) {
+    public Subtask applyForModify(String subtaskId, String version) {
         Subtask subtask = getSubtaskById(subtaskId);
         if (subtask.getState() != ApplicationConfig.SUBTASK_AUDIT_OVER) {
             throw new ResultException(ResultCode.SECOND_MODIFY_DENIED_ERROR);
         }
         subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY);
+        subtask.setVersion(version);
         return subtaskRepository.save(subtask);
     }
 
