@@ -85,45 +85,25 @@ public class SubtaskFilesService {
                 throw new ResultException(ResultCode.SUBLIBRARY_NOT__APPOINT_ERROR);
             }
             SubDepot subDepot = sublibraryService.getSublibraryById(fileMeta.getSublibraryId());      // 子库
-            // 判断该节点是否存在
-            if (hasSubtaskFilesByNameAndExtensionAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTask)) {
-                SubtaskFile subtaskFile = getSubtaskFilesByNameAndPostfixAndSubtask(FilenameUtils.getBaseName(path), FilenameUtils.getExtension(path), subTask);
-                subtaskFile.setCreateTime(new Date());
-                subtaskFile.setName(FilenameUtils.getBaseName(fileMeta.getRelativePath()));
-                subtaskFile.setPostfix(FilenameUtils.getExtension(fileMeta.getRelativePath()));
-                subtaskFile.setType(fileMeta.getType());
-                subtaskFile.setSecretClass(fileMeta.getSecretClass());
-                subtaskFile.setProductNo(fileMeta.getProductNo());
-                subtaskFile.setFileNo(fileMeta.getFileNo());
-                // subtaskFile.setVersion("M1");
-                if(!StringUtils.isEmpty(fileMeta.getVersion())){
-                    subtaskFile.setVersion(fileMeta.getVersion());
-                }
-                subtaskFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
-                Set<SubDepot> sublibraryEntities = subtaskFile.getSubDepotSet();
-                sublibraryEntities.add(subDepot);
-                subtaskFile.setSubDepotSet(sublibraryEntities);
-                subtaskFileList.add(subtaskFilesRepository.save(subtaskFile));
-            } else {
-                SubtaskFile subtaskFile = new SubtaskFile();
-                subtaskFile.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMeta.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMeta.getRelativePath()));
-                subtaskFile.setPostfix(FilenameUtils.getExtension(fileMeta.getRelativePath()));
-                subtaskFile.setType(fileMeta.getType());
-                subtaskFile.setSecretClass(fileMeta.getSecretClass());
-                subtaskFile.setProductNo(fileMeta.getProductNo());
-                subtaskFile.setFileNo(fileMeta.getFileNo());
-                if(!StringUtils.isEmpty(fileMeta.getVersion())){
-                    subtaskFile.setVersion(fileMeta.getVersion());
-                }else {
-                    subtaskFile.setVersion("M1");
-                }
-                subtaskFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
-                subtaskFile.setSubtask(subTask);
-                Set<SubDepot> sublibraryEntities = subtaskFile.getSubDepotSet() == null ? new HashSet<>() : subtaskFile.getSubDepotSet();
-                sublibraryEntities.add(subDepot);
-                subtaskFile.setSubDepotSet(sublibraryEntities);
-                subtaskFileList.add(subtaskFilesRepository.save(subtaskFile));
+            // 上传文件，前端会先调用判断接口，此处无需判断
+            SubtaskFile subtaskFile = new SubtaskFile();
+            subtaskFile.setName(StringUtils.isEmpty(FilenameUtils.getBaseName(fileMeta.getRelativePath())) ? "-" : FilenameUtils.getBaseName(fileMeta.getRelativePath()));
+            subtaskFile.setPostfix(FilenameUtils.getExtension(fileMeta.getRelativePath()));
+            subtaskFile.setType(fileMeta.getType());
+            subtaskFile.setSecretClass(fileMeta.getSecretClass());
+            subtaskFile.setProductNo(fileMeta.getProductNo());
+            subtaskFile.setFileNo(fileMeta.getFileNo());
+            if(!StringUtils.isEmpty(fileMeta.getVersion())){
+                subtaskFile.setVersion(fileMeta.getVersion());
+            }else {
+                subtaskFile.setVersion("M1");
             }
+            subtaskFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
+            subtaskFile.setSubtask(subTask);
+            Set<SubDepot> sublibraryEntities = subtaskFile.getSubDepotSet() == null ? new HashSet<>() : subtaskFile.getSubDepotSet();
+            sublibraryEntities.add(subDepot);
+            subtaskFile.setSubDepotSet(sublibraryEntities);
+            subtaskFileList.add(subtaskFilesRepository.save(subtaskFile));
         }
         return subtaskFileList;
     }
