@@ -186,9 +186,6 @@ public class SubtaskFilesService {
                 throw new ResultException(ResultCode.MODIFY_APPROVE_NOT_PASS_ERROR);
             }
             // 二次修改
-            if(StringUtils.isEmpty(fileMeta.getVersion())){
-                throw new ResultException(ResultCode.FILE_VERSION_NOT_FOUND_ERROR);
-            }
             // 修改前保存此文件历史
             saveSubtaskFilesHistoryBySubtaskFile(subtaskFile, false);
             subtaskFile.setVersion(subtask.getVersion());

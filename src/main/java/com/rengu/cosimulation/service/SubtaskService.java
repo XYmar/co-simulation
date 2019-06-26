@@ -30,10 +30,11 @@ public class SubtaskService {
     private final SublibraryFilesService sublibraryFilesService;
     private final LinkRepository linkRepository;
     private final SublibraryFilesRepository sublibraryFilesRepository;
+    private final SubtaskFilesRepository subtaskFilesRepository;
 
 
     @Autowired
-    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository, SublibraryFilesRepository sublibraryFilesRepository) {
+    public SubtaskService(SubtaskRepository subtaskRepository, ProjectService projectService, UserService userService, ProcessNodeRepository1 processNodeRepository1, SubtaskAuditRepository subtaskAuditRepository, SublibraryFilesService sublibraryFilesService, LinkRepository linkRepository, ProjectRepository projectRepository, SublibraryFilesRepository sublibraryFilesRepository, SubtaskFilesRepository subtaskFilesRepository) {
         this.subtaskRepository = subtaskRepository;
         this.projectService = projectService;
         this.userService = userService;
@@ -43,6 +44,7 @@ public class SubtaskService {
         this.linkRepository = linkRepository;
         this.projectRepository = projectRepository;
         this.sublibraryFilesRepository = sublibraryFilesRepository;
+        this.subtaskFilesRepository = subtaskFilesRepository;
     }
 
     // 根据项目id查询所有子任务
@@ -337,6 +339,7 @@ public class SubtaskService {
                 subtask.setIfApprove(true);                                                          // 通过审核
                 subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                              // 审批结束
                 subtaskAudit.setState(subtaskArgs.getState());
+                subtask.setIfModifyApprove(false);
 
                 // 子任务文件入库
                 sublibraryFilesService.stockIn(subtask);
@@ -353,6 +356,7 @@ public class SubtaskService {
         } else {                // 驳回
             if(state == ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE_AND_COMMITED){                   // 二次修改被驳回后仍可继续二次修改
                 subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE);
+                subtask.setIfModifyApprove(true);
             }else {
                 subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);                                  // 审批结束
             }
@@ -425,6 +429,13 @@ public class SubtaskService {
         if (ifModifyApprove) {
             subtask.setState(ApplicationConfig.SUBTASK_APPLY_FOR_MODIFY_APPROVE);
             subtask.setIfReject(false);
+
+            // 二次修改申请统一后将该子任务文件的版本统一修改
+            List<SubtaskFile> subtaskFileList = subtaskFilesRepository.findBySubtask(subtask);
+            for(SubtaskFile subtaskFile : subtaskFileList){
+                subtaskFile.setVersion(subtask.getVersion());
+            }
+            subtaskFilesRepository.saveAll(subtaskFileList);
         } else {
             subtask.setState(ApplicationConfig.SUBTASK_AUDIT_OVER);
         }
