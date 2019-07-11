@@ -97,8 +97,8 @@ public class SublibraryFilesController {
 
     // 申请二次修改
     @PostMapping(value = "/{sublibraryFileId}/applyForModify")
-    public Result applyForModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId){
-        return ResultUtils.success(sublibraryFilesService.applyForModify(sublibraryFileId));
+    public Result applyForModify(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String userId){
+        return ResultUtils.success(sublibraryFilesService.applyForModify(sublibraryFileId, userId));
     }
 
     // 系统管理员查询所有待审核的二次修改申请
@@ -114,6 +114,12 @@ public class SublibraryFilesController {
     @PreAuthorize(value = "hasRole('ADMIN')")
     public Result handleModifyApply(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, boolean ifModifyApprove){
         return ResultUtils.success(sublibraryFilesService.handleModifyApply(sublibraryFileId, ifModifyApprove));
+    }
+
+    // 根据用户查询待其二次修改的文件  即根据二次修改是否通过状态以及申请人查询子库文件
+    @GetMapping(value = "/modifyFilesByApplicant/{userId}")
+    public Result findModifyFilesByApplicant(@PathVariable(value = "userId") String userId, String subdepotId){
+        return ResultUtils.success(sublibraryFilesService.findModifyFilesByApplicant(userId, subdepotId));
     }
 
     // 驳回后的提交

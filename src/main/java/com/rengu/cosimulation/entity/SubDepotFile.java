@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Author: XYmar
  * Date: 2019/4/1 9:37
- * Des: 子库文件历史版本
+ * Des: 子库文件
  */
 @Entity
 @Data
@@ -36,6 +36,7 @@ public class SubDepotFile implements Serializable {
     private int auditMode;                     // 模式： 1：无会签  2：一人会签  3：多人会签
     private boolean ifModifyApprove;       // 二次修改申请是否通过
     private int rejectState;               // 记录被驳回的流程
+    private String subtaskFileId;          // 入库的子任务文件id
 
     @ManyToOne
     private Files files;
@@ -53,4 +54,7 @@ public class SubDepotFile implements Serializable {
     @ManyToOne
     @JoinColumn(name = "users_id")
     private Users users;
+    @ManyToOne
+    @JoinColumn(name = "applicant_id")
+    private Users applicant;           // 申请人
 }

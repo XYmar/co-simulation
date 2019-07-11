@@ -91,7 +91,10 @@ public class SubtaskService {
             throw new ResultException(ResultCode.USER_SECRETCLASS_NOT_SUPPORT_ERROR);
         }
         subtask.setUsers(users);
-        if (!StringUtils.isEmpty(finishTime)) {
+        if (!StringUtils.isEmpty(finishTime)) {              // 子任务节点不能晚于项目节点
+            if(Long.parseLong(finishTime) > Long.parseLong(project.getFinishTime())){
+                throw new ResultException(ResultCode.SUBTASK_FINISH_TIME_NOT_ALLOWED);
+            }
             subtask.setFinishTime(finishTime);
         }
 
@@ -171,16 +174,6 @@ public class SubtaskService {
         for (Link link : parentLinkList) {
             parentProcessNodeEntityList.add(processNodeRepository1.findById(link.getParentId()).get());
         }
-        /*for(ProcessNode processNodeEntity : parentProcessNodeEntityList){
-            ProcessNode0 parentProcessNodeEntity = null;
-            if(processNodeRepository1.existsByProjectAndSelfSign(subtask.getProject(), processNode.getParentSign())){
-                parentProcessNodeEntity = processNodeRepository1.findByProjectAndSelfSign(subtask.getProject(), processNode.getParentSign()).get(0);
-            }
-
-            if(parentProcessNodeEntity != null){
-                parentProcessNodeEntityList.add(parentProcessNodeEntity);
-            }
-        }*/
         if (parentProcessNodeEntityList.size() == 0) {             // 无父节点时
             ifOver = true;
         } else {

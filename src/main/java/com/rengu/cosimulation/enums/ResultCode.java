@@ -67,7 +67,9 @@ public enum ResultCode {
     SUBTASK_PARENT_NOT_ALL_OVER(22010,"请等待上一流程结束再提交"),
     SUBTASK_HAVE_NOT_START(22011,"此任务当前阶段无法执行上传操作"),
     SUBTASK_USER_HAVE_NO_AUTHORITY_TO_ARRANGE(22012,"无权指定子任务负责人"),
-
+    SUBTASK_FINISH_TIME_NOT_ALLOWED(22013,"子任务节点不得晚于项目节点"),
+    SUBTASK_DEVICE_ARRANGE_AUTHORITY_DENIED_ERROR(22014,"非子任务负责人无权预约"),
+    SUBTASK_DEVICE_ARRANGE_DENIED_ERROR(22015,"当前阶段无法进行预约"),
 
     // 子任务文件相关  2300
     SUBTASK_FILE_ID_NOT_FOUND_ERROR(23001,"未发现该子任务文件ID"),
@@ -132,6 +134,12 @@ public enum ResultCode {
     DEVICE_IS_OFFLINE(31002, "该设备已离线"),
     SCAN_DISK_TIME_OUT(31003, "获取设备磁盘信息超时"),
     SCAN_PROCESS_TIME_OUT(31004, "获取设备进程信息超时"),
+    DEVICE_NAME_ARGS_NOT_FOUND(31005, "设备名参数不存在或不合法"),
+    DEVICE_HOST_ADDRESS_ARGS_NOT_FOUND(31006, "设备IP参数不存在或不合法"),
+    DEVICE_HOST_ADDRESS_NOT_FOUND(31007, "未发现该设备IP"),
+    DEVICE_HOST_ADDRESS_EXISTED(31008, "该设备IP已存在"),
+    DEVICE_INTERVAL_NOT_FOUND(31019, "请指定预订时间"),
+
 
     // 通知相关   5000x
     MESSAGE_ID_NOT_FOUND_ERROR(50015,"未发现该消息ID"),

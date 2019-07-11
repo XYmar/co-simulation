@@ -36,9 +36,10 @@ public class SublibraryFilesService {
     private final SubtaskFilesRepository subtaskFilesRepository;
     private final DownloadLogsRepository downloadLogsRepository;
     private final LibraryService libraryService;
+    private final RoleService roleService;
 
     @Autowired
-    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository, DownloadLogsRepository downloadLogsRepository, LibraryService libraryService) {
+    public SublibraryFilesService(SublibraryFilesRepository sublibraryFilesRepository, FileService fileService, SublibraryService sublibraryService, UserService userService, SublibraryFilesAuditRepository sublibraryFilesAuditRepository, SublibraryFilesHistoryRepository sublibraryFilesHistoryRepository, SubtaskFilesRepository subtaskFilesRepository, DownloadLogsRepository downloadLogsRepository, LibraryService libraryService, RoleService roleService) {
         this.sublibraryFilesRepository = sublibraryFilesRepository;
         this.fileService = fileService;
         this.sublibraryService = sublibraryService;
@@ -48,6 +49,7 @@ public class SublibraryFilesService {
         this.subtaskFilesRepository = subtaskFilesRepository;
         this.downloadLogsRepository = downloadLogsRepository;
         this.libraryService = libraryService;
+        this.roleService = roleService;
     }
 
     // 根据名称、后缀及子库检查文件是否存在
@@ -62,6 +64,20 @@ public class SublibraryFilesService {
     public SubDepotFile getSublibraryFilesByNameAndPostfixAndSublibrary(String name, String postfix, SubDepot subDepot) {
         return sublibraryFilesRepository.findByNameAndPostfixAndSubDepot(name, postfix, subDepot).get();
     }
+
+    /**
+     * 子库文件
+     *     上传：
+     *          子库文件直接上传不会出现此问题
+     *     子任务入库：
+     *          入库时先根据所有字段查询文件是否存在
+     *              不存在 --> 直接入库
+     *              存在   --> 判断版本是否有变化
+     *                             有变化 --> 已有文件存入历史文件，并更新当前文件
+     *                             无变化 --> 更新当前文件
+     *
+     * 根据子库文件查看其历史文件
+     * */
 
     // 根据子库id创建文件 （后台不判断节点是否存在）
     @CacheEvict(value = "SublibraryFiles_Cache", allEntries = true)
@@ -81,7 +97,14 @@ public class SublibraryFilesService {
             subDepotFile.setProductNo(fileMeta.getProductNo());
             subDepotFile.setFileNo(fileMeta.getFileNo());
             subDepotFile.setVersion("M1");
-            subDepotFile.setIfApprove(false);
+            // 参数库： 系统管理员默认上传第一版，置为已审核通过状态
+            if(users.getRoleEntities().contains(roleService.getRoleByName(ApplicationConfig.DEFAULT_ADMIN_ROLE_NAME))){
+                subDepotFile.setIfApprove(true);
+                subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);
+            }else {
+                subDepotFile.setIfApprove(false);
+                subDepotFile.setState(0);
+            }
             subDepotFile.setIfReject(false);
             subDepotFile.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
             subDepotFile.setUsers(users);
@@ -128,7 +151,19 @@ public class SublibraryFilesService {
             // 子任务文件属于几个子库
             Set<SubDepot> subDepotSet = subtaskFile.getSubDepotSet();
             for(SubDepot subDepot : subDepotSet){
-                SubDepotFile subDepotFile = new SubDepotFile();
+                SubDepotFile subDepotFile;
+                // 判断此子任务文件在库中是否存在再入库
+                if(sublibraryFilesRepository.existsBySubtaskFileId(subtaskFile.getId())){
+                    subDepotFile = sublibraryFilesRepository.findBySubtaskFileId(subtaskFile.getId());
+                    if(!subtaskFile.getVersion().equals(subDepotFile.getVersion())){
+                        // 版本有变化，存入历史，更改此文件为新文件
+                        saveSublibraryFilesHistoryBySublibraryFile(subDepotFile, false);
+                    }
+                }else {  // 入库文件在库中不存在
+                    subDepotFile = new SubDepotFile();
+                }
+                subDepotFile.setSubtaskFileId(subtaskFile.getId());
+                subDepotFile.setCreateTime(new Date());
                 subDepotFile.setName(subtaskFile.getName());
                 subDepotFile.setPostfix(subtaskFile.getPostfix());
                 subDepotFile.setType(subtaskFile.getType());
@@ -140,14 +175,29 @@ public class SublibraryFilesService {
                 subDepotFile.setIfReject(false);
                 subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);
                 subDepotFile.setManyCounterSignState(0);
+                subDepotFile.setAuditMode(0);
+                subDepotFile.setIfModifyApprove(false);
+                subDepotFile.setRejectState(0);
                 subDepotFile.setUsers(subtask.getUsers());
                 subDepotFile.setFiles(subtaskFile.getFiles());
                 subDepotFile.setSubDepot(subDepot);
+                // 四类审核人重置
+                Set<Users> usersSet = new HashSet<>();
+                subDepotFile.setProofSet(usersSet);
+                subDepotFile.setAuditSet(usersSet);
+                subDepotFile.setCountSet(usersSet);
+                subDepotFile.setApproveSet(usersSet);
                 subDepotFileList.add(subDepotFile);
             }
         }
         sublibraryFilesRepository.saveAll(subDepotFileList);
 
+    }
+
+    // 根据子库文件查询其历史文件各版本
+    public List<SubdepotFileHis> getSublibraryFilesHisList(String sublibraryFileId){
+        SubDepotFile subDepotFile = getSublibraryFileById(sublibraryFileId);
+        return sublibraryFilesHistoryRepository.findByLeastSubDepotFileAndIfTemp(subDepotFile, false);
     }
 
     // 根据子库id查询子库下的文件
@@ -405,12 +455,14 @@ public class SublibraryFilesService {
     }
 
     // 申请二次修改
-    public SubDepotFile applyForModify(String sublibraryFileId){
+    public SubDepotFile applyForModify(String sublibraryFileId, String userId){
         SubDepotFile subDepotFile = getSublibraryFileById(sublibraryFileId);
+        Users user = userService.getUserById(userId);
         if(subDepotFile.getState() != ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER){
             throw new ResultException(ResultCode.SECOND_MODIFY_DENIED_ERROR);
         }
         subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY);
+        subDepotFile.setApplicant(user);
         return sublibraryFilesRepository.save(subDepotFile);
     }
 
@@ -426,10 +478,19 @@ public class SublibraryFilesService {
         subDepotFile.setIfApprove(false);
         if(ifModifyApprove){
             subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE);
+            subDepotFile.setUsers(subDepotFile.getApplicant());
         }else{
             subDepotFile.setState(ApplicationConfig.SUBLIBRARY_FILE_AUDIT_OVER);
+            subDepotFile.setApplicant(null);
         }
         return sublibraryFilesRepository.save(subDepotFile);
+    }
+
+    // 根据用户查询待其二次修改的文件  即根据二次修改是否通过状态以及申请人查询子库文件
+    public List<SubDepotFile> findModifyFilesByApplicant(String userId, String subdepotId){
+        Users applicant = userService.getUserById(userId);
+        SubDepot subDepot = sublibraryService.getSublibraryById(subdepotId);
+        return sublibraryFilesRepository.findByIfModifyApproveAndStateAndApplicantAndSubDepot(true, ApplicationConfig.SUBLIBRARY_FILE_APPLY_FOR_MODIFY_APPROVE, applicant, subDepot);
     }
 
     // 驳回后  修改  [id 是否是直接修改 驳回修改内容是否提交到第一个流程（直接修改需要） 文件 版本（二次修改需要）]
@@ -505,7 +566,6 @@ public class SublibraryFilesService {
             subDepotFile.setManyCounterSignState(0);           // 多人会签模式，此时无人开始会签
             subDepotFile.setFiles(fileService.getFileById(fileMeta.getFileId()));
         }
-
         return sublibraryFilesRepository.save(subDepotFile);
     }
 

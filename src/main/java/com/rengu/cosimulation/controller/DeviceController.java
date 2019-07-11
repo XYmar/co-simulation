@@ -1,13 +1,11 @@
 package com.rengu.cosimulation.controller;
 
+import com.rengu.cosimulation.entity.Device;
 import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.DeviceService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +25,12 @@ public class DeviceController {
         this.deviceService = deviceService;
     }
 
+    // 创建设备 预订
+    @PostMapping
+    public Result saveDeviceByProject(Device device, String userId, String subtaskId) {
+        return ResultUtils.success(deviceService.saveDeviceByProject(device, userId, subtaskId));
+    }
+
     // 根据Id查询设备
     @GetMapping(value = "/{deviceId}")
     public Result getDeviceById(@PathVariable(value = "deviceId") String deviceId) {
@@ -37,6 +41,12 @@ public class DeviceController {
     @GetMapping
     public Result getDevices() {
         return ResultUtils.success(deviceService.getDevices());
+    }
+
+    // 根据Id清除设备
+    @DeleteMapping(value = "/{deviceId}/clean")
+    public Result cleanDeviceById(@PathVariable(value = "deviceId") String deviceId) {
+        return ResultUtils.success(deviceService.cleanDeviceById(deviceId));
     }
 
     // 获取进程信息
@@ -50,4 +60,5 @@ public class DeviceController {
     public Result getDisksById(@PathVariable(value = "deviceId") String deviceId) throws InterruptedException, ExecutionException, TimeoutException, IOException {
         return ResultUtils.success(deviceService.getDisksById(deviceId));
     }
+
 }

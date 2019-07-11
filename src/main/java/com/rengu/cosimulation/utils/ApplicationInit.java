@@ -5,6 +5,7 @@ import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.service.DepartmentService;
 import com.rengu.cosimulation.service.DesignLinkService;
 import com.rengu.cosimulation.service.UserService;
+import com.rengu.cosimulation.thread.TCPReceiveThread;
 import com.rengu.cosimulation.thread.UDPReceiveThread;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +27,22 @@ public class ApplicationInit  implements ApplicationRunner {
     private final DesignLinkService designLinkService;
     private final UDPReceiveThread udpReceiveThread;
     private final DepartmentService departmentService;
+    private final TCPReceiveThread tcpReceiveThread;
 
     @Autowired
-    public ApplicationInit(UserService userService, DesignLinkService designLinkService, UDPReceiveThread udpReceiveThread, DepartmentService departmentService) {
+    public ApplicationInit(UserService userService, DesignLinkService designLinkService, UDPReceiveThread udpReceiveThread, DepartmentService departmentService, TCPReceiveThread tcpReceiveThread) {
         this.userService = userService;
         this.designLinkService = designLinkService;
         this.udpReceiveThread = udpReceiveThread;
         this.departmentService = departmentService;
+        this.tcpReceiveThread = tcpReceiveThread;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // 启动UDP消息接受线程
-        // udpReceiveThread.UDPMessageReceiver();
+         udpReceiveThread.UDPMessageReceiver();
+        tcpReceiveThread.TCPMessageReceiver();
 
         // 初始化库（4个）
 

@@ -7,6 +7,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -25,8 +26,13 @@ public class Device implements Serializable {
     private String name;
     private String hostAddress;
     private String description;
-    private String deployPath;
+    private double interval;                       // 预订时间
+    // private String deployPath;
     @Column(name = "ifDeleted")
     @Type(type="yes_no")
     private boolean ifDeleted = false;
+    @OneToOne
+    private Users users;                            // 预订用户
+    @OneToOne
+    private Subtask subtask;
 }

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, String> {
+    boolean existsByHostAddressAndIfDeleted(String hostAddress, boolean ifDeleted);
 }
