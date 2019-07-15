@@ -1,9 +1,8 @@
 package com.rengu.cosimulation.repository;
 
-import com.rengu.cosimulation.entity.SublibraryFilesAuditEntity;
-import com.rengu.cosimulation.entity.SubtaskAuditEntity;
-import com.rengu.cosimulation.entity.SubtaskEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Subtask;
+import com.rengu.cosimulation.entity.SubtaskAudit;
+import com.rengu.cosimulation.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,10 +14,10 @@ import java.util.List;
  * Date: 2019/4/11 16:21
  */
 @Repository
-public interface SubtaskAuditRepository extends JpaRepository<SubtaskAuditEntity, String> {
-    boolean existsBySubtaskEntityAndUserEntityAndStateAndIfOver(SubtaskEntity subtaskEntity, UserEntity userEntity, int state, boolean ifOver);
-    List<SubtaskAuditEntity> findBySubtaskEntityAndCreateTimeAfter(SubtaskEntity subtaskEntity, Date sublibraryDate);
-    List<SubtaskAuditEntity> findBySubtaskEntity(SubtaskEntity subtaskEntity);
-    List<SubtaskAuditEntity> findByUserEntityAndState(UserEntity userEntity, int state);
-    List<SubtaskAuditEntity> findByUserEntity(UserEntity userEntity);
+public interface SubtaskAuditRepository extends JpaRepository<SubtaskAudit, String> {
+    boolean existsBySubtaskAndUsersAndStateAndIfOver(Subtask subtask, Users users, int state, boolean ifOver);
+    List<SubtaskAudit> findBySubtaskAndCreateTimeAfter(Subtask subtask, Date sublibraryDate);
+    List<SubtaskAudit> findBySubtask(Subtask subtask);
+    List<SubtaskAudit> findByUsersAndStateAndIfOver(Users users, int state, boolean ifOver);
+    List<SubtaskAudit> findByUsers(Users users);
 }

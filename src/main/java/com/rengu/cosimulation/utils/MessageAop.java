@@ -10,7 +10,6 @@ import com.rengu.cosimulation.repository.MessageRepository;
 import com.rengu.cosimulation.service.MessageService;
 import com.rengu.cosimulation.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -56,13 +55,13 @@ public class MessageAop {
     }
 
     @AfterReturning(pointcut = "requestPonitCut()", returning = "result")
-    public void doAfterReturning(JoinPoint joinPoint, ResultEntity result) throws JsonProcessingException {
+    public void doAfterReturning(JoinPoint joinPoint, Result result) throws JsonProcessingException {
         // 获取Http请求对象
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         if (httpServletRequest.getUserPrincipal() != null) {
-            UserEntity mainOperator = null;
-            UserEntity arrangedPerson = null;
+            String mainOperatorName = null;
+            String arrangedPersonName = null;
             int messageOperate = ApplicationConfig.ARRANGE_NONE_OPERATE;
             int mainBody = ApplicationConfig.MAINBODY_NONE;
             String description = "";
@@ -72,24 +71,24 @@ public class MessageAop {
                 if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean")){
                     return;
                 }
-                UserEntity userEntity = (UserEntity) result.getData();
-                mainOperator = userService.getUserByUsername("admin");                         // 操作人
-                arrangedPerson = userEntity;                                                   // 被操作人
+                Users users = (Users) result.getData();
+                mainOperatorName = userService.getUserByUsername("admin").getUsername();                         // 操作人
+                arrangedPersonName = users.getUsername();                                                   // 被操作人
                 switch (joinPoint.getSignature().getName()) {
                     case "distributeUserById": {
                         messageOperate = ApplicationConfig.ARRANGE_ROLE_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_USERENTITY;                        // 对用户的操作
+                        mainBody = ApplicationConfig.MAINBODY_Users;                        // 对用户的操作
                         StringBuilder rolename= new StringBuilder();
-                        for(RoleEntity roleEntity : userEntity.getRoleEntities()){
-                            rolename.append(roleEntity.getDescription()).append(" ");
+                        for(Role role : users.getRoleEntities()){
+                            rolename.append(role.getDescription()).append(" ");
                         }
                         description = "系统管理员已将您的角色更新为：" + rolename;
                         break;
                     }
                     case "updateSecretClassById": {
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_USERENTITY;                        // 对用户的操作
-                        description = "安全保密员已将您的密级更新为：" + userEntity.getSecretClass();
+                        mainBody = ApplicationConfig.MAINBODY_Users;                        // 对用户的操作
+                        description = "安全保密员已将您的密级更新为：" + users.getSecretClass();
                         break;
                     }
                     default:
@@ -101,46 +100,46 @@ public class MessageAop {
                 if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean")){
                    return;
                 }
-                ProjectEntity projectEntity = (ProjectEntity) result.getData();
-                mainOperator = projectEntity.getCreator();                         // 操作人
-                arrangedPerson = projectEntity.getPic();                           // 被操作人
+                Project project = (Project) result.getData();
+                mainOperatorName = project.getCreator().getUsername();                         // 操作人
+                arrangedPersonName = project.getPic().getUsername();                           // 被操作人
                 switch (joinPoint.getSignature().getName()) {
                     case "saveProject": {
                         messageOperate = ApplicationConfig.ARRANGE_PROJECTPIC_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = mainOperator.getUsername() + "创建了项目" + projectEntity.getName() + "， 并指定您为项目负责人";
+                        mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
+                        description = mainOperatorName + "创建了项目" + project.getName() + "， 并指定您为项目负责人";
                         break;
                     }
                     case "arrangeProject": {
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
+                        mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        String finishTime = sdf.format(new Date(Long.valueOf(projectEntity.getFinishTime())));
-                        description = projectEntity.getName() + " 项目令号更新为：" + projectEntity.getOrderNum() + "，项目节点更新为：" + finishTime;
+                        String finishTime = sdf.format(new Date(Long.valueOf(project.getFinishTime())));
+                        description = project.getName() + " 项目令号更新为：" + project.getOrderNum() + "，项目节点更新为：" + finishTime;
                         break;
                     }
                     case "deleteProjectById": {
                         messageOperate = ApplicationConfig.DELETE_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = "项目" + projectEntity.getName() + " 已移入回收站";
+                        mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
+                        description = "项目" + project.getName() + " 已移入回收站";
                         break;
                     }
                     case "restoreProjectById": {
                         messageOperate = ApplicationConfig.RESTORE_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = "项目" +  projectEntity.getName() + " 已恢复";
+                        mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
+                        description = "项目" +  project.getName() + " 已恢复";
                         break;
                     }
                     case "startProject": {
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = "项目" +  projectEntity.getName() + "已启动";
+                        mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
+                        description = "项目" +  project.getName() + "已启动";
                         break;
                     }
                     case "updateProjectPic": {             // 修改项目负责人
                         messageOperate = ApplicationConfig.ARRANGE_PROJECTPIC_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_PROJECTENTITY;         // 对项目的操作
-                        description = mainOperator.getUsername() + "  指定您为项目负责人";
+                        mainBody = ApplicationConfig.MAINBODY_Project;         // 对项目的操作
+                        description = mainOperatorName + "  指定您为项目负责人";
                         break;
                     }
                     default:
@@ -152,63 +151,63 @@ public class MessageAop {
                 if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean") || type.equals("class java.util.HashMap")){
                     return;
                 }
-                SubtaskEntity subtaskEntity = (SubtaskEntity) result.getData();
+                Subtask subtask = (Subtask) result.getData();
                 switch (joinPoint.getSignature().getName()) {
                     case "updateSubtaskById": {
-                        mainOperator = subtaskEntity.getProjectEntity().getPic();                 // 操作人
-                        arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
-                        mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
+                        mainOperatorName = subtask.getProject().getPic().getUsername();                 // 操作人
+                        arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
+                        mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                         messageOperate = ApplicationConfig.ARRANGE_SUBTASKPIC_OPERATE;
-                        description = mainOperator.getUsername() + "将您指定为子任务  " + subtaskEntity.getName() + "  的负责人";
+                        description = mainOperatorName + "将您指定为子任务  " + subtask.getName() + "  的负责人";
                         break;
                     }
                     case "arrangeAssessorsByIds": {
                         messageOperate = ApplicationConfig.ARRANGE_AUDIT_OPERATE;
-                        mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
-                        mainOperator = subtaskEntity.getUserEntity();
-                        Set<UserEntity> proofreadUserSet = subtaskEntity.getProofreadUserSet();
-                        Set<UserEntity> auditUserSet = subtaskEntity.getAuditUserSet();
-                        Set<UserEntity> countersignUserSet = subtaskEntity.getCountersignUserSet();
-                        Set<UserEntity> approveUserSet = subtaskEntity.getApproveUserSet();
-                        proofreadUserSet.addAll(auditUserSet);
-                        proofreadUserSet.addAll(countersignUserSet);
-                        proofreadUserSet.addAll(approveUserSet);
+                        mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
+                        mainOperatorName = subtask.getUsers().getUsername();
+                        Set<Users> proofreadUsersSet = subtask.getProofSet();
+                        Set<Users> auditUsersSet = subtask.getAuditSet();
+                        Set<Users> countersignUsersSet = subtask.getCountSet();
+                        Set<Users> approveUsersSet = subtask.getApproveSet();
+                        proofreadUsersSet.addAll(auditUsersSet);
+                        proofreadUsersSet.addAll(countersignUsersSet);
+                        proofreadUsersSet.addAll(approveUsersSet);
 
-                        List<MessageEntity> messageEntityList = new ArrayList<>();
-                        for(UserEntity userEntity : proofreadUserSet){
-                            MessageEntity messageEntity = new MessageEntity();
-                            messageEntity.setMainOperator(mainOperator);
-                            messageEntity.setArrangedPerson(userEntity);
-                            messageEntity.setMessageOperate(messageOperate);
-                            messageEntity.setMainBody(mainBody);
-                            messageEntity.setDescription(subtaskEntity.getUserEntity().getUsername() + "指定您为子任务 " + subtaskEntity.getProjectEntity().getName() + "的审核人员");
-                            messageEntityList.add(messageEntity);
+                        List<Message> messageList = new ArrayList<>();
+                        for(Users users : proofreadUsersSet){
+                            Message message = new Message();
+                            message.setMainOperatorName(mainOperatorName);
+                            message.setArrangedPersonName(users.getUsername());
+                            message.setMessageOperate(messageOperate);
+                            message.setMainBody(mainBody);
+                            message.setDescription(subtask.getUsers().getUsername() + "指定您为子任务 " + subtask.getProject().getName() + "的审核人员");
+                            messageList.add(message);
                         }
-                        messageRepository.saveAll(messageEntityList);
+                        messageRepository.saveAll(messageList);
                         break;
                     }
                     case "handleModifyApply": {
-                        mainOperator = subtaskEntity.getProjectEntity().getPic();                 // 操作人
-                        arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
-                        mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
+                        mainOperatorName = subtask.getProject().getPic().getUsername();                 // 操作人
+                        arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
+                        mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                        description = "您的二次修改申请  " + (subtaskEntity.isIfModifyApprove() ? "已通过" : "未通过");
+                        description = "您的二次修改申请  " + (subtask.isIfModifyApprove() ? "已通过" : "未通过");
                         break;
                     }
                     case "subtaskAudit": {
-                        if(subtaskEntity.isIfApprove()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
-                            mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
+                        if(subtask.isIfApprove()){
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
+                            mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                            description = "您在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已审核通过，相关文件已入库";
+                            description = "您在项目  " + subtask.getProject().getName() + " 中的子任务  "  + subtask.getName() + "已审核通过，相关文件已入库";
                         }
-                        if(subtaskEntity.isIfReject()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = subtaskEntity.getUserEntity();                           // 被操作人
-                            mainBody = ApplicationConfig.MAINBODY_SUBTASKENTITY;           // 对子任务的操作
+                        if(subtask.isIfReject()){
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subtask.getUsers().getUsername();                           // 被操作人
+                            mainBody = ApplicationConfig.MAINBODY_Subtask;           // 对子任务的操作
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                            description = "您在项目  " + subtaskEntity.getProjectEntity().getName() + " 中的子任务  "  + subtaskEntity.getName() + "已被驳回";
+                            description = "您在项目  " + subtask.getProject().getName() + " 中的子任务  "  + subtask.getName() + "已被驳回";
                         }
                         break;
                     }
@@ -221,55 +220,55 @@ public class MessageAop {
                 if(type.equals("class java.util.ArrayList") || type.equals("class java.lang.Boolean") || type.equals("class java.util.HashMap")){
                     return;
                 }
-                SublibraryFilesEntity sublibraryFilesEntity = (SublibraryFilesEntity) result.getData();
+                SubDepotFile subDepotFile = (SubDepotFile) result.getData();
                 switch (joinPoint.getSignature().getName()) {
                     case "arrangeAudit": {
                         messageOperate = ApplicationConfig.ARRANGE_AUDIT_OPERATE;
                         mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;
-                        Set<UserEntity> subLibraryProofreadUserSet = sublibraryFilesEntity.getProofreadUserSet();
-                        Set<UserEntity> auditUserSet = sublibraryFilesEntity.getAuditUserSet();
-                        Set<UserEntity> countersignUserSet = sublibraryFilesEntity.getCountersignUserSet();
-                        Set<UserEntity> approveUserSet = sublibraryFilesEntity.getApproveUserSet();
-                        subLibraryProofreadUserSet.addAll(auditUserSet);
-                        subLibraryProofreadUserSet.addAll(countersignUserSet);
-                        subLibraryProofreadUserSet.addAll(approveUserSet);
+                        Set<Users> subLibraryProofreadUsersSet = subDepotFile.getProofSet();
+                        Set<Users> auditUsersSet = subDepotFile.getAuditSet();
+                        Set<Users> countersignUsersSet = subDepotFile.getCountSet();
+                        Set<Users> approveUsersSet = subDepotFile.getApproveSet();
+                        subLibraryProofreadUsersSet.addAll(auditUsersSet);
+                        subLibraryProofreadUsersSet.addAll(countersignUsersSet);
+                        subLibraryProofreadUsersSet.addAll(approveUsersSet);
 
-                        List<MessageEntity> messageEntityList = new ArrayList<>();
-                        for(UserEntity userEntity : subLibraryProofreadUserSet){
-                            MessageEntity messageEntity = new MessageEntity();
-                            messageEntity.setMainOperator(sublibraryFilesEntity.getUserEntity());
-                            messageEntity.setArrangedPerson(userEntity);
-                            messageEntity.setMessageOperate(messageOperate);
-                            messageEntity.setMainBody(mainBody);
-                            messageEntity.setDescription(sublibraryFilesEntity.getUserEntity().getUsername() + "指定您为文件 " + sublibraryFilesEntity.getName() + "的审核人员");
-                            messageEntityList.add(messageEntity);
+                        List<Message> messageList = new ArrayList<>();
+                        for(Users users : subLibraryProofreadUsersSet){
+                            Message message = new Message();
+                            message.setMainOperatorName(subDepotFile.getUsers().getUsername());
+                            message.setArrangedPersonName(users.getUsername());
+                            message.setMessageOperate(messageOperate);
+                            message.setMainBody(mainBody);
+                            message.setDescription(subDepotFile.getUsers().getUsername() + "指定您为文件 " + subDepotFile.getName() + "的审核人员");
+                            messageList.add(message);
                         }
-                        messageRepository.saveAll(messageEntityList);
+                        messageRepository.saveAll(messageList);
 
                         break;
                     }
                     case "handleModifyApply": {
-                        mainOperator = userService.getUserByUsername("admin");                 // 操作人
-                        arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
+                        mainOperatorName = userService.getUserByUsername("admin").getUsername();                 // 操作人
+                        arrangedPersonName = subDepotFile.getUsers().getUsername();                           // 被操作人
                         mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
                         messageOperate = ApplicationConfig.MODIFY_OPERATE;
-                        description = "您的二次修改申请  " + (sublibraryFilesEntity.isIfModifyApprove() ? "已通过" : "未通过");
+                        description = "您的二次修改申请  " + (subDepotFile.isIfModifyApprove() ? "已通过" : "未通过");
                         break;
                     }
                     case "sublibraryFileAudit": {
-                        if(sublibraryFilesEntity.isIfApprove()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
+                        if(subDepotFile.isIfApprove()){
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subDepotFile.getUsers().getUsername();                           // 被操作人
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
-                            description = "您上传的文件  " + sublibraryFilesEntity.getName() + "已审核通过，相关文件已入库";
+                            description = "您上传的文件  " + subDepotFile.getName() + "已审核通过，相关文件已入库";
                         }
-                        if(sublibraryFilesEntity.isIfReject()){
-                            mainOperator = null;                 // 操作人
-                            arrangedPerson = sublibraryFilesEntity.getUserEntity();                           // 被操作人
+                        if(subDepotFile.isIfReject()){
+                            mainOperatorName = null;                 // 操作人
+                            arrangedPersonName = subDepotFile.getUsers().getUsername();                           // 被操作人
                             messageOperate = ApplicationConfig.MODIFY_OPERATE;
                             mainBody = ApplicationConfig.MAINBODY_SUBLIBRARY_FILE_ENTITY;           // 对子库文件的操作
-                            description = "您上传的文件  " + sublibraryFilesEntity.getName() + "已被驳回";
+                            description = "您上传的文件  " + subDepotFile.getName() + "已被驳回";
                         }
                         break;
                     }
@@ -277,20 +276,20 @@ public class MessageAop {
                 }
             }
             if (messageOperate != ApplicationConfig.ARRANGE_NONE_OPERATE || !StringUtils.isEmpty(description)) {
-                MessageEntity messageEntity = new MessageEntity();
-                messageEntity.setMainOperator(mainOperator);
-                messageEntity.setArrangedPerson(arrangedPerson);
-                messageEntity.setMessageOperate(messageOperate);
-                messageEntity.setMainBody(mainBody);
-                messageEntity.setDescription(description);
-                messageService.saveMessage(messageEntity);
+                Message message = new Message();
+                message.setMainOperatorName(mainOperatorName);
+                message.setArrangedPersonName(arrangedPersonName);
+                message.setMessageOperate(messageOperate);
+                message.setMainBody(mainBody);
+                message.setDescription(description);
+                messageService.saveMessage(message);
             }
-            // List<MessageEntity> messageEntityList = messageService.getMessagesByUser(userService.getUserByUsername(username).getId());
+            // List<Message> messageEntityList = messageService.getMessagesByUser(userService.getUserByUsername(username).getId());
             // Long count = messageRepository.countByArrangedPersonAndIfRead(userService.getUserByUsername(username), false);
-            List<UserEntity> userEntityList = userService.getAll();
-            for(UserEntity userEntity : userEntityList){          // 向所有用户推送消息
-                Long count = messageRepository.countByArrangedPersonAndIfRead(userEntity, false);
-                simpMessagingTemplate.convertAndSend("/personalInfo/" + userEntity.getUsername(), ResultUtils.success(count));
+            List<Users> usersList = userService.getAll();
+            for(Users users : usersList){          // 向所有用户推送消息
+                Long count = messageRepository.countByArrangedPersonNameAndIfRead(users.getUsername(), false);
+                simpMessagingTemplate.convertAndSend("/personalInfo/" + users.getUsername(), ResultUtils.success(count));
             }
         }
     }

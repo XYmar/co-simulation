@@ -1,7 +1,6 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.LibraryEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Depot;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.LibraryRepository;
@@ -33,7 +32,7 @@ public class LibraryService {
     }
 
     // 根据id查询库
-    public LibraryEntity getLibraryById(String id){
+    public Depot getLibraryById(String id){
         if(!hasLibraryById(id)){
             throw new ResultException(ResultCode.LIBRARY_ID_NOT_FOUND_ERROR);
         }
@@ -41,7 +40,7 @@ public class LibraryService {
     }
 
     // 查询所有库
-    public List<LibraryEntity> getAll(){
+    public List<Depot> getAll(){
         return libraryRepository.findAll();
     }
 }

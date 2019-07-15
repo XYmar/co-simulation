@@ -1,13 +1,12 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.SublibraryFilesAuditService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.util.Date;
 
 /**
  * Author: XYmar
@@ -24,7 +23,7 @@ public class SublibraryFilesAuditController {
     }
 
     @GetMapping(value = "/{sublibraryFileId}")
-    public ResultEntity getSublibraryFilesAuditId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId,  String sublibraryDate) throws ParseException {
+    public Result getSublibraryFilesAuditId(@PathVariable(value = "sublibraryFileId") String sublibraryFileId, String sublibraryDate) throws ParseException {
         return ResultUtils.success(sublibraryFilesAuditService.getSublibraryFilesAudits(sublibraryFileId, sublibraryDate));
     }
 }

@@ -17,7 +17,7 @@ public class WebSocketMessageConfig implements WebSocketMessageBrokerConfigurer 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // config.enableSimpleBroker("/deviceInfo", "/onlineDevice", "/deployProgress");
-        config.enableSimpleBroker("/userInfo", "/personalInfo", "/audit");
+        config.enableSimpleBroker("/userInfo", "/personalInfo", "/onlineDevice", "/deviceInfo", "/deployProgress", "/audit");
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.ResultEntity;
-import com.rengu.cosimulation.entity.RoleEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Result;
+import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.service.RoleService;
 import com.rengu.cosimulation.service.UserService;
 import com.rengu.cosimulation.utils.ResultUtils;
@@ -31,56 +30,62 @@ public class UserController {
     // 新增用户（只有系统管理员可执行此操作）
     @PostMapping
     @PreAuthorize(value = "hasRole('ADMIN')")
-    public ResultEntity saveUser(UserEntity userEntity, @RequestHeader(name = "roleName") String roleName){
-        return ResultUtils.success(userService.saveUser(userEntity, roleName));
+    public Result saveUser(Users users, String departmentName, @RequestHeader(name = "roleName") String roleName){
+        return ResultUtils.success(userService.saveUser(departmentName, users, roleName));
     }
 
     // 查询所有用户
     @GetMapping
-    public ResultEntity getUsers(){
+    public Result getUsers(){
         return ResultUtils.success(userService.getAll());
     }
 
     // 根据ID查询用户
     @GetMapping(value = "/{userId}")
-    public ResultEntity getUserById(@PathVariable(value = "userId") String userId){
+    public Result getUserById(@PathVariable(value = "userId") String userId){
         return ResultUtils.success(userService.getUserById(userId));
     }
 
     // 根据ID修改用户信息
     @PatchMapping(value = "/{userId}")
-    public ResultEntity updateUserById(@PathVariable(value = "userId") String userId, UserEntity userEntity){
-        return ResultUtils.success(userService.updateUserByUserId(userId, userEntity));
+    public Result updateUserById(@PathVariable(value = "userId") String userId, Users users){
+        return ResultUtils.success(userService.updateUserByUserId(userId, users));
     }
 
     // 根据ID删除用户
     @DeleteMapping(value = "/{userId}")
-    public ResultEntity deleteUserById(@PathVariable(value = "userId") String userId){
+    public Result deleteUserById(@PathVariable(value = "userId") String userId){
         return ResultUtils.success(userService.deleteByUserId(userId));
     }
 
     // 根据ID修改用户密码
     @PatchMapping(value = "/{userId}/password")
-    public ResultEntity updatePasswordById(@PathVariable(value = "userId") String userId, String password){
+    public Result updatePasswordById(@PathVariable(value = "userId") String userId, String password){
         return ResultUtils.success(userService.updatePasswordById(userId, password));
+    }
+
+    // 根据ID修改用所属部门
+    @PatchMapping(value = "/{userId}/department")
+    public Result updateDepartmentById(@PathVariable(value = "userId") String userId, String departmentId){
+        return ResultUtils.success(userService.updateDepartmentById(userId, departmentId));
     }
 
     // 安全保密员根据用户id修改用户密级
     @PatchMapping(value = "/{userId}/secretClass")
     @PreAuthorize(value = "hasRole('SECURITY_GUARD')")
-    public ResultEntity updateSecretClassById(@PathVariable(value = "userId") String userId, int secretClass){
+    public Result updateSecretClassById(@PathVariable(value = "userId") String userId, int secretClass){
         return ResultUtils.success(userService.updateSecretClassById(userId, secretClass));
     }
 
     // 根据ID为用户分配角色
     @PatchMapping(value = "/{userId}/distribute")
-    public ResultEntity distributeUserById(@PathVariable(value = "userId") String userId,  @RequestParam(value = "ids") String[] ids){
+    public Result distributeUserById(@PathVariable(value = "userId") String userId, @RequestParam(value = "ids") String[] ids){
         return ResultUtils.success(userService.distributeUserById(userId, ids));
     }
 
     // 根据ID禁用或解除
     @PatchMapping(value = "/{userId}/authority")
-    public ResultEntity assignUserById(@PathVariable(value = "userId") String userId, Boolean enabled){
+    public Result assignUserById(@PathVariable(value = "userId") String userId, Boolean enabled){
         return ResultUtils.success(userService.assignUserById(userId, enabled));
     }
 }

@@ -1,13 +1,12 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.FileMetaEntity;
-import com.rengu.cosimulation.entity.SubtaskFilesEntity;
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.FileMeta;
+import com.rengu.cosimulation.entity.Result;
+import com.rengu.cosimulation.entity.SubtaskFile;
 import com.rengu.cosimulation.service.SubtaskFilesService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -46,45 +45,51 @@ public class SubtaskFilesController {
 
     // 根据子任务文件id查询文件信息
     @GetMapping(value = "/{subtaskFileId}")
-    public ResultEntity getSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
+    public Result getSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
         return ResultUtils.success(subtaskFilesService.getSubtaskFileById(subtaskFileId));
     }
 
     // 根据子任务文件id修改文件基本信息
     @PatchMapping(value = "/{subtaskFileId}")
-    public ResultEntity updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFilesEntity subtaskFilesEntity, String sublibraryId){
-        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFilesEntity, sublibraryId));
+    public Result updateSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId, SubtaskFile subtaskFile, String sublibraryId){
+        return ResultUtils.success(subtaskFilesService.updateSubtaskFileId(subtaskFileId, subtaskFile, sublibraryId));
     }
 
     // 根据子任务文件id删除文件
     // TODO 只有项目管理员登录成功后，才能删除吗
     @DeleteMapping(value = "/{subtaskFileId}")
     //@PreAuthorize(value = "hasRole('PROJECT_MANAGER')")
-    public ResultEntity deleteSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
+    public Result deleteSubtaskFileId(@PathVariable(value = "subtaskFileId") String subtaskFileId){
         return ResultUtils.success(subtaskFilesService.deleteSubtaskFileId(subtaskFileId));
     }
 
     // 驳回后修改子任务文件
     @PostMapping(value = "/{subtaskFileId}/modifySubtaskFiles")
-    public ResultEntity modifySubtaskFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId, @RequestBody FileMetaEntity fileMetaEntity){
-        return ResultUtils.success(subtaskFilesService.modifySubtaskFiles(subtaskFileId, fileMetaEntity));
+    public Result modifySubtaskFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId, @RequestBody FileMeta fileMeta){
+        return ResultUtils.success(subtaskFilesService.modifySubtaskFiles(subtaskFileId, fileMeta));
+    }
+
+    // 批量删除
+    @PatchMapping(value = "/deleteFilesInBatch")
+    public Result deleteFilesInBatch(@RequestParam(value = "ids") String[] ids){
+        return ResultUtils.success(subtaskFilesService.deleteFilesInBatch(ids));
     }
 
     // 根据子任务文件id查找其历史版本文件
     @GetMapping(value = "/{subtaskFileId}/getSublibraryHistoriesFiles")
-    public ResultEntity getSubtaskHistoriesFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId) {
+    public Result getSubtaskHistoriesFiles(@PathVariable(value = "subtaskFileId") String subtaskFileId) {
         return ResultUtils.success(subtaskFilesService.getSubtaskHistoriesFiles(subtaskFileId));
     }
 
     // 撤销修改
     @PatchMapping(value = "/{subtaskFileId}/revokeModify")
-    public ResultEntity revokeModify(@PathVariable(value = "subtaskFileId") String subtaskFileId){
+    public Result revokeModify(@PathVariable(value = "subtaskFileId") String subtaskFileId){
         return ResultUtils.success(subtaskFilesService.revokeModify(subtaskFileId));
     }
 
     // 更换版本
     @PatchMapping(value = "/{subtaskFileId}/versionReplace")
-    public ResultEntity versionReplace(@PathVariable(value = "subtaskFileId") String subtaskFileId, String version){
+    public Result versionReplace(@PathVariable(value = "subtaskFileId") String subtaskFileId, String version){
         return ResultUtils.success(subtaskFilesService.versionReplace(subtaskFileId, version));
     }
 }

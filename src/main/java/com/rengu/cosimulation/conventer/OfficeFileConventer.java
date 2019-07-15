@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.conventer;
 
-import com.rengu.cosimulation.entity.PreviewFileEntity;
+import com.rengu.cosimulation.entity.PreviewFile;
 import com.rengu.cosimulation.utils.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
@@ -38,29 +38,29 @@ public class OfficeFileConventer {
     /**
      * office文件统一转为html格式文件
      *
-     * @param previewFileEntity
+     * @param previewFile
      */
-    public void conventerToHtml(PreviewFileEntity previewFileEntity) {
+    public void conventerToHtml(PreviewFile previewFile) {
 
         // 创建hash目录
-        String hashDirPath = root + File.separator + previewFileEntity.getFileId();
+        String hashDirPath = root + File.separator + previewFile.getFileId();
         log.info(hashDirPath);
         File hashDir = FileUtil.createDir(hashDirPath);
         if (hashDir.exists() && hashDir.isDirectory()) {
             // 复制源文件到hash目录
-            String filePath = previewFileEntity.getFilePath();
+            String filePath = previewFile.getFilePath();
             FileUtil.copyFile(filePath, hashDirPath);
             // 计算文件大小
-            previewFileEntity.setFileSize(FileUtil.getFileSize(filePath));
+            previewFile.setFileSize(FileUtil.getFileSize(filePath));
             // 创建resource目录，存放源文件
             String resourceDirPath = hashDirPath + File.separator + "resource";
             File resourceDir = FileUtil.createDir(resourceDirPath);
             if (resourceDir.exists() && resourceDir.isDirectory()) {
                 // 进行文件转换
                 String fileName = FileUtil
-                        .getFileName(FileUtil.getFileName(previewFileEntity.getFilePath()));
+                        .getFileName(FileUtil.getFileName(previewFile.getFilePath()));
                 String htmlFilePath = fileName + ".html";
-                String inputFile = previewFileEntity.getFilePath();
+                String inputFile = previewFile.getFilePath();
                 // 转换后的文件放在resource目录中
                 String outputFile = resourceDirPath + File.separator
                         + htmlFilePath;
@@ -69,40 +69,40 @@ public class OfficeFileConventer {
                 File input = new File(inputFile);
                 File html = new File(outputFile);
                 converter.convert(input, html);
-               previewFileEntity.setConventedFileName(htmlFilePath);
+               previewFile.setConventedFileName(htmlFilePath);
                 // 设置content-type
-                previewFileEntity.setOriginalMIMEType("text/html");
+                previewFile.setOriginalMIMEType("text/html");
             }
             // 创建meta文件，存放文件基本信息
             String metaPath = hashDirPath + File.separator + "meta";
             File metaFile = FileUtil.createFile(metaPath);
-            FileUtil.writeContent(metaFile, previewFileEntity, "GBK");
+            FileUtil.writeContent(metaFile, previewFile, "GBK");
         }
     }
 
     /**
      * office文件转为pdf格式
      */
-    public void conventerToPdf(PreviewFileEntity previewFileEntity) {
+    public void conventerToPdf(PreviewFile previewFile) {
 
         // 创建hash目录
-        String hashDirPath = root + File.separator + previewFileEntity.getFileId();
+        String hashDirPath = root + File.separator + previewFile.getFileId();
         File hashDir = FileUtil.createDir(hashDirPath);
         if (hashDir.exists() && hashDir.isDirectory()) {
             // 复制源文件到hash目录
-            String filePath = previewFileEntity.getFilePath();
+            String filePath = previewFile.getFilePath();
             FileUtil.copyFile(filePath, hashDirPath);
             // 计算文件大小
-            previewFileEntity.setFileSize(FileUtil.getFileSize(filePath));
+            previewFile.setFileSize(FileUtil.getFileSize(filePath));
             // 创建resource目录，存放源文件
             String resourceDirPath = hashDirPath + File.separator + "resource";
             File resourceDir = FileUtil.createDir(resourceDirPath);
             if (resourceDir.exists() && resourceDir.isDirectory()) {
                 // 进行文件转换
                 String fileName = FileUtil
-                        .getFileName(previewFileEntity.getFilePath());
+                        .getFileName(previewFile.getFilePath());
                 String htmlFilePath = fileName + ".pdf";
-                String inputFile = previewFileEntity.getFilePath();
+                String inputFile = previewFile.getFilePath();
                 // 转换后的文件放在resource目录中
                 String outputFile = resourceDirPath + File.separator
                         + htmlFilePath;
@@ -111,14 +111,14 @@ public class OfficeFileConventer {
                 File input = new File(inputFile);
                 File html = new File(outputFile);
                 converter.convert(input, html);
-                previewFileEntity.setConventedFileName(htmlFilePath);
+                previewFile.setConventedFileName(htmlFilePath);
                 // 设置content-type
-                previewFileEntity.setOriginalMIMEType("application/pdf");
+                previewFile.setOriginalMIMEType("application/pdf");
             }
             // 创建meta文件，存放文件基本信息
             String metaPath = hashDirPath + File.separator + "meta";
             File metaFile = FileUtil.createFile(metaPath);
-            FileUtil.writeContent(metaFile, previewFileEntity, "GBK");
+            FileUtil.writeContent(metaFile, previewFile, "GBK");
         }
     }
 

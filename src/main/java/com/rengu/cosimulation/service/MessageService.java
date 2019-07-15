@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.MessageEntity;
-import com.rengu.cosimulation.entity.UserEntity;
+import com.rengu.cosimulation.entity.Message;
+import com.rengu.cosimulation.entity.Users;
 import com.rengu.cosimulation.enums.ResultCode;
 import com.rengu.cosimulation.exception.ResultException;
 import com.rengu.cosimulation.repository.MessageRepository;
@@ -30,44 +30,44 @@ public class MessageService {
     }
 
     // 保存通知
-    public MessageEntity saveMessage(MessageEntity messageEntity){
-        return messageRepository.save(messageEntity);
+    public Message saveMessage(Message message){
+        return messageRepository.save(message);
     }
 
     // 标记已读
-    public MessageEntity readAlready(String messageId){
-        MessageEntity messageEntity = getMessageById(messageId);
-        messageEntity.setIfRead(true);
-        return messageRepository.save(messageEntity);
+    public Message readAlready(String messageId){
+        Message message = getMessageById(messageId);
+        message.setIfRead(true);
+        return messageRepository.save(message);
     }
 
     // 全部已读
-    public List<MessageEntity> readAll(String userId){
-        List<MessageEntity> messageEntityList = getMessagesByUser(userId);
-        for(MessageEntity messageEntity : messageEntityList){
-            messageEntity.setIfRead(true);
+    public List<Message> readAll(String userId){
+        List<Message> messageList = getMessagesByUser(userId);
+        for(Message message : messageList){
+            message.setIfRead(true);
         }
-        return messageRepository.saveAll(messageEntityList);
+        return messageRepository.saveAll(messageList);
     }
 
     // 清空所有已读通知
-    public List<MessageEntity> clearAllRead(String userId){
-        UserEntity userEntity = userService.getUserById(userId);
-        List<MessageEntity> messageEntityList = messageRepository.findByArrangedPersonAndIfRead(userEntity, true);
-        messageRepository.deleteAll(messageEntityList);
-        return messageEntityList;
+    public List<Message> clearAllRead(String userId){
+        Users users = userService.getUserById(userId);
+        List<Message> messageList = messageRepository.findByArrangedPersonNameAndIfRead(users.getUsername(), true);
+        messageRepository.deleteAll(messageList);
+        return messageList;
     }
 
     // 根据状态查询通知: 查看所有已读未读消息
-    public List<MessageEntity> findByIfRead(String userId, boolean ifRead){
-        UserEntity userEntity = userService.getUserById(userId);
-        return messageRepository.findByArrangedPersonAndIfRead(userEntity, ifRead);
+    public List<Message> findByIfRead(String userId, boolean ifRead){
+        Users users = userService.getUserById(userId);
+        return messageRepository.findByArrangedPersonNameAndIfRead(users.getUsername(), ifRead);
     }
 
     // 查看全部通知，根据被操作用户返回消息
-    public List<MessageEntity> getMessagesByUser(String userId){
-        UserEntity userEntity = userService.getUserById(userId);
-        return messageRepository.findByArrangedPerson(userEntity);
+    public List<Message> getMessagesByUser(String userId){
+        Users users = userService.getUserById(userId);
+        return messageRepository.findByArrangedPersonName(users.getUsername());
     }
 
     // 根据Id查询用户是否存在
@@ -80,7 +80,7 @@ public class MessageService {
 
     // 根据id查询用户
     @Cacheable(value = "User_Cache", key = "#messageId")
-    public MessageEntity getMessageById(String messageId) {
+    public Message getMessageById(String messageId) {
         if(!hasMessageById(messageId)){
             throw new ResultException(ResultCode.MESSAGE_ID_NOT_FOUND_ERROR);
         }

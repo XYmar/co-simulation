@@ -1,6 +1,6 @@
 package com.rengu.cosimulation.thread;
 
-import com.rengu.cosimulation.entity.HeartbeatEntity;
+import com.rengu.cosimulation.entity.Heartbeat;
 import com.rengu.cosimulation.service.DeviceService;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import com.rengu.cosimulation.utils.JsonUtils;
@@ -72,25 +72,25 @@ public class UDPReceiveThread {
                 log.info("心跳格式解析异常:" + e.getMessage());
                 e.printStackTrace();
             }
-            HeartbeatEntity heartbeatEntity = new HeartbeatEntity();
-            heartbeatEntity.setHostAddress(datagramPacket.getAddress().getHostAddress());
-            heartbeatEntity.setCpuTag(cpuTag);
-            heartbeatEntity.setCpuClock(cpuClock);
-            heartbeatEntity.setCpuUtilization(cpuUtilization);
-            heartbeatEntity.setRamTotalSize(ramTotalSize);
-            heartbeatEntity.setRamFreeSize(freeRAMSize);
-            heartbeatEntity.setUpLoadSpeed(upLoadSpeed);
-            heartbeatEntity.setDownLoadSpeed(downLoadSpeed);
-            heartbeatEntity.setOSType(OSType);
-            heartbeatEntity.setOSName(OSName);
-            simpMessagingTemplate.convertAndSend("/deviceInfo/" + heartbeatEntity.getHostAddress(), JsonUtils.toJson(heartbeatEntity));
-            if (heartbeatEntity.getCpuUtilization() > 100 || heartbeatEntity.getCpuClock() > 6000) {
-                log.info(heartbeatEntity.toString());
+            Heartbeat heartbeat = new Heartbeat();
+            heartbeat.setHostAddress(datagramPacket.getAddress().getHostAddress());
+            heartbeat.setCpuTag(cpuTag);
+            heartbeat.setCpuClock(cpuClock);
+            heartbeat.setCpuUtilization(cpuUtilization);
+            heartbeat.setRamTotalSize(ramTotalSize);
+            heartbeat.setRamFreeSize(freeRAMSize);
+            heartbeat.setUpLoadSpeed(upLoadSpeed);
+            heartbeat.setDownLoadSpeed(downLoadSpeed);
+            heartbeat.setOSType(OSType);
+            heartbeat.setOSName(OSName);
+            simpMessagingTemplate.convertAndSend("/deviceInfo/" + heartbeat.getHostAddress(), JsonUtils.toJson(heartbeat));
+            if (heartbeat.getCpuUtilization() > 100 || heartbeat.getCpuClock() > 6000) {
+                log.info(heartbeat.toString());
             }
-            if (!DeviceService.ONLINE_HOST_ADRESS.containsKey(heartbeatEntity.getHostAddress())) {
-                log.info(heartbeatEntity.getHostAddress() + "----->建立服务器连接。");
+            if (!DeviceService.ONLINE_HOST_ADRESS.containsKey(heartbeat.getHostAddress())) {
+                log.info(heartbeat.getHostAddress() + "----->建立服务器连接。");
             }
-            DeviceService.ONLINE_HOST_ADRESS.put(heartbeatEntity.getHostAddress(), heartbeatEntity);
+            DeviceService.ONLINE_HOST_ADRESS.put(heartbeat.getHostAddress(), heartbeat);
             simpMessagingTemplate.convertAndSend("/onlineDevice", JsonUtils.toJson(DeviceService.ONLINE_HOST_ADRESS));
         }
     }

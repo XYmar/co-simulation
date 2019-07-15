@@ -1,21 +1,21 @@
 package com.rengu.cosimulation.repository;
 
-import com.rengu.cosimulation.entity.SublibraryFilesEntity;
-import com.rengu.cosimulation.entity.SublibraryFilesHistoryEntity;
+import com.rengu.cosimulation.entity.SubDepotFile;
+import com.rengu.cosimulation.entity.SubdepotFileHis;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface SublibraryFilesHistoryRepository extends JpaRepository<SublibraryFilesHistoryEntity, String> {
-    boolean existsByLeastSublibraryFilesEntityAndIfDirectModify(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify);
-    boolean existsByLeastSublibraryFilesEntityAndIfTemp(SublibraryFilesEntity sublibraryFilesEntity, boolean ifTemp);
-    boolean existsByLeastSublibraryFilesEntity(SublibraryFilesEntity sublibraryFilesEntity);
-    List<SublibraryFilesHistoryEntity> findByLeastSublibraryFilesEntity(SublibraryFilesEntity sublibraryFilesEntity);
-    List<SublibraryFilesHistoryEntity> findByLeastSublibraryFilesEntityAndIfTemp(SublibraryFilesEntity sublibraryFilesEntity, boolean ifTemp);
-    SublibraryFilesHistoryEntity findByLeastSublibraryFilesEntityAndIfDirectModifyAndVersion(SublibraryFilesEntity sublibraryFilesEntity, boolean ifDirectModify, String version);
-    SublibraryFilesHistoryEntity findByLeastSublibraryFilesEntityAndIfTempAndVersion(SublibraryFilesEntity sublibraryFilesEntity, boolean ifTemp, String version);
+public interface SublibraryFilesHistoryRepository extends JpaRepository<SubdepotFileHis, String> {
+    boolean existsByLeastSubDepotFileAndIfDirectModify(SubDepotFile subDepotFile, boolean ifDirectModify);
+    boolean existsByLeastSubDepotFileAndIfTemp(SubDepotFile subDepotFile, boolean ifTemp);
+    boolean existsByLeastSubDepotFile(SubDepotFile subDepotFile);
+    List<SubdepotFileHis> findByLeastSubDepotFile(SubDepotFile subDepotFile);
+    List<SubdepotFileHis> findByLeastSubDepotFileAndIfTemp(SubDepotFile subDepotFile, boolean ifTemp);
+    SubdepotFileHis findByLeastSubDepotFileAndIfDirectModifyAndVersion(SubDepotFile subDepotFile, boolean ifDirectModify, String version);
+    SubdepotFileHis findByLeastSubDepotFileAndIfTempAndVersion(SubDepotFile subDepotFile, boolean ifTemp, String version);
 
 
 }

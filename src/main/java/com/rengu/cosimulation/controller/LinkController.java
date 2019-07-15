@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.LinkEntity;
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.Link;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.LinkService;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class LinkController {
 
     // 保存项目流程节点信息
     @PostMapping
-    public ResultEntity saveLinks(@RequestHeader(value = "projectId") String projectId, @RequestBody @Valid LinkEntity[] linkEntities){
+    public Result saveLinks(@RequestHeader(value = "projectId") String projectId, @RequestBody @Valid Link[] linkEntities){
         return ResultUtils.success(linkService.saveLinks(projectId, linkEntities));
     }
 

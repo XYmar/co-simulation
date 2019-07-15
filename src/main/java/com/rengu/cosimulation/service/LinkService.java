@@ -1,10 +1,11 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.LinkEntity;
-import com.rengu.cosimulation.entity.ProcessNodeEntity1;
-import com.rengu.cosimulation.entity.ProjectEntity;
+import com.rengu.cosimulation.entity.Link;
+import com.rengu.cosimulation.entity.ProcessNode;
+import com.rengu.cosimulation.entity.Project;
 import com.rengu.cosimulation.repository.LinkRepository;
 import com.rengu.cosimulation.repository.ProcessNodeRepository1;
+import com.rengu.cosimulation.utils.ApplicationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,38 +34,45 @@ public class LinkService {
     }
 
     // 保存流程节点连接
-    public List<ProcessNodeEntity1> saveLinks(String projectId, LinkEntity[] linkEntities){
-        ProjectEntity projectEntity = projectService.getProjectById(projectId);
-        List<ProcessNodeEntity1> processNodeEntity1List = processNode1Service.getProcessNodesByProjectId(projectId);      // 所有节点
-        if(processNodeEntity1List.size() > 0){                // 流程节点存在时，清空节点的连接
-            for(ProcessNodeEntity1 processNodeEntity1 : processNodeEntity1List){
-                processNodeEntity1.setLinkEntityList(null);
+    public List<ProcessNode> saveLinks(String projectId, Link[] linkEntities){
+        Project project = projectService.getProjectById(projectId);
+        List<ProcessNode> processNodeList = processNode1Service.getProcessNodesByProjectId(projectId);      // 所有节点
+        if(processNodeList.size() > 0){                // 流程节点存在时，清空节点的连接
+            for(ProcessNode processNode : processNodeList){
+                processNode.setLinkList(null);
             }
-            processNodeRepository1.saveAll(processNodeEntity1List);
+            processNodeRepository1.saveAll(processNodeList);
         }
 
-        if(linkRepository.existsByProjectEntity(projectEntity)){
-            linkRepository.deleteAllByProjectEntity(projectEntity);
+        if(linkRepository.existsByProject(project)){
+            linkRepository.deleteAllByProject(project);
         }
-        List<LinkEntity> linkEntityList = new ArrayList<>();
-        for(LinkEntity linkEntity : linkEntities){
-            linkEntity.setProjectEntity(projectEntity);
-            linkEntityList.add(linkEntity);
+        List<Link> linkList = new ArrayList<>();
+        for(Link link : linkEntities){
+            link.setProject(project);
+            linkList.add(link);
         }
-        linkRepository.saveAll(linkEntityList);
+        linkRepository.saveAll(linkList);
         return saveRelations(projectId);
     }
 
     // 将连接保存到对应的节点中
-    public List<ProcessNodeEntity1> saveRelations(String projectId){
-        List<ProcessNodeEntity1> processNodeEntity1List = processNode1Service.getProcessNodesByProjectId(projectId);      // 所有节点
-        for(ProcessNodeEntity1 processNodeEntity1 : processNodeEntity1List){
-            List<LinkEntity> selfLinks = linkRepository.findBySelfId(processNodeEntity1.getId());
-           // List<LinkEntity> selfLinks = linkRepository.findBySelfId("0037aeae-b50a-47f3-b917-f7f7ab81bc9b");
+    public List<ProcessNode> saveRelations(String projectId){
+        List<ProcessNode> processNodeList = processNode1Service.getProcessNodesByProjectId(projectId);      // 所有节点
+        for(ProcessNode processNode : processNodeList){
+            List<Link> selfLinks = linkRepository.findBySelfId(processNode.getId());
+
             if(selfLinks.size() > 0){
-                processNodeEntity1.setLinkEntityList(selfLinks);
+                processNode.setLinkList(selfLinks);
+
+                for(Link link : selfLinks){
+                    if(processNodeRepository1.findById(link.getParentId()).get().getSubtask().getState() == ApplicationConfig.SUBTASK_AUDIT_OVER){
+                        processNode.getSubtask().setState(ApplicationConfig.SUBTASK_START);
+                        break;
+                    }
+                }
             }
         }
-        return processNodeRepository1.saveAll(processNodeEntity1List);
+        return processNodeRepository1.saveAll(processNodeList);
     }
 }

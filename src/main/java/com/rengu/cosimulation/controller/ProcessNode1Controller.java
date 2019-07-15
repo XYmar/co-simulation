@@ -1,7 +1,7 @@
 package com.rengu.cosimulation.controller;
 
-import com.rengu.cosimulation.entity.ProcessNodeEntity1;
-import com.rengu.cosimulation.entity.ResultEntity;
+import com.rengu.cosimulation.entity.ProcessNode;
+import com.rengu.cosimulation.entity.Result;
 import com.rengu.cosimulation.service.ProcessNode1Service;
 import com.rengu.cosimulation.utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +25,19 @@ public class ProcessNode1Controller {
 
     // 保存项目流程节点信息
     @PostMapping
-    public ResultEntity saveProcessNodes(@RequestHeader(value = "projectId") String projectId, @RequestBody @Valid ProcessNodeEntity1[] processNodeEntities){
+    public Result saveProcessNodes(@RequestHeader(value = "projectId") String projectId, @RequestBody @Valid ProcessNode[] processNodeEntities){
         return ResultUtils.success(processNode1Service.saveProcessNodes(projectId, processNodeEntities));
     }
 
     // 根据项目返回流程节点信息
     @GetMapping(value = "/byProjectId/{projectId}")
-    public ResultEntity getProcessNodesByProjectId(@PathVariable(value = "projectId") String projectId){
+    public Result getProcessNodesByProjectId(@PathVariable(value = "projectId") String projectId){
         return ResultUtils.success(processNode1Service.getProcessNodesByProjectId(projectId));
+    }
+
+    // 项目是否已经包含项目流程
+    @PostMapping("/ifHasProcessNode")
+    public Result ifHasProcessNode(String projectId){
+        return ResultUtils.success(processNode1Service.ifHasProcessNode(projectId));
     }
 }

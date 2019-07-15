@@ -1,11 +1,10 @@
 package com.rengu.cosimulation.service;
 
-import com.rengu.cosimulation.entity.OrderEntity;
+import com.rengu.cosimulation.entity.Order;
 import com.rengu.cosimulation.utils.ApplicationConfig;
 import com.rengu.cosimulation.utils.FormatUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.*;
@@ -27,18 +26,18 @@ public class OrderService {
     public static final String PROCESS_SCAN_RESULT_TAG = "C105";
     public static final String DISK_SCAN_RESULT_TAG = "C106";
 
-    public void sendProcessScanOrderByUDP(OrderEntity orderEntity) throws IOException {
-        String tag = FormatUtils.getString(orderEntity.getTag(), 4);
+    public void sendProcessScanOrderByUDP(Order order) throws IOException {
+        String tag = FormatUtils.getString(order.getTag(), 4);
         String type = FormatUtils.getString("", 1);
-        String uuid = FormatUtils.getString(orderEntity.getId(), 37);
-        sandMessageByUDP(orderEntity.getTargetDevice().getHostAddress(), tag + type + uuid);
+        String uuid = FormatUtils.getString(order.getId(), 37);
+        sandMessageByUDP(order.getTargetDevice().getHostAddress(), tag + type + uuid);
     }
 
-    public void sendDiskScanOrderByUDP(OrderEntity orderEntity) throws IOException {
-        String tag = FormatUtils.getString(orderEntity.getTag(), 4);
+    public void sendDiskScanOrderByUDP(Order order) throws IOException {
+        String tag = FormatUtils.getString(order.getTag(), 4);
         String type = FormatUtils.getString("", 1);
-        String uuid = FormatUtils.getString(orderEntity.getId(), 37);
-        sandMessageByUDP(orderEntity.getTargetDevice().getHostAddress(), tag + type + uuid);
+        String uuid = FormatUtils.getString(order.getId(), 37);
+        sandMessageByUDP(order.getTargetDevice().getHostAddress(), tag + type + uuid);
     }
 
     private void sandMessageByUDP(String hostAdress, String message) throws IOException {

@@ -94,7 +94,7 @@ public class WhereSpecification implements Specification<Object> {
         //look at Hibernate Mapping types
         //we only support primitive types and data/time types
         if (!(value instanceof Comparable || value instanceof Collection)) {
-            throw new IllegalStateException("This library only support primitive types and date/time types in the list: " +
+            throw new IllegalStateException("This depot only support primitive types and date/time types in the list: " +
                     "Integer, Long, Double, Float, Short, BidDecimal, Character, String, Byte, Boolean" +
                     ", Date, Time, TimeStamp, Calendar");
         }
