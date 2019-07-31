@@ -23,9 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +56,7 @@ public class FileService {
 
     // 保存文件块
     public void saveChunk(Chunk chunkEntity, MultipartFile multipartFile) throws IOException {
-        java.io.File chunk = new java.io.File(ApplicationConfig.CHUNKS_SAVE_PATH + java.io.File.separator + chunkEntity.getIdentifier() + java.io.File.separator + chunkEntity.getChunkNumber() + ".tmp");
+        File chunk = new File(ApplicationConfig.CHUNKS_SAVE_PATH + File.separator + chunkEntity.getIdentifier() + File.separator + chunkEntity.getChunkNumber() + ".tmp");
         chunk.getParentFile().mkdirs();
         chunk.createNewFile();
         IOUtils.copy(multipartFile.getInputStream(), new FileOutputStream(chunk));
@@ -72,14 +70,14 @@ public class FileService {
     @CacheEvict(value = "File_Cache", allEntries = true)
     public Files deleteFileById(String fileId) throws IOException {
         Files files = getFileById(fileId);
-        FileUtils.forceDeleteOnExit(new java.io.File(files.getLocalPath()));
+        FileUtils.forceDeleteOnExit(new File(files.getLocalPath()));
         fileRepository.delete(files);
         return files;
     }
 
     // 检查文件块是否存在
     public boolean hasChunk(Chunk chunkEntity) {
-        java.io.File chunk = new java.io.File(ApplicationConfig.CHUNKS_SAVE_PATH + java.io.File.separator + chunkEntity.getIdentifier() + java.io.File.separator + chunkEntity.getChunkNumber() + ".tmp");
+        File chunk = new File(ApplicationConfig.CHUNKS_SAVE_PATH + File.separator + chunkEntity.getIdentifier() + File.separator + chunkEntity.getChunkNumber() + ".tmp");
         return chunk.exists() && chunkEntity.getChunkSize() == FileUtils.sizeOf(chunk);
     }
 
@@ -114,37 +112,17 @@ public class FileService {
         return fileRepository.findAll(pageable);
     }
 
-
-//    private Files mergeChunks(java.io.File file, Chunk chunkEntity) throws IOException {
-//        file.delete();
-//        file.getParentFile().mkdirs();
-//        file.createNewFile();
-//        for (int i = 1; i <= chunkEntity.getTotalChunks(); i++) {
-//            java.io.File chunk = new java.io.File(ApplicationConfig.CHUNKS_SAVE_PATH + java.io.File.separator + chunkEntity.getIdentifier() + java.io.File.separator + i + ".tmp");
-//            if (chunk.exists()) {
-//                FileUtils.writeByteArrayToFile(file, FileUtils.readFileToByteArray(chunk), true);
-//            } else {
-//                throw new ResultException(ResultCode.FILE_CHUNK_NOT_FOUND_ERROR);
-//            }
-//        }
-//        @Cleanup FileInputStream fileInputStream = new FileInputStream(file);
-//        if (!chunkEntity.getIdentifier().equals(DigestUtils.md5Hex(fileInputStream))) {
-//            throw new RuntimeException("文件合并失败，请检查：" + file.getAbsolutePath() + "是否正确。");
-//        }
-//        return saveFile(file);
-//    }
-
     // 合并文件块
     public Files mergeChunks(Chunk chunk) throws IOException, ExecutionException, InterruptedException {
         if (hasFileByMD5(chunk.getIdentifier())) {
             return getFileByMD5(chunk.getIdentifier());
         } else {
-            java.io.File file = null;
+            File file = null;
             String extension = FilenameUtils.getExtension(chunk.getFilename());
             if (StringUtils.isEmpty(extension)) {
-                file = new java.io.File(ApplicationConfig.FILES_SAVE_PATH + java.io.File.separator + chunk.getIdentifier());
+                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + chunk.getIdentifier());
             } else {
-                file = new java.io.File(ApplicationConfig.FILES_SAVE_PATH + java.io.File.separator + chunk.getIdentifier() + "." + FilenameUtils.getExtension(chunk.getFilename()));
+                file = new File(ApplicationConfig.FILES_SAVE_PATH + File.separator + chunk.getIdentifier() + "." + FilenameUtils.getExtension(chunk.getFilename()));
             }
             return mergeChunks(file, chunk);
         }
@@ -152,7 +130,7 @@ public class FileService {
 
     // 保存文件信息
     @CacheEvict(value = "File_Cache", allEntries = true)
-    public Files saveFile(java.io.File file) throws IOException {
+    public Files saveFile(File file) throws IOException {
         Files filesEntity = new Files();
         @Cleanup FileInputStream fileInputStream = new FileInputStream(file);
         String MD5 = DigestUtils.md5Hex(fileInputStream);
@@ -198,7 +176,7 @@ public class FileService {
             IOUtils.closeQuietly(fileOutputStream);
         } else {
             for (int i = 1; i <= chunkEntity.getTotalChunks(); i++) {
-                java.io.File chunk = new java.io.File(ApplicationConfig.CHUNKS_SAVE_PATH + java.io.File.separator + chunkEntity.getIdentifier() + java.io.File.separator + i + ".tmp");
+                File chunk = new File(ApplicationConfig.CHUNKS_SAVE_PATH + File.separator + chunkEntity.getIdentifier() + File.separator + i + ".tmp");
                 if (chunk.exists()) {
                     FileUtils.writeByteArrayToFile(file, FileUtils.readFileToByteArray(chunk), true);
                 } else {

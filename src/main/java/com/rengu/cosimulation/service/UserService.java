@@ -22,7 +22,7 @@ import java.util.*;
  * Author: XYmar
  * Date: 2019/2/12 16:15
  */
-@Service
+@Service("userService")
 @Slf4j
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
