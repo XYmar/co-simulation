@@ -66,7 +66,8 @@ public class ExceptionHandlerAdvice implements ResponseBodyAdvice {
 
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception e, HttpServletRequest request) {
-        return ResultUtils.warn(ResultCode.WEAK_NET_WORK);
+        String tips = e.getMessage();
+        return ResultUtils.warn(ResultCode.WEAK_NET_WORK, tips);
     }
 
     @InitBinder
